@@ -48,7 +48,49 @@
     <p>Choose <strong>Revoke pairing</strong> in <strong>Agents</strong> to end access and remove the pairing’s MCP entry.</p>
   </section>
 
-  <section id="how-it-works" class="example" aria-labelledby="example-title">
+  <section id="how-it-works" class="walkthrough" aria-labelledby="walkthrough-title">
+    <h2 id="walkthrough-title">Plan, review, and follow the work</h2>
+    <ol class="walkthrough-steps">
+      <li>
+        <h3>Put the plan on the board</h3>
+        <p>Ask Codex or Claude Code to turn its plan into task cards and connect the steps that depend on each other.</p>
+      </li>
+      <li>
+        <h3>Mark up the plan</h3>
+        <p>Sketch, circle, or move cards as you review. Use <strong>Queue feedback</strong> to tell your agent what to change.</p>
+      </li>
+      <li>
+        <h3>Follow the agent’s reply</h3>
+        <p>Your agent can acknowledge feedback, reply on the board, and update cards as work starts or finishes.</p>
+      </li>
+    </ol>
+
+    <div class="walkthrough-examples">
+      <figure>
+        <div class="board-sketch" aria-hidden="true"><del class="sketch-card">Extra export format</del></div>
+        <figcaption><strong>Trim the scope</strong><p>“Leave the extra export format out of this release.”</p></figcaption>
+      </figure>
+      <figure>
+        <div class="board-sketch" aria-hidden="true"><span class="sketch-card sketch-priority">Verify signatures</span></div>
+        <figcaption><strong>Set a priority</strong><p>“Verify signatures first, before testing the installer.”</p></figcaption>
+      </figure>
+      <figure>
+        <div class="board-sketch" aria-hidden="true"><span class="sketch-card">Test ZIP</span><span class="sketch-arrow">→</span><span class="sketch-card">Ship</span></div>
+        <figcaption><strong>Change the sequence</strong><p>“Move ZIP testing ahead of publication.”</p></figcaption>
+      </figure>
+      <figure>
+        <div class="board-sketch" aria-hidden="true"><span class="sketch-card">Verify signatures</span><span class="sketch-question">?</span></div>
+        <figcaption>
+          <strong>Ask for a reply</strong>
+          <p>“Which archive does the Mac updater verify?”</p>
+          <p class="walkthrough-reply"><strong>Reply</strong> “The signed app archive.”</p>
+        </figcaption>
+      </figure>
+    </div>
+    <p class="walkthrough-pause">Need to pause the work? Queue “Pause packaging until we review the checks” and ask your agent to read the feedback.</p>
+  </section>
+
+  <section class="example" aria-labelledby="example-title">
     <div class="example-header">
       <h2 id="example-title">Reviewing the Raqsh release</h2>
       <a href="{{ asset "examples/raqsh-release-board.raqsh" }}" download>Download example board</a>
