@@ -68,13 +68,16 @@ export function markElement(mark: Mark, key: string): ExcalidrawElement {
   }
   const [x, y] = mark.points[0];
   const points = mark.points.map(([px, py]): Point => [px - x, py - y]);
-  if (points.length === 2 && (points[1][0] || points[1][1])) {
+  const width = Math.max(...points.map(([px]) => px)) - Math.min(...points.map(([px]) => px));
+  const height = Math.max(...points.map(([, py]) => py)) - Math.min(...points.map(([, py]) => py));
+  // A native line keeps the vertices and endpoints of a legacy stroke.
+  // Freehand smoothing can shorten a stroke with widely spaced points.
+  if (width || height) {
     return convertToExcalidrawElements([{ ...style, type: "line", x: mark.x + x, y: mark.y + y,
-      width: Math.abs(points[1][0]), height: Math.abs(points[1][1]), points: localPoints(points) }], exact)[0];
+      width, height, points: localPoints(points) }], exact)[0];
   }
   const [base] = convertToExcalidrawElements([{ ...style, type: "rectangle", x: mark.x + x, y: mark.y + y,
-    width: Math.max(...points.map(([px]) => px)) - Math.min(...points.map(([px]) => px)),
-    height: Math.max(...points.map(([, py]) => py)) - Math.min(...points.map(([, py]) => py)) }], exact);
+    width, height }], exact);
   return { ...base, type: "freedraw", strokeWidth: mark.width / penWidthScale, points: localPoints(points),
     pressures: [], simulatePressure: true, lastCommittedPoint: null };
 }

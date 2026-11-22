@@ -53,9 +53,11 @@
     await action();
     await waitFor(() => (checkpoint()?.revision ?? -1) > revision, description);
   }
-  function painted(x, y) {
+  function painted(x, y, width = 3, height = 3) {
     const ratio = devicePixelRatio;
-    const pixels = find("[data-board-surface] canvas.static").getContext("2d").getImageData(Math.round(x * ratio), Math.round(y * ratio), 6, 6).data;
+    const pixels = find("[data-board-surface] canvas.static").getContext("2d").getImageData(
+      Math.round(x * ratio), Math.round(y * ratio), Math.ceil(width * ratio), Math.ceil(height * ratio),
+    ).data;
     return pixels.some((value, index) => index % 4 === 3 && value > 0);
   }
   async function createCard() {
@@ -243,6 +245,17 @@
       return;
     }
     check(canvas().width === Math.round(canvas().clientWidth * devicePixelRatio), "Canvas backing width must match the device scale");
+    if (mode === "legacy") {
+      await document.fonts.ready;
+      const metrics = document.createElement("canvas").getContext("2d");
+      metrics.font = "17px Excalifont";
+      const end = 69 + metrics.measureText("ONBOARDING REFRESH").width;
+      await waitFor(() => painted(end - 9, 78, 12, 23), "the end of the legacy label to render");
+      check(painted(268, 105, 9, 9), "The last segment of the legacy stroke must render");
+      check(checkpoint()?.revision === 0, "Opening a legacy scene must leave its drawing checkpoint intact");
+      report("pass", { mode });
+      return;
+    }
     if (mode === "reopen" || mode === "reopen-edits") {
       check(find(".lean-card")?.textContent.includes(title), "The card title did not survive reopening");
       check(find(".lean-card").dataset.status === "done", "The MCP status did not survive reopening");

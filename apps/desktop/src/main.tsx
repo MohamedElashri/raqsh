@@ -15,7 +15,12 @@ declare global {
   interface Window { __BOARD_FIXTURE__?: string }
 }
 
-const Editor = import.meta.env.VITE_TAURI_SHELL === "1" ? null : lazy(() => import("./lean/LeanEditor"));
+const Editor = import.meta.env.VITE_TAURI_SHELL === "1" ? null : lazy(async () => {
+  const editor = await import("./lean/LeanEditor");
+  // Legacy labels become native text elements whose bounds are measured on creation.
+  await document.fonts.load("17px Excalifont").catch(() => {});
+  return editor;
+});
 type CloseEditor = (windowClose: boolean) => void;
 const emptyPage = { items: [], nextOffset: null };
 

@@ -24,6 +24,7 @@ fn main() -> tauri::Result<()> {
         "--macos-live=screenshot-agents" => Some("screenshot-agents"),
         "--macos-live=reopen" => Some("reopen"),
         "--macos-live=reopen-edits" => Some("reopen-edits"),
+        "--macos-live=legacy" => Some("legacy"),
         "--macos-live=stress" => Some("stress"),
         _ => None,
     });
