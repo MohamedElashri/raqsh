@@ -45,7 +45,7 @@
 .lean-canvas.tool-text { cursor: text; }
 .lean-canvas:focus { outline: none; }
 .lean-canvas:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
-.lean-cards { transform-origin: 0 0; pointer-events: none; }
+.lean-cards { z-index: 1; transform-origin: 0 0; pointer-events: none; }
 .lean-card { position: absolute; white-space: pre-wrap; }
 .lean-card {
   display: grid;
@@ -307,21 +307,17 @@
 }
 
 .excalidraw-surface {
-  isolation: isolate;
   overflow: hidden;
 }
-/* Let the floating picker share the board's stacking context while the canvas
-   and its editing controls stay below the Raqsh toolbar and panels. */
-.excalidraw-surface:has(.color-picker-content) {
-  isolation: auto;
+/* Put task cards between the canvas and Excalidraw's controls. The floating
+   picker keeps its native layer above the board toolbar and panels. */
+.excalidraw-surface .excalidraw {
   --zIndex-canvas: 0;
   --zIndex-interactiveCanvas: 0;
-  --zIndex-svgLayer: 1;
-  --zIndex-wysiwyg: 1;
-  --zIndex-canvasButtons: 1;
-  --zIndex-layerUI: 1;
-}
-.excalidraw-surface .excalidraw {
+  --zIndex-svgLayer: 0;
+  --zIndex-wysiwyg: 2;
+  --zIndex-canvasButtons: 2;
+  --zIndex-layerUI: 2;
   --ui-font: Assistant, system-ui, sans-serif;
   --color-primary: var(--focus);
   --color-primary-darker: var(--focus);
