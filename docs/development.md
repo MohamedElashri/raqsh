@@ -8,6 +8,39 @@ pnpm test:unit
 pnpm desktop:dev
 ```
 
+## Coding harnesses
+
+Choose a client under **Agents** and approve a pairing. For manual setup, merge the generated entry into the file shown in the panel, preserve existing entries, and follow the client's approval flow. Keep generated entries local to your machine. After revoking a manual pairing in Raqsh, remove its named entry from the client's config. Raqsh removes registrations it installed automatically when the client's removal command succeeds.
+
+Each client uses the same local stdio helper. The portable feedback workflow requires the agent to read, acknowledge, and respond using the board tools. For clients without a named profile, choose **Other MCP client** for a generic snippet.
+
+| Client | Setup | Linux evidence |
+| --- | --- | --- |
+| Codex | Automatic | Existing real model proof |
+| Claude Code | Automatic | Existing registration and connection proof |
+| OpenCode | Project config for v2 | v2.3.2 connected over stdio |
+| Pi | Automatic with Pi 1.6.0 or later. Manual project config is also available for an existing pairing | v1.6.0 discovered all nine tools and removed the registration on revoke |
+| GitHub Copilot CLI | Project MCP config | Config generation tested |
+| Cursor Agent CLI | Project MCP config and server approval | Config generation tested |
+| Google Antigravity CLI | Workspace or user MCP config | v1.5.12 listed the user config entry |
+| Cline CLI | User MCP config | Config generation tested |
+| Qwen Code | Project settings | Config generation tested |
+| Kiro CLI | Workspace MCP config | Config generation tested |
+| Goose CLI | Stdio extension config | Config generation tested |
+| Amp CLI | Workspace settings and server approval | Config generation tested |
+
+### Maintaining profiles
+
+The profile modules live in `crates/harnesses/src/`. For a new client, add its module with a stable ID and include it in `REGISTRY` in `lib.rs`. Change the client's module to update detection, registration, setup instructions or removal commands. Set its registry flag to `false` to hide it from the desktop and disable its named format in `raqsh-mcp setup` and `probe`. Keep the adapter registered so Raqsh can still revoke existing pairings and remove past automatic registrations.
+
+`raqsh-mcp setup --pairing UUID --format PROFILE` prints a snippet. `raqsh-mcp probe --pairing UUID --format PROFILE` checks the authenticated Raqsh session. Use the client's MCP tooling to verify discovery and run a real model turn against a disposable board to verify the feedback workflow.
+
+On Linux, with `tauri-driver`, `WebKitWebDriver`, and the relevant CLIs installed, run the native setup check after building the desktop and helper together.
+
+```sh
+python3 bench/scripts/linux-harnesses.py target/release/raqsh target/release/raqsh-mcp opencode pi antigravity
+```
+
 ## macOS
 
 Run the native WebKit, MCP, stress, and signed updater tests from a logged-in desktop session. The updater test uses a disposable bundle and a loopback release server.

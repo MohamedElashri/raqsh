@@ -55,10 +55,40 @@
     find('.agent-panel input[name="label"]').value = name;
     button("Approve pairing").click();
     if (provider !== "generic") {
-      await waitFor(() => find('.agent-panel output[role="status"]')?.textContent.includes("connected"),
+      await waitFor(() => find('.agent-panel output[role="status"]')?.textContent.includes("registered"),
         "the provider to finish registering");
     }
     return waitFor(() => find('.agent-panel select[name="binding"]')?.value, "a pairing ID");
+  }
+
+  async function checkGuidedConfig(binding) {
+    const option = find('.agent-panel select[name="provider"] option[value="opencode"]');
+    if (!option) return;
+    const picker = option.parentElement;
+    picker.value = option.value;
+    picker.dispatchEvent(new Event("change", { bubbles: true }));
+    await waitFor(() => find('.agent-panel input[name="label"]')?.placeholder === "OpenCode",
+      "the OpenCode profile");
+    button("MCP configuration").click();
+    const text = await waitFor(() => find('.agent-panel textarea[aria-label="MCP configuration"]')?.value,
+      "the OpenCode setup snippet");
+    const [entry] = Object.values(JSON.parse(text).mcp.servers);
+    check(entry.type === "local" && entry.command[0].endsWith("/raqsh-mcp") && entry.command.at(-1) === binding,
+      "OpenCode must use the packaged stdio helper for the selected pairing");
+    const cline = picker.querySelector('option[value="cline"]');
+    if (cline) {
+      picker.value = cline.value;
+      picker.dispatchEvent(new Event("change", { bubbles: true }));
+      await waitFor(() => find('.agent-panel input[name="label"]')?.placeholder === "Cline CLI", "the Cline profile");
+      check(!find('.agent-panel textarea[aria-label="MCP configuration"]'),
+        "Changing clients must hide the previous client's setup snippet");
+      button("MCP configuration").click();
+      const next = await waitFor(() => find('.agent-panel textarea[aria-label="MCP configuration"]')?.value,
+        "the Cline setup snippet");
+      const [server] = Object.values(JSON.parse(next).mcpServers);
+      check(server.args.at(-1) === binding, "Cline must use the selected pairing");
+    }
+    button("MCP configuration").click();
   }
 
   async function run() {
@@ -150,6 +180,7 @@
     await waitFor(() => !find(".lean-card"), "Cmd+Z to undo the card");
     const card = await createCard();
     const binding = await pair(window.__RAQSH_LIVE_PROVIDER__, "macOS live test");
+    if (mode === "edit") await checkGuidedConfig(binding);
     report("paired", { binding, task: card.dataset.cardId, revision: Number(editor.dataset.semanticRevision) });
     await waitFor(() => find(".lean-card")?.dataset.status === "done", "the status update from the MCP process",
       mode === "provider" ? 120_000 : 10_000);

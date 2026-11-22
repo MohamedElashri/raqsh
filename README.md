@@ -27,7 +27,7 @@ curl -fsSL https://github.com/MohamedElashri/raqsh/releases/latest/download/inst
 
 ## Get started
 
-Open a project folder, create a board, and press **N** on the canvas to add a card. To connect an agent, open **Agents**, choose Codex or Claude Code, and approve the pairing. Raqsh registers its bundled MCP helper. Open a new session in your client to use it.
+Open a project folder, create a board, and press **N** on the canvas to add a card. To connect an agent, open **Agents**, choose your client, and approve the pairing. Raqsh can register its bundled MCP helper for some clients and provides configuration for manual setup. Open a new session in your client to use it. [Client setup and compatibility](docs/development.md#coding-harnesses)
 
 Check for updates under **Settings → About**. Checking, downloading, installing, and restarting are each started from the app. Boards are stored on your device.
 

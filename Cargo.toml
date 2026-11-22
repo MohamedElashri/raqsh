@@ -1,5 +1,5 @@
 [workspace]
-members = ["apps/desktop/src-tauri", "crates/domain", "crates/store", "crates/ipc", "crates/mcp"]
+members = ["apps/desktop/src-tauri", "crates/domain", "crates/store", "crates/ipc", "crates/mcp", "crates/harnesses"]
 resolver = "3"
 
 [workspace.dependencies]
