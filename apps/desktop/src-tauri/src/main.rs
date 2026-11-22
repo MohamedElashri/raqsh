@@ -23,6 +23,8 @@ fn main() -> tauri::Result<()> {
         "--macos-live=screenshot" => Some("screenshot"),
         "--macos-live=screenshot-agents" => Some("screenshot-agents"),
         "--macos-live=reopen" => Some("reopen"),
+        "--macos-live=reopen-edits" => Some("reopen-edits"),
+        "--macos-live=legacy" => Some("legacy"),
         "--macos-live=stress" => Some("stress"),
         _ => None,
     });
@@ -122,6 +124,8 @@ fn main() -> tauri::Result<()> {
             };
 
             let mut window = WebviewWindowBuilder::from_config(app, &config.app.windows[0])?
+                .disable_drag_drop_handler()
+                .enable_clipboard_access()
                 .on_navigation(move |url| {
                     (url.scheme() == "tauri" && url.host_str() == Some("localhost"))
                         || dev_origin.as_ref() == Some(&url.origin())

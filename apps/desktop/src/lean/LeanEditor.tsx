@@ -1,11 +1,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MutableRefObject, type PointerEvent } from "react";
-import { id, kinds, makeCard, priorities, statuses, type Arrow, type Card, type Change, type Drawing, type Id, type OpenBoard,
-  type Operation, type Point, type Receipt, type Stroke } from "../model";
-import { exportImage, paintPaths, type Board, type View, type VisibleBoard } from "./board";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MutableRefObject } from "react";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import { id, kinds, makeCard, priorities, statuses, type Card, type Change, type ExcalidrawScene, type Id,
+  type OpenBoard, type Operation, type Point, type Receipt } from "../model";
+import type { Board, View } from "./board";
 import { Checkpoint, type SaveState } from "./checkpoint";
-import { nearPath, nearStroke, outline, type Shape } from "./geometry";
+import { boundedOffset, duplicateSelection, geometry, movableBounds, removeSelection } from "./editing";
+import EditorSurface, { blankSelection, countSelection, type BoardSelection, type Tool } from "./EditorSurface";
+import { exportScene, openScene } from "./scene";
 import AgentPanel from "./AgentPanel";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
@@ -13,30 +16,19 @@ import { Modal } from "../Modal";
 import "../editor.css";
 import "./lean.css";
 
-type Tool = "select" | "pan" | "pen" | "text" | "arrow" | "connect" | "eraser" | Shape;
-type Rectangle = Pick<Card, "x" | "y" | "width" | "height">;
-type Gesture =
-  | { kind: "pan"; start: Point; view: View }
-  | { kind: "card"; start: Point; card: Card; before: Rectangle; resize: boolean }
-  | { kind: "pen"; stroke: Stroke }
-  | { kind: "shape"; shape: Shape; stroke: Stroke }
-  | { kind: "eraser"; removed: Set<Mark> }
-  | { kind: "arrow"; arrow: Arrow };
-type DrawingKind = keyof Drawing;
-type Mark = Drawing[DrawingKind][number];
-type DrawingChange = { kind: DrawingKind; mark: Mark; index: number };
-type DrawingEdit = { remove: boolean; changes: DrawingChange[] };
-type Edit = { kind: "card"; card: Card; fresh: boolean } | { kind: "text"; point: Point };
+type Edit = { card: Card; fresh: boolean };
 type Delta = Pick<Receipt, "revision" | "changes">;
 type DeltaPage = { revision: number; deltas: Delta[]; nextRevision: number };
-type Submission = { operation: Operation; undo: boolean };
+type HistoryAction = "record" | "undo" | "redo";
+type HistoryEntry = { changes: Change[]; scene?: ExcalidrawScene };
+type Submission = { operation: Operation; scene?: ExcalidrawScene; history: HistoryAction; selection?: BoardSelection };
 type Props = {
   opened: OpenBoard;
   registerClose: MutableRefObject<((windowClose: boolean) => void) | undefined>;
   onClose: () => void;
 };
 
-const tools: { id: Tool | "image"; label: string; key?: string; number?: string }[] = [
+const tools: { id: Exclude<Tool, "connect" | "frame" | "laser">; label: string; key?: string; number?: string }[] = [
   { id: "pan", label: "Hand", key: "h" },
   { id: "select", label: "Selection", key: "v", number: "1" },
   { id: "rectangle", label: "Rectangle", key: "r", number: "2" },
@@ -46,12 +38,9 @@ const tools: { id: Tool | "image"; label: string; key?: string; number?: string 
   { id: "line", label: "Line", key: "l", number: "6" },
   { id: "pen", label: "Draw", key: "p", number: "7" },
   { id: "text", label: "Text", key: "t", number: "8" },
-  { id: "image", label: "Image attachments unavailable", number: "9" },
+  { id: "image", label: "Insert image", number: "9" },
   { id: "eraser", label: "Eraser", key: "e", number: "0" },
 ];
-const drawingKinds = ["strokes", "arrows", "labels"] satisfies DrawingKind[];
-const clamp = (value: number) => Math.min(100_000, Math.max(-100_000, value));
-const geometry = (value: number) => Math.round(clamp(value) * 100) / 100;
 const ordered = (a: Card, b: Card) => a.order - b.order || a.id.localeCompare(b.id);
 const setNode = (node: Card): Change => ({ type: "setNode", node });
 const choices = (values: Record<string, string>) => Object.entries(values).map(([value, label]) => (
@@ -69,11 +58,12 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   const { scope, board: info, drawing } = opened;
   const [board] = useState<Board>(() => ({ ...drawing, nodes: opened.nodes.sort(ordered), edges: opened.edges }));
   const [nodeIndex] = useState(() => new Map(board.nodes.map((node) => [node.id, node])));
-  const [strokeBounds] = useState(() => new WeakMap<Stroke, VisibleBoard["region"]>());
+  const [scene, setScene] = useState(() => openScene(drawing));
+  const sceneRef = useRef(scene);
   const [tool, setTool] = useState<Tool>("select");
   const [keepTool, setKeepTool] = useState(false);
   const [zoomPercent, setZoomPercent] = useState(100);
-  const [selected, setSelected] = useState<Id>();
+  const [selection, setSelection] = useState(blankSelection);
   const [edit, setEdit] = useState<Edit>();
   const [inspector, setInspector] = useState(false);
   const [agents, setAgents] = useState(false);
@@ -91,96 +81,52 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const menu = useRef<HTMLDetailsElement>(null);
   const moreTools = useRef<HTMLDetailsElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const canvas = useRef<HTMLDivElement>(null);
+  const controller = useRef<ExcalidrawImperativeAPI>(null);
+  const settleScene = useRef<() => void>();
+  const active = useRef(false);
   const cardsLayer = useRef<HTMLDivElement>(null);
   const cards = useRef(new Map<Id, HTMLDivElement>());
   const list = useRef<HTMLOListElement>(null);
   const listToggle = useRef<HTMLButtonElement>(null);
   const agentsToggle = useRef<HTMLButtonElement>(null);
-  const selectedRef = useRef<Id>();
-  const gesture = useRef<Gesture>();
+  const selectionRef = useRef(selection);
+  const focusedCard = useRef<Id>();
   const view = useRef<View>({ x: 0, y: 0, zoom: 1 });
   const revision = useRef(info.semanticRevision);
-  const undoCards = useRef<{ revision: number; changes: Change[] }[]>([]);
-  const undoDrawing = useRef<DrawingEdit[]>([]);
-  const redoDrawing = useRef<DrawingEdit[]>([]);
-  const [initialPointCount] = useState(() => drawing.strokes.reduce((total, stroke) => total + stroke.points.length, 0));
-  const points = useRef(initialPointCount);
+  const undoHistory = useRef<HistoryEntry[]>([]);
+  const redoHistory = useRef<HistoryEntry[]>([]);
   const semantic = useRef<Promise<void>>();
   const failed = useRef<Submission>();
   const dependency = useRef<Id>();
   const latestClose = useRef<(windowClose: boolean) => void>();
   const locked = useRef(false);
   const draftChanged = useRef(false);
-  const space = useRef(false);
-  const frame = useRef(0);
+  const editAnchor = useRef<HTMLElement>();
   const remoteTimer = useRef(0);
   const remoteNeeded = useRef(false);
   const remoteBusy = useRef(false);
   const mounted = useRef(false);
   const remoteRefresh = useRef<() => void>();
   const [saver] = useState(() => new Checkpoint(scope, info.drawingRevision, drawing, setSaveState));
-  const [darkMode] = useState(() => window.matchMedia("(prefers-color-scheme: dark)"));
-
-  const repaint = useCallback(() => {
-    if (frame.current || document.hidden) return;
-    frame.current = requestAnimationFrame(() => {
-      frame.current = 0;
-      const surface = canvas.current;
-      if (!surface || !cardsLayer.current) return;
-      const ratio = window.devicePixelRatio;
-      const cssWidth = surface.clientWidth;
-      const cssHeight = surface.clientHeight;
-      const width = Math.round(cssWidth * ratio);
-      const height = Math.round(cssHeight * ratio);
-      if (surface.width !== width) surface.width = width;
-      if (surface.height !== height) surface.height = height;
-      const context = surface.getContext("2d")!;
-      const camera = view.current;
-      context.setTransform(1, 0, 0, 1, 0, 0);
-      context.clearRect(0, 0, width, height);
-      context.setTransform(ratio * camera.zoom, 0, 0, ratio * camera.zoom, ratio * camera.x, ratio * camera.y);
-      const active = gesture.current;
-      const draft = active?.kind === "pen" || active?.kind === "shape" ? active.stroke : active?.kind === "arrow" ? active.arrow : undefined;
-      paintPaths(context, board, draft, {
-        cards: nodeIndex, strokes: strokeBounds, dark: darkMode.matches, region: {
-          left: -camera.x / camera.zoom, top: -camera.y / camera.zoom,
-          right: (cssWidth - camera.x) / camera.zoom, bottom: (cssHeight - camera.y) / camera.zoom,
-        },
-      });
-      const transform = `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`;
-      if (cardsLayer.current.style.transform !== transform) cardsLayer.current.style.transform = transform;
-      if (panel.current && !panel.current.dataset.editorReady) panel.current.dataset.editorReady = "true";
-    });
-  }, [board, nodeIndex, strokeBounds, darkMode]);
+  const [dark, setDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   useEffect(() => {
-    const observer = new ResizeObserver(repaint);
-    if (canvas.current) observer.observe(canvas.current);
-    menu.current?.querySelector("summary")?.focus();
-    repaint();
-    const release = () => { space.current = false; };
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const changeTheme = (event: MediaQueryListEvent) => setDark(event.matches);
     const flushHidden = () => {
-      if (document.hidden) {
-        cancelAnimationFrame(frame.current);
-        frame.current = 0;
-        if (!locked.current) void saver.flush().catch(() => {});
-      } else repaint();
+      if (document.hidden && !locked.current) void saver.flush().catch(() => {});
     };
-    window.addEventListener("blur", release);
     document.addEventListener("visibilitychange", flushHidden);
-    darkMode.addEventListener("change", repaint);
+    media.addEventListener("change", changeTheme);
     registerClose.current = (windowClose) => latestClose.current?.(windowClose);
     return () => {
       registerClose.current = undefined;
-      observer.disconnect();
-      cancelAnimationFrame(frame.current);
       saver.dispose();
-      window.removeEventListener("blur", release);
       document.removeEventListener("visibilitychange", flushHidden);
-      darkMode.removeEventListener("change", repaint);
+      media.removeEventListener("change", changeTheme);
     };
-  }, [registerClose, repaint, saver, darkMode]);
+  }, [registerClose, saver]);
 
   useEffect(() => {
     mounted.current = true;
@@ -200,7 +146,8 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function scheduleRemote() {
     remoteNeeded.current = true;
-    if (!mounted.current || remoteTimer.current || remoteBusy.current || gesture.current || semantic.current || locked.current || edit) return;
+    if (!mounted.current || remoteTimer.current || remoteBusy.current || active.current || semantic.current
+      || failed.current || locked.current || edit) return;
     remoteTimer.current = window.setTimeout(() => {
       remoteTimer.current = 0;
       remoteRefresh.current?.();
@@ -208,7 +155,8 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   remoteRefresh.current = () => {
-    if (!mounted.current || !remoteNeeded.current || remoteBusy.current || gesture.current || semantic.current || locked.current || edit) return;
+    if (!mounted.current || !remoteNeeded.current || remoteBusy.current || active.current || semantic.current
+      || failed.current || locked.current || edit) return;
     remoteNeeded.current = false;
     remoteBusy.current = true;
     void invoke<DeltaPage>("board_deltas", { scope, since: revision.current })
@@ -217,7 +165,10 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         const changes = page.deltas.filter((delta) => delta.revision > revision.current);
         if (changes.length) {
           project(changes);
-          undoCards.current = [];
+          const retainDrawing = (stack: HistoryEntry[]) => stack.filter((entry) => entry.scene)
+            .map((entry) => ({ ...entry, changes: [] }));
+          undoHistory.current = retainDrawing(undoHistory.current);
+          redoHistory.current = retainDrawing(redoHistory.current);
           if (!failed.current) setNotice(`Paired client update · revision ${revision.current}`);
         }
         if (page.nextRevision < page.revision) remoteNeeded.current = true;
@@ -233,30 +184,15 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     if (!edit && remoteNeeded.current) scheduleRemote();
   }, [edit]);
 
-  function showCard(card: Card) {
-    const button = cards.current.get(card.id);
-    if (button) {
-      button.style.left = `${card.x}px`;
-      button.style.top = `${card.y}px`;
-      button.style.width = `${card.width}px`;
-      button.style.height = `${card.height}px`;
-    }
-  }
-
   function project(deltas: Delta[]) {
-    let geometryChanged = false;
+    const picked = selectionRef.current;
+    let pruned: BoardSelection | undefined;
     for (const delta of deltas) {
       for (const change of delta.changes) {
         switch (change.type) {
           case "setNode": {
             const index = board.nodes.findIndex((node) => node.id === change.node.id);
-            const previous = board.nodes[index];
             const node = change.node;
-            if (!previous || previous.x !== node.x || previous.y !== node.y
-              || previous.width !== node.width || previous.height !== node.height) {
-              geometryChanged = true;
-              showCard(node);
-            }
             if (index < 0) board.nodes.push(node);
             else board.nodes[index] = node;
             nodeIndex.set(node.id, node);
@@ -266,46 +202,49 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
             const index = board.nodes.findIndex((node) => node.id === change.id);
             if (index >= 0) board.nodes.splice(index, 1);
             nodeIndex.delete(change.id);
-            geometryChanged = true;
+            if (picked.cards.has(change.id)) {
+              pruned ??= { ...picked, cards: new Set(picked.cards), edges: new Set(picked.edges) };
+              pruned.cards.delete(change.id);
+            }
             break;
           }
           case "setEdge": {
             const index = board.edges.findIndex((edge) => edge.id === change.edge.id);
             if (index < 0) board.edges.push(change.edge);
             else board.edges[index] = change.edge;
-            geometryChanged = true;
             break;
           }
           case "removeEdge": {
             const index = board.edges.findIndex((edge) => edge.id === change.id);
             if (index >= 0) board.edges.splice(index, 1);
-            geometryChanged = true;
+            if (picked.edges.has(change.id)) {
+              pruned ??= { ...picked, cards: new Set(picked.cards), edges: new Set(picked.edges) };
+              pruned.edges.delete(change.id);
+            }
             break;
           }
         }
       }
       revision.current = delta.revision;
     }
-    if (selectedRef.current && !nodeIndex.has(selectedRef.current)) selectCard();
+    if (pruned) chooseSelection(pruned);
     board.nodes.sort(ordered);
     update();
-    if (geometryChanged) repaint();
+  }
+
+  function chooseSelection(next: BoardSelection) {
+    selectionRef.current = next;
+    if (next.cards.size === 1) focusedCard.current = next.cards.values().next().value;
+    setSelection(next);
   }
 
   function send(submission: Submission) {
     failed.current = undefined;
-    setNotice("Saving card changes…");
+    setNotice("Saving board changes…");
     semantic.current = invoke<Receipt>("apply_operation", { scope, operation: submission.operation })
       .then((receipt) => {
         project([receipt]);
-        if (submission.undo) {
-          undoCards.current.pop();
-          const previous = undoCards.current.at(-1);
-          if (previous) previous.revision = receipt.revision;
-        } else {
-          undoCards.current.push({ revision: receipt.revision, changes: receipt.inverse });
-          if (undoCards.current.length > 32) undoCards.current.shift();
-        }
+        finishEdit(submission.scene, receipt.inverse, submission.history, submission.selection);
         setNotice(`Saved · revision ${receipt.revision}`);
       })
       .catch((error) => {
@@ -314,87 +253,62 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       })
       .finally(() => {
         semantic.current = undefined;
+        update();
         if (remoteNeeded.current) scheduleRemote();
       });
   }
 
-  function commit(changes: Change[], undoRevision?: number) {
-    if (locked.current || semantic.current || failed.current || remoteBusy.current) return false;
-    send({ operation: { id: id(), expectedRevision: undoRevision ?? revision.current, changes }, undo: undoRevision !== undefined });
+  function canEdit() {
+    return !locked.current && !semantic.current && !failed.current && !remoteBusy.current;
+  }
+
+  function commit(changes: Change[], nextScene?: ExcalidrawScene, history: HistoryAction = "record", selected?: BoardSelection) {
+    if (!canEdit() || (!changes.length && !nextScene)) return false;
+    if (changes.length > 64) {
+      setNotice("This edit affects more than 64 cards or links. Select fewer objects and try again.");
+      return false;
+    }
+    if (changes.length) {
+      send({ operation: { id: id(), expectedRevision: revision.current, changes }, scene: nextScene, history, selection: selected });
+    } else {
+      finishEdit(nextScene, [], history, selected);
+    }
     return true;
   }
 
-  function undoCard() {
-    const entry = undoCards.current.at(-1);
-    if (entry) commit(entry.changes, entry.revision);
-  }
-
-  function applyDrawing(edit: DrawingEdit, reverse = false) {
-    const remove = edit.remove !== reverse;
-    const changes = remove ? edit.changes.slice().reverse() : edit.changes;
-    for (const { kind, mark, index } of changes) {
-      const marks: Mark[] = drawing[kind];
-      if (remove) marks.splice(index, 1);
-      else marks.splice(index, 0, mark);
-      if ("points" in mark) points.current += (remove ? -1 : 1) * mark.points.length;
+  function finishEdit(nextScene: ExcalidrawScene | undefined, inverse: Change[], history: HistoryAction, selected?: BoardSelection) {
+    const entry: HistoryEntry = { changes: inverse, scene: nextScene ? sceneRef.current : undefined };
+    if (nextScene) {
+      sceneRef.current = nextScene;
+      setScene(nextScene);
+      drawing.excalidraw = nextScene;
+      drawing.strokes = [];
+      drawing.labels = [];
+      drawing.arrows = [];
+      saver.changed();
     }
-    saver.changed();
+    if (selected) chooseSelection(selected);
+    else if (nextScene) {
+      const live = new Set(nextScene.elements.map(({ id }) => id));
+      const picked = selectionRef.current;
+      chooseSelection({ ...picked, elements: new Set([...picked.elements].filter((id) => live.has(id))) });
+    }
+    if (history === "undo") {
+      undoHistory.current.pop();
+      redoHistory.current.push(entry);
+    } else {
+      if (history === "redo") redoHistory.current.pop();
+      else redoHistory.current = [];
+      undoHistory.current.push(entry);
+      if (undoHistory.current.length > 24) undoHistory.current.shift();
+    }
     update();
-    repaint();
   }
 
-  function changeDrawing(edit: DrawingEdit) {
-    undoDrawing.current.push(edit);
-    if (undoDrawing.current.length > 32) undoDrawing.current.shift();
-    redoDrawing.current = [];
-    applyDrawing(edit);
-  }
-
-  function addMark<K extends DrawingKind>(kind: K, mark: Drawing[K][number]) {
-    changeDrawing({ remove: false, changes: [{ kind, mark, index: drawing[kind].length }] });
-  }
-
-  function undoInk(redo = false) {
-    if (locked.current || gesture.current) return;
-    const from = redo ? redoDrawing : undoDrawing;
-    const to = redo ? undoDrawing : redoDrawing;
-    const edit = from.current.pop();
-    if (!edit) return;
-    to.current.push(edit);
-    applyDrawing(edit, !redo);
-  }
-
-  function eraseAt(event: PointerEvent<HTMLCanvasElement>, removed: Set<Mark>) {
-    const [x, y] = point(event);
-    const radius = 6 / view.current.zoom;
-    for (const stroke of drawing.strokes) {
-      if (!removed.has(stroke) && nearStroke(stroke, x, y, radius, strokeBounds)) {
-        removed.add(stroke);
-      }
-    }
-    for (const arrow of drawing.arrows) {
-      if (nearPath([arrow.from, arrow.to], x, y, radius)) removed.add(arrow);
-    }
-    cardsLayer.current?.querySelectorAll(".lean-label").forEach((element, index) => {
-      const rect = element.getBoundingClientRect();
-      if (event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom) {
-        removed.add(drawing.labels[index]);
-      }
-    });
-  }
-
-  function point(event: PointerEvent<HTMLCanvasElement>, convert = true): Point {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const position: Point = [event.clientX - rect.left, event.clientY - rect.top];
-    const camera = view.current;
-    return convert ? [geometry((position[0] - camera.x) / camera.zoom), geometry((position[1] - camera.y) / camera.zoom)] : position;
-  }
-
-  function hit([x, y]: Point) {
-    for (let index = board.nodes.length - 1; index >= 0; index--) {
-      const card = board.nodes[index];
-      if (x >= card.x && x <= card.x + card.width && y >= card.y && y <= card.y + card.height) return card;
-    }
+  function changeHistory(redo = false) {
+    if (active.current || edit) return;
+    const entry = (redo ? redoHistory : undoHistory).current.at(-1);
+    if (entry) commit(entry.changes, entry.scene, redo ? "redo" : "undo");
   }
 
   function connect(card?: Card) {
@@ -409,110 +323,18 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     }
   }
 
-  function start(event: PointerEvent<HTMLCanvasElement>) {
-    if (event.button !== 0 || locked.current || gesture.current || edit || remoteBusy.current) return;
-    event.currentTarget.focus();
-    const start = point(event);
-    if (tool === "pan" || space.current) {
-      gesture.current = { kind: "pan", start: point(event, false), view: { ...view.current } };
-    } else if (tool === "pen") {
-      if (drawing.strokes.length >= 2_000 || points.current > 179_998) return setNotice("This board reached its stroke limit.");
-      gesture.current = { kind: "pen", stroke: { id: id(), x: start[0], y: start[1], points: [[0, 0]], width: 3, color: "slate" } };
-    } else if (tool === "rectangle" || tool === "diamond" || tool === "ellipse" || tool === "line") {
-      if (drawing.strokes.length >= 2_000 || points.current + outline(tool, [0, 0]).length > 180_000) {
-        return setNotice("This board reached its stroke limit.");
-      }
-      gesture.current = { kind: "shape", shape: tool, stroke: { id: id(), x: start[0], y: start[1], points: [], width: 2, color: "slate" } };
-    } else if (tool === "eraser") {
-      const removed = new Set<Mark>();
-      eraseAt(event, removed);
-      gesture.current = { kind: "eraser", removed };
-    } else if (tool === "arrow") {
-      if (drawing.arrows.length >= 1_000) return setNotice("This board reached its arrow limit.");
-      gesture.current = { kind: "arrow", arrow: { from: start, to: start, color: "slate" } };
-    } else if (tool === "text") {
-      const card = hit(start);
-      if (card && (semantic.current || failed.current)) return;
-      setEdit(card ? { kind: "card", card, fresh: false } : { kind: "text", point: start });
-      return;
-    } else if (!semantic.current && !failed.current) {
-      const card = hit(start);
-      selectCard(card);
-      if (tool === "connect") return connect(card);
-      if (!card) return;
-      const { x, y, width, height } = card;
-      const resize = selected === card.id && x + width - start[0] <= 14 && y + height - start[1] <= 14;
-      gesture.current = { kind: "card", start, card, before: { x, y, width, height }, resize };
-    }
-    if (gesture.current) event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function move(event: PointerEvent<HTMLCanvasElement>) {
-    const active = gesture.current;
-    if (!active) return;
-    if (active.kind === "pan") {
-      const [x, y] = point(event, false);
-      view.current.x = active.view.x + x - active.start[0];
-      view.current.y = active.view.y + y - active.start[1];
-    } else if (active.kind === "card") {
-      const [x, y] = point(event);
-      if (active.resize) {
-        active.card.width = Math.min(4096, Math.max(48, geometry(active.before.width + x - active.start[0])));
-        active.card.height = Math.min(4096, Math.max(32, geometry(active.before.height + y - active.start[1])));
-      } else {
-        active.card.x = geometry(active.before.x + x - active.start[0]);
-        active.card.y = geometry(active.before.y + y - active.start[1]);
-      }
-      showCard(active.card);
-    } else if (active.kind === "arrow") active.arrow.to = point(event);
-    else if (active.kind === "eraser") eraseAt(event, active.removed);
-    else if (active.kind === "shape") {
-      const [x, y] = point(event);
-      active.stroke.points = outline(active.shape, [x - active.stroke.x, y - active.stroke.y]);
-    } else if (active.stroke.points.length < Math.min(1024, 180_000 - points.current)) {
-      const [x, y] = point(event);
-      active.stroke.points.push([x - active.stroke.x, y - active.stroke.y]);
-    }
-    repaint();
-  }
-
-  function finish(canceled: boolean) {
-    const active = gesture.current;
-    gesture.current = undefined;
-    if (!active) return;
-    if (active.kind === "card") {
-      const { card, before } = active;
-      const moved = card.x !== before.x || card.y !== before.y || card.width !== before.width || card.height !== before.height;
-      if (!canceled && moved) commit([setNode({ ...card })]);
-      Object.assign(card, before);
-      if (canceled || !moved) showCard(card);
-      else void semantic.current?.finally(() => showCard(board.nodes.find((item) => item.id === card.id) ?? card));
-    } else if (!canceled && (active.kind === "pen" || active.kind === "shape") && active.stroke.points.length >= 2) {
-      addMark("strokes", active.stroke);
-      if (active.kind === "shape" && !keepTool) setTool("select");
-    } else if (!canceled && active.kind === "arrow" &&
-      (active.arrow.from[0] !== active.arrow.to[0] || active.arrow.from[1] !== active.arrow.to[1])) {
-      addMark("arrows", active.arrow);
-      if (!keepTool) setTool("select");
-    } else if (!canceled && active.kind === "eraser" && active.removed.size) {
-      const changes: DrawingChange[] = [];
-      for (const kind of drawingKinds) {
-        drawing[kind].forEach((mark, index) => {
-          if (active.removed.has(mark)) changes.push({ kind, mark, index });
-        });
-      }
-      changeDrawing({ remove: true, changes });
-    }
-    repaint();
-    if (remoteNeeded.current) scheduleRemote();
-  }
-
   function addCard() {
-    if (edit || locked.current || gesture.current || semantic.current || failed.current || remoteBusy.current) return;
+    if (edit || locked.current || active.current || semantic.current || failed.current || remoteBusy.current) return;
     const camera = view.current;
     const shift = 32 * (board.nodes.length % 7);
     const at: Point = [geometry((70 + shift - camera.x) / camera.zoom), geometry((90 + shift - camera.y) / camera.zoom)];
-    setEdit({ kind: "card", card: makeCard("", at, (board.nodes.at(-1)?.order ?? -1) + 1), fresh: true });
+    openEdit({ card: makeCard("", at, (board.nodes.at(-1)?.order ?? -1) + 1), fresh: true });
+  }
+
+  function openEdit(next: Edit) {
+    const active = document.activeElement;
+    editAnchor.current = active instanceof HTMLElement ? active : undefined;
+    setEdit(next);
   }
 
   function enterEdit(event: FormEvent<HTMLFormElement>) {
@@ -522,25 +344,17 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     const text = String(values.get("title")).trim();
     if (!text) return;
     if (new TextEncoder().encode(text).length > 1024) return setNotice("Enter a title of 1–1024 bytes.");
-    if (edit.kind === "text") {
-      if (drawing.labels.length >= 1_000) return setNotice("This board reached its text limit.");
-      addMark("labels", { x: edit.point[0], y: edit.point[1], text });
-      if (!keepTool) setTool("select");
-    } else {
-      if (semantic.current || failed.current) return;
-      const card: Card = {
-        ...edit.card, title: text, description: String(values.get("description")),
-        kind: values.get("kind") as Card["kind"], status: values.get("status") as Card["status"],
-        priority: values.get("priority") as Card["priority"], width: Number(values.get("width")),
-        height: Number(values.get("height")), x: Number(values.get("x")), y: Number(values.get("y")),
-        parent: (values.get("parent") || null) as Card["parent"],
-      };
-      if (card.parent !== edit.card.parent) card.order = (board.nodes.at(-1)?.order ?? -1) + 1;
-      commit([setNode(card)]);
-      selectCard(card);
-    }
-    draftChanged.current = false;
-    setEdit(undefined);
+    if (semantic.current || failed.current) return;
+    const card: Card = {
+      ...edit.card, title: text, description: String(values.get("description")),
+      kind: values.get("kind") as Card["kind"], status: values.get("status") as Card["status"],
+      priority: values.get("priority") as Card["priority"], width: Number(values.get("width")),
+      height: Number(values.get("height")), x: Number(values.get("x")), y: Number(values.get("y")),
+      parent: (values.get("parent") || null) as Card["parent"],
+    };
+    if (card.parent !== edit.card.parent) card.order = (board.nodes.at(-1)?.order ?? -1) + 1;
+    if (!commit([setNode(card)], undefined, "record", { ...blankSelection(), cards: new Set([card.id]) })) return;
+    closeEdit(surface());
   }
 
   async function flush() {
@@ -551,7 +365,11 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function leave(windowClose: boolean, discard = false) {
     if (locked.current) return;
-    finish(true);
+    if (!discard && controller.current?.getAppState().editingTextElement) {
+      setCloseFailure({ windowClose, message: "Finish editing the board text before closing." });
+      return;
+    }
+    settleScene.current?.();
     locked.current = true;
     setPending(true);
     setCloseFailure(undefined);
@@ -577,14 +395,15 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   latestClose.current = leave;
 
   async function prepareExport(format: "png" | "svg" | "board") {
-    if (locked.current || gesture.current) return;
+    if (locked.current || active.current) return;
+    settleScene.current?.();
     locked.current = true;
     setPending(true);
     try {
       await deadline(flush(), 4_000);
       const written = format === "board"
         ? await invoke<boolean>("export_board", { scope })
-        : await invoke<boolean>("export_preview", await (await exportImage(board, format)).arrayBuffer(),
+        : await invoke<boolean>("export_preview", await (await exportScene(board.nodes, board.edges, sceneRef.current, format)).arrayBuffer(),
           { headers: { "x-board-image": format } });
       if (written) setNotice("Export saved.");
     } catch (error) {
@@ -596,17 +415,25 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   function zoom(factor: number) {
-    if (gesture.current) return;
-    view.current.zoom = Math.min(2, Math.max(0.3, view.current.zoom * factor));
-    setZoomPercent(Math.round(view.current.zoom * 100));
-    repaint();
+    const api = controller.current;
+    if (!api || active.current) return;
+    const { zoom, scrollX, scrollY, width, height } = api.getAppState();
+    const value = Math.min(3, Math.max(0.1, zoom.value * factor)) as typeof zoom.value;
+    api.updateScene({ appState: { zoom: { value },
+      scrollX: scrollX + width / 2 * (1 / value - 1 / zoom.value),
+      scrollY: scrollY + height / 2 * (1 / value - 1 / zoom.value) } });
   }
 
   function resetView() {
-    if (gesture.current) return;
-    view.current = { x: 0, y: 0, zoom: 1 };
-    setZoomPercent(100);
-    repaint();
+    const api = controller.current;
+    if (api && !active.current) {
+      const { zoom } = api.getAppState();
+      api.updateScene({ appState: { scrollX: 0, scrollY: 0, zoom: { value: 1 as typeof zoom.value } } });
+    }
+  }
+
+  function pickedCards() {
+    return board.nodes.filter((card) => selectionRef.current.cards.has(card.id));
   }
 
   function reorder(card: Card, direction: number) {
@@ -618,37 +445,63 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   function editCard(card: Card) {
     if (!edit && !locked.current && !semantic.current && !failed.current && !remoteBusy.current) {
       selectCard(card);
-      setEdit({ kind: "card", card, fresh: false });
+      openEdit({ card, fresh: false });
     }
+  }
+
+  function deleteSelected() {
+    if (active.current || edit) return;
+    const picked = selectionRef.current;
+    const { changes } = removeSelection(board, { ...picked, marks: new Set() });
+    // Native Delete owns freeform deletion, including frame membership and bindings.
+    if (picked.elements.size) {
+      surface()?.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", code: "Delete", bubbles: true }));
+    } else commit(changes);
+  }
+
+  function duplicateSelected() {
+    if (active.current || edit || !canEdit()) return;
+    const picked = selectionRef.current;
+    const offset = boundedOffset([24, 24], movableBounds(pickedCards(), [], new WeakMap()));
+    const { changes, selected } = duplicateSelection(board, { ...picked, marks: new Set() }, offset);
+    if (board.nodes.length + selected.cards.size > 2_000) {
+      setNotice("This board reached its card limit.");
+      return;
+    }
+    commit(changes, undefined, "record", { ...blankSelection(), cards: selected.cards, edges: selected.edges });
+  }
+
+  function cycleCards(direction: number) {
+    if (!board.nodes.length) return;
+    const index = board.nodes.findIndex((item) => item.id === focusedCard.current);
+    const next = index === -1 ? (direction > 0 ? 0 : board.nodes.length - 1)
+      : (index + direction + board.nodes.length) % board.nodes.length;
+    selectCard(board.nodes[next], true);
   }
 
   function selectCard(card?: Card, reveal = false) {
-    selectedRef.current = card?.id;
-    setSelected(card?.id);
-    if (!card || !reveal || !canvas.current) return;
-    const camera = view.current;
-    const left = card.x * camera.zoom + camera.x;
-    const top = card.y * camera.zoom + camera.y;
-    const width = canvas.current.clientWidth;
-    const height = canvas.current.clientHeight;
-    const tools = panel.current?.querySelector(".lean-toolbar")?.getBoundingClientRect();
-    const shelf = panel.current?.querySelector(".lean-shelf, .agent-panel")?.getBoundingClientRect();
-    const bounds = canvas.current.getBoundingClientRect();
-    const leftLimit = 12;
-    const rightLimit = shelf ? shelf.left - bounds.left - 12 : width - 12;
-    const topLimit = tools ? tools.bottom - bounds.top + 12 : 62;
-    const bottomLimit = height - 62;
-    if (left < leftLimit || top < topLimit || left + card.width * camera.zoom > rightLimit
-      || top + card.height * camera.zoom > bottomLimit) {
-      camera.x += (leftLimit + Math.max(leftLimit, rightLimit)) / 2 - left - card.width * camera.zoom / 2;
-      camera.y += (topLimit + bottomLimit) / 2 - top - card.height * camera.zoom / 2;
-      repaint();
-    }
+    chooseSelection({ ...blankSelection(), cards: new Set(card ? [card.id] : []) });
+    const api = controller.current;
+    const element = card && api?.getSceneElements().find(({ customData }) => customData?.raqshCard === card.id);
+    if (reveal && element) api?.scrollToContent(element, { animate: false });
   }
 
   function cancelEdit() {
+    closeEdit(editAnchor.current);
+  }
+
+  function surface() {
+    return canvas.current?.querySelector<HTMLElement>(".excalidraw");
+  }
+
+  function closeEdit(anchor?: HTMLElement | null) {
+    editAnchor.current = undefined;
     draftChanged.current = false;
     setEdit(undefined);
+    requestAnimationFrame(() => {
+      const target = anchor?.isConnected && !anchor.matches(":disabled") ? anchor : surface();
+      target?.focus({ preventScroll: true });
+    });
   }
 
   function closePanel(id: "cards" | "agents") {
@@ -659,6 +512,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function selectTool(next: Tool) {
     setTool(next);
+    surface()?.focus({ preventScroll: true });
     dependency.current = undefined;
     setNotice("");
   }
@@ -672,96 +526,82 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function onBoardKey(event: KeyboardEvent<HTMLDivElement>) {
     if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp) return;
-    if (event.key === "Escape") {
-      if (gesture.current) finish(true);
-      else if (closeDisclosure(menu.current) || closeDisclosure(moreTools.current)) {
-        event.preventDefault();
-        return;
+    const target = event.target as HTMLElement;
+    if (locked.current || target.closest("input, textarea, select, [contenteditable], .agent-panel")) return;
+    const nativeState = controller.current?.getAppState();
+    if (nativeState?.openPopup && canvas.current?.contains(target)) return;
+    const shortcut = event.key.toLowerCase();
+    const consume = () => { event.preventDefault(); event.stopPropagation(); };
+    if ((event.ctrlKey || event.metaKey) && !event.altKey) {
+      if (shortcut === "z" || shortcut === "y" || (shortcut === "d" && selectionRef.current.cards.size)) {
+        consume();
+        settleScene.current?.();
+        if (shortcut === "d") duplicateSelected();
+        else changeHistory(shortcut === "y" || event.shiftKey);
       }
-      else if (agents) closePanel("agents");
-      else if (inspector) closePanel("cards");
-      else if (event.target === canvas.current) {
-        dependency.current = undefined;
-        selectCard();
-        setNotice("");
-      } else return;
-      event.preventDefault();
-      return;
-    }
-    if (event.target !== canvas.current || locked.current) return;
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
-      event.preventDefault();
-      if (event.shiftKey) undoInk();
-      else undoCard();
       return;
     }
     if (event.altKey || event.ctrlKey || event.metaKey) return;
-    const shortcut = event.key.toLowerCase();
-    const next = tools.find((item) => item.key === shortcut || item.number === shortcut);
-    if (next && next.id !== "image") {
-      event.preventDefault();
-      selectTool(next.id);
-      return;
-    }
-    if (shortcut === "q" || shortcut === "?") {
-      event.preventDefault();
-      if (shortcut === "q") setKeepTool(!keepTool);
-      else setKeyboardHelp(true);
-      return;
-    }
-    const arrows = ["ArrowLeft", "ArrowUp", "ArrowRight", "ArrowDown"];
-    if (arrows.includes(event.key)) {
-      event.preventDefault();
-      if (tool === "pan") {
-        const direction = arrows.indexOf(event.key);
-        if (direction % 2) view.current.y += direction === 1 ? 64 : -64;
-        else view.current.x += direction === 0 ? 64 : -64;
-        repaint();
-      } else if (board.nodes.length) {
-        const index = board.nodes.findIndex((item) => item.id === selectedRef.current);
-        const direction = arrows.indexOf(event.key) < 2 ? -1 : 1;
-        const next = index === -1 ? 0 : (index + direction + board.nodes.length) % board.nodes.length;
-        selectCard(board.nodes[next], true);
+    if (event.key === "Escape") {
+      if (active.current || nativeState?.contextMenu || nativeState?.openPopup || nativeState?.openDialog) return;
+      consume();
+      if (closeDisclosure(menu.current) || closeDisclosure(moreTools.current)) return;
+      if (agents) closePanel("agents");
+      else if (inspector) closePanel("cards");
+      else {
+        if (tool === "connect") selectTool("select");
+        chooseSelection(blankSelection());
+        setNotice("");
       }
-    } else if (event.key === "Enter") {
-      event.preventDefault();
-      const selectedCard = board.nodes.find((item) => item.id === selectedRef.current);
-      if (tool === "connect") connect(selectedCard);
-      else if (selectedCard) editCard(selectedCard);
-    } else if (event.key === "Insert" || shortcut === "n") {
-      event.preventDefault();
-      addCard();
-    } else if (event.key === " ") {
-      event.preventDefault();
-      space.current = true;
-    } else if (event.key === "+" || event.key === "=" || event.key === "-") {
-      event.preventDefault();
-      zoom(event.key === "-" ? 1 / 1.1 : 1.1);
+      return;
     }
+    if (active.current) return;
+    const next = tools.find((item) => item.key === shortcut || item.number === shortcut);
+    if (next && !event.shiftKey) { consume(); selectTool(next.id); }
+    else if (shortcut === "insert" || shortcut === "n") { consume(); addCard(); }
+    else if (shortcut === "c") { consume(); selectTool("connect"); }
+    else if (shortcut === "q") { consume(); setKeepTool(!keepTool); }
+    else if (shortcut === "f1") { consume(); setKeyboardHelp(true); }
+    else if (shortcut === "[" || shortcut === "]") { consume(); cycleCards(shortcut === "[" ? -1 : 1); }
+    else if (shortcut === "enter" && (selectionRef.current.cards.size > 0 || tool === "connect")
+      && canvas.current?.contains(target)) {
+      consume();
+      if (tool === "connect") connect(pickedCards()[0]);
+      else {
+        const card = pickedCards()[0];
+        if (card && countSelection(selectionRef.current) === 1) editCard(card);
+      }
+    } else if (["+", "=", "-"].includes(shortcut)) { consume(); zoom(shortcut === "-" ? 1 / 1.1 : 1.1); }
   }
 
-  const card = board.nodes.find((item) => item.id === selected);
-  const group = card && board.nodes.find((item) => item.id === card.parent);
+  const count = countSelection(selection);
+  const typedSelected = selection.cards.size > 0 || selection.edges.size > 0;
+  const card = count === 1 ? nodeIndex.get(selection.cards.values().next().value ?? "") : undefined;
+  const edge = count === 1 && selection.edges.size ? board.edges.find((edge) => selection.edges.has(edge.id)) : undefined;
+  const group = card && nodeIndex.get(card.parent ?? "");
+  const unavailable = pending || !canEdit();
   return (
     <div className="board-editor lean-editor" ref={panel} data-fixture={window.__BOARD_FIXTURE__}
-      data-initial-elements={opened.nodes.length * 2 + opened.edges.length + drawing.strokes.length}
-      data-semantic-revision={revision.current} data-renderer="lean"
+      data-initial-elements={opened.nodes.length * 2 + opened.edges.length + (drawing.excalidraw?.elements.length ?? drawing.strokes.length)}
+      data-semantic-revision={revision.current} data-renderer="excalidraw"
       onPointerDownCapture={(event) => {
         const target = event.target as Node;
         for (const disclosure of [menu.current, moreTools.current]) {
           if (disclosure?.open && !disclosure.contains(target)) disclosure.open = false;
         }
       }}
-      onKeyDown={onBoardKey} onKeyUp={(event) => {
-        if (event.key === " ") space.current = false;
-      }}>
+      onKeyDownCapture={onBoardKey}>
       <h1 className="visually-hidden" dir="auto">{info.title}</h1>
       <details ref={menu} className="board-header">
         <summary className="board-control" aria-label="Board menu" title="Board menu"><Icon name="menu" size={16} /></summary>
         <div className="board-menu">
           <button type="button" disabled={pending} onClick={() => { closeDisclosure(menu.current); addCard(); }}><Icon name="add" size={16} />Add card</button>
-          <button type="button" disabled={pending || !undoCards.current.length}
-            onClick={() => { closeDisclosure(menu.current); undoCard(); }}><Icon name="undo" size={16} />Undo card</button>
+          <button type="button" data-menu-history="undo" disabled={unavailable || !undoHistory.current.length}
+            onClick={() => { closeDisclosure(menu.current); changeHistory(); }}><Icon name="undo" size={16} />Undo</button>
+          <button type="button" disabled={unavailable || !redoHistory.current.length}
+            onClick={() => { closeDisclosure(menu.current); changeHistory(true); }}><Icon name="redo" size={16} />Redo</button>
+          <button type="button" disabled={unavailable || !count}
+            onClick={() => { closeDisclosure(menu.current); deleteSelected(); }}>Delete selection</button>
           <details className="export-menu"><summary><Icon name="export" size={16} />Export</summary>
             <div>
               <button type="button" disabled={pending} onClick={() => void prepareExport("board")}>Board file…</button>
@@ -772,33 +612,29 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
           <button type="button" disabled={pending} onClick={() => leave(false)}><Icon name="back" size={16} />Close board</button>
         </div>
       </details>
-      <p id="board-keyboard-summary" className="visually-hidden">Arrow keys select cards. Enter edits the selected card or links it in Dependency mode.</p>
-      <div role="status" aria-atomic="true" className="visually-hidden">{card ? `Selected ${card.title}` : ""}</div>
-      <canvas ref={canvas} className={`interactive lean-canvas tool-${tool}`} data-board-surface tabIndex={0}
-        aria-label="Drawing canvas" aria-describedby="board-keyboard-summary"
-        onPointerDown={start} onPointerMove={move} onPointerUp={() => finish(false)} onPointerCancel={() => finish(true)}
-        onLostPointerCapture={() => finish(true)}
-        onDoubleClick={(event) => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          const camera = view.current;
-          const card = hit([(event.clientX - rect.left - camera.x) / camera.zoom, (event.clientY - rect.top - camera.y) / camera.zoom]);
-          if (card && tool === "select") editCard(card);
-        }} />
+      <p id="board-keyboard-summary" className="visually-hidden">Press N to add a card. Arrow keys move the selection. Enter edits the selected card or text. F1 opens all shortcuts.</p>
+      <div role="status" aria-atomic="true" className="visually-hidden">{card ? `Selected ${card.title}` : count ? `${count} selected` : ""}</div>
+      <EditorSurface board={board} scene={scene} container={canvas} cardsLayer={cardsLayer} cards={cards} active={active}
+        controller={controller} sync={settleScene} selection={selection} view={view} tool={tool} keepTool={keepTool}
+        dark={dark} canEdit={canEdit} readOnly={pending || !!edit || keyboardHelp || !!closeFailure}
+        onReady={() => { if (panel.current) panel.current.dataset.editorReady = "true"; }} onView={setZoomPercent} onTool={setTool} onSelection={chooseSelection} onEditCard={editCard} onConnect={(card) => {
+          selectCard(card);
+          connect(card);
+        }} onSettle={() => { if (remoteNeeded.current) scheduleRemote(); }} onNotice={setNotice}
+        onCommit={(changes, next, selected) => commit(changes, next, "record", selected)} />
       <div className="lean-cards" aria-hidden="true" ref={cardsLayer}>
         {board.nodes.map((item) => (
           <div key={item.id} dir="auto" className="lean-card" data-card-id={item.id}
             data-kind={item.kind} data-status={item.status} data-priority={item.priority} data-dropped={item.dropped}
             data-badge={item.dropped ? "Dropped" : statuses[item.status]}
-            data-selected={selected === item.id}
+            data-selected={selection.cards.has(item.id)}
             ref={(element) => { if (element) cards.current.set(item.id, element); else cards.current.delete(item.id); }}
-            style={{ left: item.x, top: item.y, width: item.width, height: item.height }}
-            onClick={() => tool === "connect" ? connect(item) : editCard(item)}>
+            style={{ left: item.x, top: item.y, width: item.width, height: item.height }}>
             <span className="card-title">{item.title}</span>
           </div>
         ))}
-        {drawing.labels.map((label, index) => <span className="lean-label" dir="auto" key={index} style={{ left: label.x, top: label.y }}>{label.text}</span>)}
       </div>
-      {!board.nodes.length && !drawing.strokes.length && !drawing.labels.length && !drawing.arrows.length && <div className="lean-empty">
+      {!board.nodes.length && !scene.elements.length && <div className="lean-empty">
         <strong>{brand.displayName}</strong>
         <p>Draw here. Your plan starts on the board.</p>
         <small>Press N to add a card, or pick a tool to sketch and write.</small>
@@ -810,19 +646,40 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         </button>
         <span className="tool-divider" aria-hidden="true" />
         {tools.map(({ id, label, key, number }) => <button key={id} type="button" data-tool={id}
-          disabled={pending || id === "image"} aria-pressed={tool === id} aria-label={label}
+          disabled={pending} aria-pressed={tool === id} aria-label={label}
           title={key ? `${label} (${key.toUpperCase()}${number ? ` or ${number}` : ""})` : label}
-          onClick={() => { if (id !== "image") selectTool(id); }}>
+          onClick={() => selectTool(id)}>
           <Icon name={id} size={16} />{number && <span className="tool-key" aria-hidden="true">{number}</span>}
         </button>)}
         <span className="tool-divider" aria-hidden="true" />
         <details ref={moreTools} className="more-tools">
           <summary aria-label="More tools" title="More tools"><Icon name="more" size={16} /></summary>
           <div className="board-menu">
-            <button type="button" data-tool="connect" disabled={pending} aria-pressed={tool === "connect"}
-              onClick={() => { selectTool("connect"); closeDisclosure(moreTools.current); }}>
+            <button type="button" data-tool="connect" disabled={pending} aria-pressed={tool === "connect"} title="Dependency (C)"
+              onClick={() => { closeDisclosure(moreTools.current); selectTool("connect"); }}>
               <Icon name="connect" size={16} />Dependency
             </button>
+            <button type="button" data-tool="frame" disabled={pending} aria-pressed={tool === "frame"}
+              onClick={() => { closeDisclosure(moreTools.current); selectTool("frame"); }}>
+              <Icon name="rectangle" size={16} />Frame
+            </button>
+            <button type="button" data-tool="laser" disabled={pending} aria-pressed={tool === "laser"}
+              onClick={() => { closeDisclosure(moreTools.current); selectTool("laser"); }}>
+              <Icon name="pen" size={16} />Laser pointer
+            </button>
+            <button type="button" data-drawing-properties disabled={pending} onClick={() => {
+              closeDisclosure(moreTools.current);
+              const api = controller.current;
+              if (api) api.updateScene({ appState: { openMenu: api.getAppState().openMenu === "shape" ? null : "shape" } });
+            }}><Icon name="more" size={16} />Drawing properties</button>
+            <button type="button" data-drawing-library disabled={pending} onClick={() => {
+              closeDisclosure(moreTools.current);
+              controller.current?.toggleSidebar({ name: "default", tab: "library" });
+            }}><Icon name="library" size={16} />Drawing library</button>
+            <button type="button" data-mermaid disabled={pending} onClick={() => {
+              closeDisclosure(moreTools.current);
+              controller.current?.updateScene({ appState: { openDialog: { name: "ttd", tab: "mermaid" } } });
+            }}><Icon name="connect" size={16} />Mermaid diagram</button>
           </div>
         </details>
       </div>
@@ -832,12 +689,12 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
           <button type="button" onClick={resetView} title="Reset view" aria-label={`Reset view, zoom ${zoomPercent}%`}>{zoomPercent}%</button>
           <button className="zoom-in-button" type="button" onClick={() => zoom(1.1)} aria-label="Zoom in" title="Zoom in"><Icon name="add" size={16} /></button>
         </div>
-        <div className="lean-history board-control" role="group" aria-label="Drawing history">
-          <button type="button" disabled={pending || !undoDrawing.current.length} onClick={() => undoInk()} title="Undo drawing">
-            <Icon name="undo" size={16} /><span className="visually-hidden">Undo drawing</span>
+        <div className="lean-history board-control" role="group" aria-label="Board history">
+          <button type="button" data-history="undo" disabled={unavailable || !undoHistory.current.length} onClick={() => changeHistory()} title="Undo (Ctrl/Cmd+Z)">
+            <Icon name="undo" size={16} /><span className="visually-hidden">Undo</span>
           </button>
-          <button type="button" disabled={pending || !redoDrawing.current.length} onClick={() => undoInk(true)} title="Redo drawing">
-            <Icon name="redo" size={16} /><span className="visually-hidden">Redo drawing</span>
+          <button type="button" data-history="redo" disabled={unavailable || !redoHistory.current.length} onClick={() => changeHistory(true)} title="Redo (Ctrl/Cmd+Shift+Z)">
+            <Icon name="redo" size={16} /><span className="visually-hidden">Redo</span>
           </button>
         </div>
       </div>
@@ -869,7 +726,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
             }
           }}><span aria-hidden="true" />Agents</button>
       {agents && <AgentPanel scope={scope} onClose={() => closePanel("agents")} />}
-      {!agents && (inspector || card) && <div className="lean-shelf">
+      {!agents && (inspector || typedSelected) && <div className="lean-shelf">
       {inspector && <aside id="board-card-list" className="lean-inspector" aria-label="Card list">
         <header><h2>Cards</h2><button type="button" title="Close cards" aria-label="Close cards" onClick={() => closePanel("cards")}><Icon name="close" size={16} /></button></header>
         {board.nodes.length === 0 && <p>No cards yet.</p>}
@@ -885,51 +742,70 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
           if (item) selectCard(item, true);
           buttons[index]?.focus();
         }}>{board.nodes.map((item, index) => (
-          <li key={item.id}><button dir="auto" type="button" data-status={item.status} aria-pressed={selected === item.id}
+          <li key={item.id}><button dir="auto" type="button" data-status={item.status} aria-pressed={selection.cards.has(item.id)}
             tabIndex={(card ? card.id === item.id : index === 0) ? 0 : -1}
             onClick={() => { selectCard(item, true); if (tool === "connect") connect(item); }}>{item.title}</button></li>
         ))}</ol>
       </aside>}
-      {card && <aside className="lean-selection" aria-label="Selected card">
+      {typedSelected && <aside className="lean-selection" aria-label="Selection">
+        {card && <>
         <strong dir="auto">{card.title}</strong>
         <small>{kinds[card.kind]} · {statuses[card.status]} · {priorities[card.priority]}{group && ` · ${group.title}`}</small>
         {card.kind === "task" && <small>Status source {card.statusSource ? "paired client" : "local editor"}</small>}
         <div>
-          <button type="button" onClick={() => editCard(card)}>Edit card</button>
-          <button type="button" disabled={pending} onClick={() => commit([setNode({ ...card, dropped: !card.dropped })])}>{card.dropped ? "Restore" : "Drop"}</button>
-          <button type="button" disabled={pending} onClick={() => reorder(card, -1)}>Move earlier</button>
-          <button type="button" disabled={pending} onClick={() => reorder(card, 1)}>Move later</button>
+          <button type="button" disabled={unavailable} onClick={() => editCard(card)}>Edit card</button>
+          <button type="button" disabled={unavailable} onClick={() => commit([setNode({ ...card, dropped: !card.dropped })])}>{card.dropped ? "Restore" : "Drop"}</button>
+          <button type="button" disabled={unavailable} onClick={() => reorder(card, -1)}>Move earlier</button>
+          <button type="button" disabled={unavailable} onClick={() => reorder(card, 1)}>Move later</button>
         </div>
         {board.edges.filter((edge) => edge.from === card.id || edge.to === card.id).map((edge) => (
           <div key={edge.id}>
             <span dir="auto">{edge.from === card.id ? "Required by " : "Requires "}{board.nodes.find((item) => item.id === (edge.from === card.id ? edge.to : edge.from))?.title}</span>
-            <button type="button" disabled={pending} onClick={() => commit([{ type: "removeEdge", id: edge.id }])}>Remove link</button>
+            <button type="button" disabled={unavailable} onClick={() => commit([{ type: "removeEdge", id: edge.id }])}>Remove link</button>
           </div>
         ))}
+        </>}
+        {edge && <strong dir="auto">{nodeIndex.get(edge.from)?.title} → {nodeIndex.get(edge.to)?.title}</strong>}
+        {count > 1 && <strong>{count} objects selected</strong>}
+        <div>
+          <button type="button" disabled={unavailable || !selection.cards.size}
+            onClick={duplicateSelected}>Duplicate</button>
+          <button type="button" disabled={unavailable} onClick={deleteSelected}>Delete</button>
+        </div>
       </aside>}
       </div>}
       {keyboardHelp && <Modal title="Board shortcuts" cancel={() => setKeyboardHelp(false)}>
         <h2>Board shortcuts</h2>
         <dl className="board-shortcuts">
-          <dt>Arrow keys</dt><dd>Select a card, or pan in Pan mode.</dd>
-          <dt>Enter</dt><dd>Edit the selected card, or link two cards in Dependency mode.</dd>
+          <dt>V / 1</dt><dd>Selection. Drag an empty area to select objects, or Shift-click to add and remove objects.</dd>
+          <dt>Arrow keys</dt><dd>Move the selection. Hold Shift for larger steps.</dd>
+          <dt>[ / ]</dt><dd>Select the previous or next card.</dd>
+          <dt>Enter / double-click</dt><dd>Edit a card or existing board text. In Dependency mode, Enter links cards.</dd>
           <dt>N / Insert</dt><dd>Add a card.</dd>
+          <dt>C</dt><dd>Dependency tool.</dd>
+          <dt>Ctrl / Cmd + A</dt><dd>Select all objects.</dd>
+          <dt>Ctrl / Cmd + D</dt><dd>Duplicate the selection.</dd>
+          <dt>Delete / Backspace</dt><dd>Delete the selection.</dd>
           <dt>Plus / minus</dt><dd>Zoom in or out.</dd>
-          <dt>Ctrl / Cmd + Z</dt><dd>Undo the last card change.</dd>
-          <dt>Ctrl / Cmd + Shift + Z</dt><dd>Undo the last drawing change.</dd>
+          <dt>Ctrl / Cmd + Z</dt><dd>Undo the last board edit.</dd>
+          <dt>Ctrl / Cmd + Shift + Z</dt><dd>Redo. Ctrl / Cmd + Y also works.</dd>
+          <dt>Ctrl / Cmd + Enter</dt><dd>Save the open card edit.</dd>
           <dt>Escape</dt><dd>Cancel a gesture or close the active panel.</dd>
         </dl>
         <button type="button" data-initial-focus onClick={() => setKeyboardHelp(false)}>Close shortcuts</button>
       </Modal>}
-      {edit && <Modal title={edit.kind === "text" ? "Place text" : edit.fresh ? "Add card" : "Edit card"} cancel={cancelEdit}>
-        <h2>{edit.kind === "text" ? "Place text" : edit.fresh ? "Add card" : "Edit card"}</h2>
-        <form className="lean-edit" onSubmit={enterEdit} onChange={() => { draftChanged.current = true; }}>
-        <label>{edit.kind === "card" ? "Title" : "Board text"}
+      {edit && <Modal title={edit.fresh ? "Add card" : "Edit card"} cancel={cancelEdit}>
+        <h2>{edit.fresh ? "Add card" : "Edit card"}</h2>
+        <form className="lean-edit" onSubmit={enterEdit} onChange={() => { draftChanged.current = true; }}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" || event.nativeEvent.isComposing || (!event.ctrlKey && !event.metaKey)) return;
+            event.preventDefault();
+            event.currentTarget.requestSubmit();
+          }}>
+        <label>Title
           <textarea name="title" dir="auto" data-initial-focus required
-            className={edit.kind === "text" ? "lean-note-input" : undefined}
-            defaultValue={edit.kind === "card" ? edit.card.title : ""} maxLength={512} />
+            defaultValue={edit.card.title} maxLength={512} />
         </label>
-        {edit.kind === "card" && <>
           <label>Description<textarea name="description" dir="auto" defaultValue={edit.card.description} maxLength={4096} /></label>
           <div className="edit-fields">
             <label>Type<select name="kind" defaultValue={edit.card.kind}>{choices(kinds)}</select></label>
@@ -946,10 +822,9 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
               ))}
             </select></label>
           </div>
-        </>}
         <div className="dialog-actions">
           <button type="button" onClick={cancelEdit}>Cancel</button>
-          <button type="submit" disabled={pending}>{edit.kind === "card" ? edit.fresh ? "Create card" : "Save card" : "Place text"}</button>
+          <button type="submit" disabled={unavailable}>{edit.fresh ? "Create card" : "Save card"}</button>
         </div>
         </form>
       </Modal>}
@@ -957,7 +832,11 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         {notice ? <output data-card-save="">{notice}</output> : <span className="visually-hidden">Revision {revision.current}</span>}
         <output data-drawing-save="" className={saveState.failed || saveState.pending ? undefined : "visually-hidden"}>{saveState.message}</output>
         {failed.current && <div><button type="button" disabled={pending} onClick={() => { if (failed.current) send(failed.current); }}>Retry card change</button>
-          <button type="button" disabled={pending} onClick={() => { failed.current = undefined; setNotice(""); }}>Dismiss card change</button></div>}
+          <button type="button" disabled={pending} onClick={() => {
+            failed.current = undefined;
+            setNotice("");
+            if (remoteNeeded.current) scheduleRemote();
+          }}>Dismiss card change</button></div>}
         {saveState.failed && <button type="button" disabled={pending} onClick={() => void saver.flush().catch(() => {})}>Retry drawing save</button>}
       </div>
       {closeFailure && <Modal title="Could not close board" className="lean-close" cancel={() => setCloseFailure(undefined)} role="alertdialog">

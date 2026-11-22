@@ -1,11 +1,12 @@
 [package]
 name = "raqsh-mcp"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 publish = false
 
 [dependencies]
 board-ipc = { path = "../ipc" }
 board-domain = { path = "../domain" }
+raqsh-harnesses = { path = "../harnesses" }
 serde.workspace = true
 serde_json.workspace = true

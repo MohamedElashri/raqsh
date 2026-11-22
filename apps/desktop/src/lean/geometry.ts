@@ -28,6 +28,24 @@ export function nearStroke(stroke: Stroke, x: number, y: number, radius: number,
     && nearPath(stroke.points, x - stroke.x, y - stroke.y, padding);
 }
 
+export function insideClosedStroke(stroke: Stroke, x: number, y: number, cache: WeakMap<Stroke, Bounds>) {
+  if (stroke.points.length < 4) return false;
+  const first = stroke.points[0];
+  const last = stroke.points.at(-1)!;
+  if (Math.abs(first[0] - last[0]) + Math.abs(first[1] - last[1]) > 0.01) return false;
+  const box = getStrokeBounds(stroke, cache);
+  if (x < box.left || x > box.right || y < box.top || y > box.bottom) return false;
+  const px = x - stroke.x;
+  const py = y - stroke.y;
+  let inside = false;
+  for (let index = 1; index < stroke.points.length; index++) {
+    const [ax, ay] = stroke.points[index - 1];
+    const [bx, by] = stroke.points[index];
+    if ((ay > py) !== (by > py) && px < ax + (bx - ax) * (py - ay) / (by - ay)) inside = !inside;
+  }
+  return inside;
+}
+
 export function outline(shape: Shape, [width, height]: Point): Point[] {
   switch (shape) {
     case "line":

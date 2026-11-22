@@ -1,4 +1,4 @@
-use crate::mcp_setup::{self, Provider};
+use crate::mcp_setup;
 use board_domain::{Board, Drawing, Id, Operation, Project};
 use board_store::{OpenBoard, Page, Scope, Store};
 use std::{
@@ -296,9 +296,10 @@ pub async fn pair_client(
     scope: Scope,
     label: String,
     project_wide: bool,
-    provider: Option<Provider>,
+    provider: Option<String>,
 ) -> Reply<board_store::bridge::Binding> {
     let _guard = state.mcp_setup.lock().await;
+    let harness = provider.as_deref().map(mcp_setup::named).transpose()?;
     let library = state.library.clone();
     let binding = state
         .call(move |store| {
@@ -311,8 +312,9 @@ pub async fn pair_client(
             Ok(binding)
         })
         .await?;
-    if let Some(provider) = provider
-        && let Err(error) = mcp_setup::configure(&state.library, binding.id, provider).await
+    if let Some(harness) = harness
+        && harness.automatic.is_some()
+        && let Err(error) = mcp_setup::configure(&state.library, binding.id, harness).await
     {
         revoke_binding(&state, scope, binding.id).await?;
         return Err(error);
@@ -321,8 +323,8 @@ pub async fn pair_client(
 }
 
 #[tauri::command]
-pub fn mcp_clients() -> Vec<Provider> {
-    mcp_setup::installed_clients()
+pub fn mcp_clients() -> Vec<mcp_setup::Client> {
+    mcp_setup::clients()
 }
 
 async fn confirm_binding(state: &Desktop, scope: Scope, binding: Id) -> Reply<()> {
@@ -339,17 +341,23 @@ pub async fn connect_client(
     state: State<'_, Desktop>,
     scope: Scope,
     binding: Id,
-    provider: Provider,
+    provider: String,
 ) -> Reply<()> {
     let _guard = state.mcp_setup.lock().await;
     confirm_binding(&state, scope, binding).await?;
-    mcp_setup::configure(&state.library, binding, provider).await
+    mcp_setup::configure(&state.library, binding, mcp_setup::named(&provider)?).await
 }
 
 #[tauri::command]
-pub async fn client_config(state: State<'_, Desktop>, scope: Scope, binding: Id) -> Reply<String> {
+pub async fn client_config(
+    state: State<'_, Desktop>,
+    scope: Scope,
+    binding: Id,
+    provider: Option<String>,
+) -> Reply<mcp_setup::Configuration> {
     confirm_binding(&state, scope, binding).await?;
-    mcp_setup::generic_config(binding)
+    let harness = provider.as_deref().map(mcp_setup::named).transpose()?;
+    mcp_setup::configuration(binding, harness)
 }
 
 #[tauri::command]

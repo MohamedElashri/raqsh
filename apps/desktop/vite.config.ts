@@ -5,7 +5,7 @@ const htmlEntities: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "
 
 export default defineConfig({
   base: "./",
-  publicDir: false,
+  publicDir: ".generated-public",
   server: { host: "127.0.0.1", port: 1420, strictPort: true },
   plugins: [{
     name: "app-title",

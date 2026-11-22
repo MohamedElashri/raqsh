@@ -1,5 +1,6 @@
 use board_domain::Id;
 use board_ipc::{Call, Credential, MAX_FRAME, Request, Session, VERSION};
+use raqsh_harnesses::{Harness, Setup, enabled_harness, enabled_harnesses, generic, server_name};
 use serde_json::{Value, json};
 use std::{
     collections::HashMap,
@@ -318,23 +319,31 @@ pub fn main_entry(mut arguments: impl Iterator<Item = OsString>, combined: bool)
     let command = arguments.next().and_then(|arg| arg.into_string().ok());
     if matches!(command.as_deref(), None | Some("--help" | "help")) {
         println!("Usage: raqsh-mcp <serve|doctor|probe|setup|remove> --pairing <UUID>");
-        println!("Setup and probe also accept --format <json|codex|claude>.");
+        let formats = std::iter::once("json")
+            .chain(enabled_harnesses().map(|harness| harness.id))
+            .collect::<Vec<_>>()
+            .join("|");
+        println!("Setup and probe also accept --format <{formats}>.");
         return Ok(());
     }
     let command = command.as_deref().unwrap_or_default();
     let binding = pairing_arg(&mut arguments)?;
     let format = match arguments.next() {
-        None => RegistrationFormat::Json,
+        None => None,
         Some(option) if matches!(command, "setup" | "probe") && option == "--format" => {
             let format = arguments.next();
             match format.as_deref().and_then(std::ffi::OsStr::to_str) {
-                Some("json") => RegistrationFormat::Json,
-                Some("codex") => RegistrationFormat::Codex,
-                Some("claude") => RegistrationFormat::Claude,
-                _ => {
+                Some("json") => None,
+                Some(id) => Some(enabled_harness(id).ok_or_else(|| {
+                    io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        "Unknown or disabled setup format. See --help.",
+                    )
+                })?),
+                None => {
                     return Err(io::Error::new(
                         io::ErrorKind::InvalidInput,
-                        "Expected json, codex or claude.",
+                        "Expected a setup format. See --help.",
                     ));
                 }
             }
@@ -395,17 +404,11 @@ pub fn main_entry(mut arguments: impl Iterator<Item = OsString>, combined: bool)
     }
 }
 
-enum RegistrationFormat {
-    Json,
-    Codex,
-    Claude,
-}
-
-fn provider_capabilities(format: RegistrationFormat, session: Value) -> Value {
-    let provider = match format {
-        RegistrationFormat::Json => "generic_mcp",
-        RegistrationFormat::Claude => "claude_code",
-        RegistrationFormat::Codex => "codex",
+fn provider_capabilities(format: Option<&Harness>, session: Value) -> Value {
+    let provider = match format.map(|harness| harness.id) {
+        None => "generic_mcp",
+        Some("claude") => "claude_code",
+        Some(id) => id,
     };
     json!({
         "provider": provider,
@@ -418,43 +421,44 @@ fn registration(
     executable: &Path,
     binding: Id,
     combined: bool,
-    format: RegistrationFormat,
+    format: Option<&Harness>,
 ) -> io::Result<String> {
-    let path = executable
-        .to_str()
-        .ok_or_else(|| io::Error::other("Executable path must be UTF-8"))?;
-    let binding = binding.to_string();
-    let mut args = vec!["serve", "--pairing", &binding];
-    if combined {
-        args.insert(0, "mcp");
-    }
+    let server = match format.map(|harness| harness.id) {
+        None | Some("codex" | "claude") => SERVER_ID.to_owned(),
+        Some(_) => server_name(binding, format),
+    };
+    let setup = Setup::new(executable, binding, combined, server)?;
     match format {
-        RegistrationFormat::Json => Ok(format!(
-            "{}\n",
-            serde_json::to_string_pretty(&json!({ "mcpServers": { SERVER_ID: { "command": path, "args": args } } }))
-                .map_err(io::Error::other)?
-        )),
-        RegistrationFormat::Claude => Ok(format!(
-            "{}\n",
-            serde_json::to_string_pretty(&json!({ "mcpServers": { SERVER_ID: { "type": "stdio", "command": path, "args": args } } }))
-                .map_err(io::Error::other)?
-        )),
-        RegistrationFormat::Codex => {
-            let command = serde_json::to_string(path)
-                .map_err(io::Error::other)?
-                .replace('\u{7f}', "\\u007f");
-            let args = serde_json::to_string(&args).map_err(io::Error::other)?;
-            Ok(format!(
-                "[mcp_servers.{SERVER_ID}]\ncommand = {command}\nargs = {args}\n\
-                 env_vars = [\"XDG_DATA_HOME\", \"XDG_RUNTIME_DIR\", \"RAQSH_RUNTIME_DIR\"]\n"
-            ))
-        }
+        Some(harness) => (harness.render)(&setup),
+        None => generic(&setup),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn format(id: &str) -> Option<&'static Harness> {
+        Some(
+            raqsh_harnesses::registered_harnesses()
+                .find(|harness| harness.id == id)
+                .unwrap(),
+        )
+    }
+
+    #[test]
+    fn new_profile_server_names_fit_qualified_tool_names() {
+        let binding = Id::new_v4();
+        let server = server_name(binding, format("pi"));
+        assert_eq!(
+            server.strip_prefix("rq-").unwrap().parse::<Id>().unwrap(),
+            binding
+        );
+        for tool in tools().as_array().unwrap() {
+            let name = tool["name"].as_str().unwrap();
+            assert!(format!("mcp__{server}__{name}").len() <= 64);
+        }
+    }
 
     #[test]
     fn provider_capabilities_report_only_verified_session_evidence() {
@@ -464,9 +468,10 @@ mod tests {
             "liveSteering": "unsupported"
         });
         for (format, provider) in [
-            (RegistrationFormat::Json, "generic_mcp"),
-            (RegistrationFormat::Codex, "codex"),
-            (RegistrationFormat::Claude, "claude_code"),
+            (None, "generic_mcp"),
+            (format("codex"), "codex"),
+            (format("claude"), "claude_code"),
+            (format("opencode"), "opencode"),
         ] {
             assert_eq!(
                 provider_capabilities(format, evidence.clone()),
@@ -479,24 +484,21 @@ mod tests {
     fn formats_use_the_stable_server_id_and_preserve_quoted_paths() {
         let path = Path::new("/opt/Board \"Test\"/raqsh-mcp");
         let binding = Id::new_v4();
-        let json: Value = serde_json::from_str(
-            &registration(path, binding, false, RegistrationFormat::Json).unwrap(),
-        )
-        .unwrap();
-        let claude: Value = serde_json::from_str(
-            &registration(path, binding, false, RegistrationFormat::Claude).unwrap(),
-        )
-        .unwrap();
+        let json: Value =
+            serde_json::from_str(&registration(path, binding, false, None).unwrap()).unwrap();
+        let claude: Value =
+            serde_json::from_str(&registration(path, binding, false, format("claude")).unwrap())
+                .unwrap();
         let generic = &json["mcpServers"][SERVER_ID];
         let claude = &claude["mcpServers"][SERVER_ID];
         let args = json!(["serve", "--pairing", binding]);
-        assert_eq!(generic, &json!({ "command": path, "args": args }));
-        assert_eq!(
-            claude,
-            &json!({ "type": "stdio", "command": path, "args": args })
-        );
+        assert_eq!(generic["command"], json!(path));
+        assert_eq!(generic["args"], args);
+        assert_eq!(claude["command"], json!(path));
+        assert_eq!(claude["args"], args);
+        assert_eq!(claude["type"], "stdio");
 
-        let codex = registration(path, binding, true, RegistrationFormat::Codex).unwrap();
+        let codex = registration(path, binding, true, format("codex")).unwrap();
         assert!(codex.starts_with("[mcp_servers.raqsh]\n"));
         assert!(codex.contains(r#"command = "/opt/Board \"Test\"/raqsh-mcp""#));
         assert!(codex.contains(&format!(

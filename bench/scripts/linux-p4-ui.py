@@ -89,8 +89,6 @@ def exercise(web, pid, settings):
     assert initial["cards"] == 10, initial
     if settings.dark:
         assert initial["color_scheme"] == "dark", initial
-    check_focus(web, ".board-header > summary")
-    key(web, "Tab")
     check_focus(web, canvas)
     a11y = {}
     if settings.atspi:
@@ -225,13 +223,14 @@ def exercise(web, pid, settings):
         web.click('[data-tool="rectangle"]')
         pointer(web, at(web, 90, 494), {"type": "pointerDown", "button": 0},
                 at(web, 180, 540), {"type": "pointerUp", "button": 0})
+        key(web, "Escape")
         with_shape = wait_until(lambda: (image := bitmap()) != before and image, "rectangle on the canvas")
         web.click('[data-tool="eraser"]')
         pointer(web, at(web, 135, 494), {"type": "pointerDown", "button": 0}, {"type": "pointerUp", "button": 0})
         wait_until(lambda: bitmap() == before, "erased rectangle")
-        button(web, "Undo drawing")
+        web.click('[data-history="undo"]')
         wait_until(lambda: bitmap() == with_shape, "undo erase")
-        button(web, "Redo drawing")
+        web.click('[data-history="redo"]')
         wait_until(lambda: bitmap() == before, "redo erase")
         initial["shape_history"] = True
         frame = web.call("GET", "/window/rect")
