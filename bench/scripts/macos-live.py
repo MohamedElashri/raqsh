@@ -223,7 +223,7 @@ def main():
         (root / "runtime").mkdir(mode=0o700)
         env = dict(os.environ, RAQSH_BENCH_PROJECT=str(root / "project"),
                    RAQSH_RUNTIME_DIR=str(root / "runtime"), RAQSH_TEST_LIBRARY=str(root / "library"))
-        modes = ("provider", "reopen") if args.provider else ("about", "edit", "reopen", "stress")
+        modes = ("provider", "reopen") if args.provider else ("about", "edit", "reopen-edits", "stress")
         if args.stress_only:
             modes = ("stress",)
         for mode in modes:
