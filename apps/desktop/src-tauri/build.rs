@@ -16,6 +16,7 @@ fn main() {
             "export_preview",
             "open_benchmark",
             "finish_close",
+            "open_about_link",
             "pair_client",
             "mcp_clients",
             "install_board_skill",

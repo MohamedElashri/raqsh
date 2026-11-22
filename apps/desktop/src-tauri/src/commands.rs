@@ -309,6 +309,35 @@ pub fn finish_close(window: WebviewWindow, state: State<'_, Desktop>) -> Reply<(
 }
 
 #[tauri::command]
+pub async fn open_about_link(url: String) -> Reply<()> {
+    let links: std::collections::BTreeMap<String, String> =
+        serde_json::from_str(include_str!("../../src/about-links.json"))
+            .map_err(|_| "About links could not be loaded.")?;
+    if !links.values().any(|link| link == &url) {
+        return Err("This link is unavailable in About.".into());
+    }
+
+    #[cfg(target_os = "macos")]
+    const OPENER: &str = "/usr/bin/open";
+    #[cfg(target_os = "linux")]
+    const OPENER: &str = "xdg-open";
+
+    let status = tokio::process::Command::new(OPENER)
+        .arg(url)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .await
+        .map_err(|error| format!("Could not open the browser. {error}"))?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err("Could not open the link in the default browser.".into())
+    }
+}
+
+#[tauri::command]
 pub async fn pair_client(
     state: State<'_, Desktop>,
     scope: Scope,

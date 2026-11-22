@@ -247,6 +247,16 @@
         button("Restart Raqsh").click();
         return;
       }
+      check(find(".about-credits").textContent.includes("Mohamed Elashri"), "About must credit the creator");
+      const website = find('.about-project-links a[href="https://melashri.net/raqsh/"]');
+      check(website, "About must link to the project website");
+      const license = find(".about-credits details");
+      license.querySelector("summary").click();
+      check(license.open && license.querySelector("pre").textContent.includes("## Distribution License"),
+        "The bundled Raqsh license must open without a network request");
+      const rejected = await window.__TAURI_INTERNALS__.invoke("open_about_link", { url: "https://example.invalid/" })
+        .then(() => false, (error) => String(error).includes("unavailable in About"));
+      check(rejected, "The About opener must reject unrelated URLs");
       button("Done").click();
       await waitFor(() => !find("dialog[open]"), "Settings to close");
       report("pass", { mode });
