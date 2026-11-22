@@ -1,8 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { Icon } from "./Icon";
 import { Modal } from "./Modal";
+import aboutLinks from "./about-links.json";
 import { brand } from "./generated/brand";
 import icon from "./generated/icon.svg";
+import license from "../../../LICENSE?raw";
+import excalidrawLicense from "../src-tauri/licenses/Excalidraw-MIT.txt?raw";
 
 type Stage = "disabled" | "idle" | "current" | "available" | "downloaded" | "installed";
 type UpdateInfo = { currentVersion: string; version: string | null; stage: Stage };
@@ -13,11 +17,18 @@ const actions = {
   downloaded: ["install_update", "Install update", "Installing update…"],
   installed: ["restart_updated", "Restart Raqsh", "Restarting Raqsh…"],
 } as const;
+const projectLinks = [
+  { label: "Project website", url: aboutLinks.website },
+  { label: "Source code", url: aboutLinks.source },
+  { label: "Release notes", url: aboutLinks.releases },
+  { label: "Report an issue", url: aboutLinks.issues },
+];
 
 export function AboutSettings({ onClose }: { onClose: () => void }) {
   const [info, setInfo] = useState<UpdateInfo>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [linkError, setLinkError] = useState("");
   const running = useRef(false);
 
   useEffect(() => {
@@ -57,23 +68,50 @@ export function AboutSettings({ onClose }: { onClose: () => void }) {
     }
   }
 
-  return <Modal title="Settings" className="about-settings" cancel={() => { if (!running.current) onClose(); }}>
+  function openLink(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
+    const { href } = event.currentTarget;
+    setLinkError("");
+    void invoke("open_about_link", { url: href }).catch((failure) => setLinkError(String(failure)));
+  }
+
+  return <Modal title={`About ${brand.displayName}`} className="about-settings" cancel={() => { if (!running.current) onClose(); }}>
     <header className="settings-header">
-      <h2>Settings</h2>
+      <h2>About</h2>
       <button type="button" data-initial-focus disabled={busy} onClick={onClose}>Done</button>
     </header>
     <section aria-labelledby="about-heading">
-      <h3 id="about-heading">About</h3>
       <div className="about-brand">
-        <img src={icon} width="64" height="64" alt="" />
-        <div><strong>{brand.displayName}</strong>{info && <p>Version {info.currentVersion}</p>}</div>
+        <img src={icon} width="76" height="76" alt="" />
+        <div>
+          <h3 id="about-heading">{brand.displayName}</h3>
+          {info && <p className="about-version">Version {info.currentVersion}</p>}
+          <p className="about-tagline">{brand.tagline}</p>
+        </div>
       </div>
-      <div className="about-updates">
-        <h3>Software updates</h3>
-        <p role="status">{busy && action ? action[2] : info ? messages[info.stage] : "Loading version…"}</p>
-        {error && <p className="library-error" role="alert">{error}</p>}
-        {action && <button type="button" className="primary" disabled={busy} onClick={() => void perform()}>{action[1]}</button>}
-      </div>
+      <p className="about-description">Raqsh is a local-first whiteboard for planning with coding agents. Map task dependencies, sketch on the Excalidraw canvas, and share board feedback with agents you pair through MCP.</p>
+      <nav className="about-project-links" aria-label="Raqsh project links">
+        {projectLinks.map(({ label, url }) => <a key={url} href={url} onClick={openLink}>{label}<Icon name="arrow" size={15} /></a>)}
+      </nav>
     </section>
+    <section className="about-updates" aria-labelledby="about-updates-heading">
+      <h3 id="about-updates-heading">Software updates</h3>
+      <p role="status">{busy && action ? action[2] : info ? messages[info.stage] : "Loading version…"}</p>
+      {error && <p className="library-error" role="alert">{error}</p>}
+      {action && <button type="button" className="primary" disabled={busy} onClick={() => void perform()}>{action[1]}</button>}
+    </section>
+    <footer className="about-credits">
+      <p>Copyright © 2026 <a href={aboutLinks.author} onClick={openLink}>Mohamed Elashri</a></p>
+      <details>
+        <summary>PolyForm Noncommercial License 1.0.0</summary>
+        <pre tabIndex={0} aria-label="Raqsh license">{license}</pre>
+      </details>
+      <p>Drawing tools powered by <a href={aboutLinks.excalidraw} onClick={openLink}>Excalidraw</a>.</p>
+      <details>
+        <summary>Excalidraw MIT license</summary>
+        <pre tabIndex={0} aria-label="Excalidraw license">{excalidrawLicense}</pre>
+      </details>
+    </footer>
+    {linkError && <p className="library-error" role="alert">{linkError}</p>}
   </Modal>;
 }

@@ -112,16 +112,66 @@ dialog::backdrop { background: #241f1966; }
 dialog h2 { margin: 0 0 12px; font-size: 1.25rem; letter-spacing: -.02em; }
 dialog p:first-child { margin-top: 0; }
 
-.about-settings { width: min(29rem, calc(100% - 32px)); }
-.settings-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.about-settings { width: min(37rem, calc(100% - 32px)); }
+.settings-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
 .settings-header h2, .about-settings h3, .about-brand p { margin: 0; }
-.about-settings h3 { font-size: .95rem; }
-.about-brand { display: flex; align-items: center; gap: 15px; margin-block: 8px 20px; }
-.about-brand strong { display: block; font-size: 1.8rem; letter-spacing: -.045em; line-height: 1.15; }
-.about-brand p, .about-updates [role="status"] { color: var(--muted); }
-.about-updates { border-block-start: 1px solid var(--line); padding-block-start: 16px; }
+.about-brand {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 4vw, 20px);
+  padding: clamp(14px, 4vw, 21px);
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 23%, var(--line));
+  border-radius: 10px;
+  background-color: color-mix(in srgb, var(--brand-accent) 8%, var(--panel));
+  background-image: radial-gradient(color-mix(in srgb, var(--brand-accent) 18%, transparent) 1px, transparent 1px);
+  background-size: 15px 15px;
+}
+.about-brand img { flex: none; width: clamp(55px, 15vw, 76px); height: auto; }
+.about-brand h3 { font-size: clamp(1.9rem, 6vw, 2.65rem); letter-spacing: -.045em; line-height: 1; }
+.about-brand .about-version { margin-top: 4px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.about-brand .about-tagline { margin-top: 7px; font-weight: 600; }
+.about-description { margin: 14px 0; }
+.about-settings a { color: inherit; text-underline-offset: .17em; }
+.about-settings :is(a, pre):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.about-project-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 7px;
+}
+.about-project-links a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 35px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  text-decoration: none;
+}
+.about-project-links a:hover { background: var(--control); }
+.about-project-links svg { flex: none; color: var(--muted); }
+.about-updates, .about-credits { border-block-start: 1px solid var(--line); margin-block-start: 16px; padding-block-start: 13px; }
+.about-updates h3 { font-size: 1rem; }
+.about-updates [role="status"], .about-credits { color: var(--muted); }
 .about-updates p { margin: 7px 0 12px; overflow-wrap: anywhere; }
 .about-updates .primary { min-width: 9rem; }
+.about-credits p { margin: 0 0 3px; }
+.about-credits details + p { margin-top: 9px; }
+.about-credits summary { width: fit-content; cursor: pointer; color: var(--ink); }
+.about-credits pre {
+  max-height: 11rem;
+  margin: 6px 0 0;
+  padding: 9px 11px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  white-space: pre-wrap;
+}
 
 .board-workspace { height: 100dvh; background: var(--canvas); }
 .board-loading { display: grid; height: 100%; margin: 0; place-items: center; color: var(--muted); }

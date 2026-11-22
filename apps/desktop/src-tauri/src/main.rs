@@ -82,6 +82,7 @@ fn main() -> tauri::Result<()> {
             commands::import_board,
             commands::open_benchmark,
             commands::finish_close,
+            commands::open_about_link,
             commands::pair_client,
             commands::mcp_clients,
             commands::install_board_skill,
