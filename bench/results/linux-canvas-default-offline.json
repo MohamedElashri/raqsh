@@ -1,0 +1,36 @@
+{
+  "binary_sha256": "437082985d8607ec42fc41252e53410d8e9b90e0eac68ed52dfd48f16a59b018",
+  "interfaces": [
+    "lo"
+  ],
+  "held_drag_samples": 10,
+  "native_batches_before_release": 0,
+  "native_batches_after_release": 1,
+  "undo_and_backend_delta": true,
+  "viewport_native_batches_and_drawing_changes": [
+    0,
+    0
+  ],
+  "saved_fixture_reopened": true,
+  "keyboard_card_edit": true,
+  "freehand_and_text_annotation": true,
+  "native_input": null,
+  "svg": {
+    "paths": 401,
+    "external": 0,
+    "type": "image/svg+xml",
+    "firstEdge": "296,123 398,123 387.1946347717679,117.78041359066523 398,123 387.1946347717679,128.21958640933477",
+    "bytes": 185089,
+    "rtl": [
+      "خطة الإطلاق — Task 42"
+    ],
+    "cards": 200
+  },
+  "png": {
+    "height": 4096,
+    "type": "image/png",
+    "magic": 2303741511,
+    "bytes": 505666,
+    "width": 1004
+  }
+}

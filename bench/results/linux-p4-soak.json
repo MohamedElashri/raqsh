@@ -1,0 +1,4002 @@
+{
+  "started_at_utc": "2026-11-21T23:13:14.199246+00:00",
+  "duration_target_seconds": 3600,
+  "interval_seconds": 60,
+  "desktop": {
+    "bytes": 10665312,
+    "sha256": "f5c3bb224bf5c67344e21005639266cb75b93b43ccb062449557782ffb7a0f28",
+    "dynamic_libraries": [
+      "\tlinux-vdso.so.1 (0x00007e16c7ce0000)",
+      "\tlibgdk-3.so.0 => /lib/x86_64-linux-gnu/libgdk-3.so.0 (0x00007e16c7105000)",
+      "\tlibgdk_pixbuf-2.0.so.0 => /lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0 (0x00007e16c7c8e000)",
+      "\tlibcairo.so.2 => /lib/x86_64-linux-gnu/libcairo.so.2 (0x00007e16c6fc1000)",
+      "\tlibgobject-2.0.so.0 => /lib/x86_64-linux-gnu/libgobject-2.0.so.0 (0x00007e16c6f5e000)",
+      "\tlibglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007e16c6e15000)",
+      "\tlibwebkit2gtk-4.1.so.0 => /lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0 (0x00007e16c1200000)",
+      "\tlibgtk-3.so.0 => /lib/x86_64-linux-gnu/libgtk-3.so.0 (0x00007e16c0a00000)",
+      "\tlibsoup-3.0.so.0 => /lib/x86_64-linux-gnu/libsoup-3.0.so.0 (0x00007e16c6d7b000)",
+      "\tlibgio-2.0.so.0 => /lib/x86_64-linux-gnu/libgio-2.0.so.0 (0x00007e16c0830000)",
+      "\tlibjavascriptcoregtk-4.1.so.0 => /lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so.0 (0x00007e16be800000)",
+      "\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007e16c7c5e000)",
+      "\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007e16c0747000)",
+      "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007e16be400000)",
+      "\t/lib64/ld-linux-x86-64.so.2 (0x00007e16c7ce2000)",
+      "\tlibpango-1.0.so.0 => /lib/x86_64-linux-gnu/libpango-1.0.so.0 (0x00007e16c6d10000)",
+      "\tlibfribidi.so.0 => /lib/x86_64-linux-gnu/libfribidi.so.0 (0x00007e16c7c3e000)",
+      "\tlibcairo-gobject.so.2 => /lib/x86_64-linux-gnu/libcairo-gobject.so.2 (0x00007e16c6d04000)",
+      "\tlibepoxy.so.0 => /lib/x86_64-linux-gnu/libepoxy.so.0 (0x00007e16be6dd000)",
+      "\tlibfontconfig.so.1 => /lib/x86_64-linux-gnu/libfontconfig.so.1 (0x00007e16c6cb3000)",
+      "\tlibpangocairo-1.0.so.0 => /lib/x86_64-linux-gnu/libpangocairo-1.0.so.0 (0x00007e16c11ef000)",
+      "\tlibxkbcommon.so.0 => /lib/x86_64-linux-gnu/libxkbcommon.so.0 (0x00007e16c06fe000)",
+      "\tlibwayland-client.so.0 => /lib/x86_64-linux-gnu/libwayland-client.so.0 (0x00007e16c11df000)",
+      "\tlibwayland-cursor.so.0 => /lib/x86_64-linux-gnu/libwayland-cursor.so.0 (0x00007e16c11d5000)",
+      "\tlibwayland-egl.so.1 => /lib/x86_64-linux-gnu/libwayland-egl.so.1 (0x00007e16c7c37000)",
+      "\tlibX11.so.6 => /lib/x86_64-linux-gnu/libX11.so.6 (0x00007e16be2c2000)",
+      "\tlibXi.so.6 => /lib/x86_64-linux-gnu/libXi.so.6 (0x00007e16c06eb000)",
+      "\tlibXext.so.6 => /lib/x86_64-linux-gnu/libXext.so.6 (0x00007e16c06d7000)",
+      "\tlibXcursor.so.1 => /lib/x86_64-linux-gnu/libXcursor.so.1 (0x00007e16c06cb000)",
+      "\tlibXdamage.so.1 => /lib/x86_64-linux-gnu/libXdamage.so.1 (0x00007e16c11d0000)",
+      "\tlibXfixes.so.3 => /lib/x86_64-linux-gnu/libXfixes.so.3 (0x00007e16c06c3000)",
+      "\tlibXcomposite.so.1 => /lib/x86_64-linux-gnu/libXcomposite.so.1 (0x00007e16c06be000)",
+      "\tlibXrandr.so.2 => /lib/x86_64-linux-gnu/libXrandr.so.2 (0x00007e16c06b1000)",
+      "\tlibXinerama.so.1 => /lib/x86_64-linux-gnu/libXinerama.so.1 (0x00007e16c06ac000)",
+      "\tlibgmodule-2.0.so.0 => /lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007e16c06a5000)",
+      "\tlibpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16 (0x00007e16be6a5000)",
+      "\tlibjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8 (0x00007e16be622000)",
+      "\tlibz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007e16be2a6000)",
+      "\tlibfreetype.so.6 => /lib/x86_64-linux-gnu/libfreetype.so.6 (0x00007e16be1da000)",
+      "\tlibXrender.so.1 => /lib/x86_64-linux-gnu/libXrender.so.1 (0x00007e16be616000)",
+      "\tlibxcb.so.1 => /lib/x86_64-linux-gnu/libxcb.so.1 (0x00007e16be1b1000)",
+      "\tlibxcb-render.so.0 => /lib/x86_64-linux-gnu/libxcb-render.so.0 (0x00007e16be1a2000)",
+      "\tlibxcb-shm.so.0 => /lib/x86_64-linux-gnu/libxcb-shm.so.0 (0x00007e16be19d000)",
+      "\tlibpixman-1.so.0 => /lib/x86_64-linux-gnu/libpixman-1.so.0 (0x00007e16be0ee000)",
+      "\tlibffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007e16be0e2000)",
+      "\tlibpcre2-8.so.0 => /lib/x86_64-linux-gnu/libpcre2-8.so.0 (0x00007e16be048000)",
+      "\tlibatomic.so.1 => /lib/x86_64-linux-gnu/libatomic.so.1 (0x00007e16be03d000)",
+      "\tlibharfbuzz.so.0 => /lib/x86_64-linux-gnu/libharfbuzz.so.0 (0x00007e16bdf30000)",
+      "\tlibatk-1.0.so.0 => /lib/x86_64-linux-gnu/libatk-1.0.so.0 (0x00007e16bdf06000)",
+      "\tlibwebpmux.so.3 => /lib/x86_64-linux-gnu/libwebpmux.so.3 (0x00007e16bdef8000)",
+      "\tlibexpat.so.1 => /lib/x86_64-linux-gnu/libexpat.so.1 (0x00007e16bdeca000)",
+      "\tlibicudata.so.74 => /lib/x86_64-linux-gnu/libicudata.so.74 (0x00007e16bc000000)",
+      "\tlibicui18n.so.74 => /lib/x86_64-linux-gnu/libicui18n.so.74 (0x00007e16bbc00000)",
+      "\tlibsystemd.so.0 => /lib/x86_64-linux-gnu/libsystemd.so.0 (0x00007e16bdde8000)",
+      "\tlibicuuc.so.74 => /lib/x86_64-linux-gnu/libicuuc.so.74 (0x00007e16bb800000)",
+      "\tlibxml2.so.2 => /lib/x86_64-linux-gnu/libxml2.so.2 (0x00007e16bba1e000)",
+      "\tlibsqlite3.so.0 => /lib/x86_64-linux-gnu/libsqlite3.so.0 (0x00007e16bb698000)",
+      "\tlibxslt.so.1 => /lib/x86_64-linux-gnu/libxslt.so.1 (0x00007e16bdda7000)",
+      "\tliblcms2.so.2 => /lib/x86_64-linux-gnu/liblcms2.so.2 (0x00007e16bbf9e000)",
+      "\tlibgcrypt.so.20 => /lib/x86_64-linux-gnu/libgcrypt.so.20 (0x00007e16bb54f000)",
+      "\tlibgpg-error.so.0 => /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007e16bdd80000)",
+      "\tlibgstallocators-1.0.so.0 => /lib/x86_64-linux-gnu/libgstallocators-1.0.so.0 (0x00007e16bdd76000)",
+      "\tlibgstapp-1.0.so.0 => /lib/x86_64-linux-gnu/libgstapp-1.0.so.0 (0x00007e16bdd60000)",
+      "\tlibgstbase-1.0.so.0 => /lib/x86_64-linux-gnu/libgstbase-1.0.so.0 (0x00007e16bb4ca000)",
+      "\tlibgstreamer-1.0.so.0 => /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0 (0x00007e16bb377000)",
+      "\tlibgstpbutils-1.0.so.0 => /lib/x86_64-linux-gnu/libgstpbutils-1.0.so.0 (0x00007e16bbf59000)",
+      "\tlibgstaudio-1.0.so.0 => /lib/x86_64-linux-gnu/libgstaudio-1.0.so.0 (0x00007e16bb2f2000)",
+      "\tlibgsttag-1.0.so.0 => /lib/x86_64-linux-gnu/libgsttag-1.0.so.0 (0x00007e16bb2b1000)",
+      "\tlibgstvideo-1.0.so.0 => /lib/x86_64-linux-gnu/libgstvideo-1.0.so.0 (0x00007e16bb1dc000)",
+      "\tlibgstgl-1.0.so.0 => /lib/x86_64-linux-gnu/libgstgl-1.0.so.0 (0x00007e16bb149000)",
+      "\tlibgstfft-1.0.so.0 => /lib/x86_64-linux-gnu/libgstfft-1.0.so.0 (0x00007e16bbf4e000)",
+      "\tlibwebpdemux.so.2 => /lib/x86_64-linux-gnu/libwebpdemux.so.2 (0x00007e16bba15000)",
+      "\tlibwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7 (0x00007e16bb0ce000)",
+      "\tlibharfbuzz-icu.so.0 => /lib/x86_64-linux-gnu/libharfbuzz-icu.so.0 (0x00007e16bba10000)",
+      "\tlibwayland-server.so.0 => /lib/x86_64-linux-gnu/libwayland-server.so.0 (0x00007e16bb0b8000)",
+      "\tlibmanette-0.2.so.0 => /lib/x86_64-linux-gnu/libmanette-0.2.so.0 (0x00007e16bb088000)",
+      "\tlibseccomp.so.2 => /lib/x86_64-linux-gnu/libseccomp.so.2 (0x00007e16bb068000)",
+      "\tlibenchant-2.so.2 => /lib/x86_64-linux-gnu/libenchant-2.so.2 (0x00007e16bb05b000)",
+      "\tlibgbm.so.1 => /lib/x86_64-linux-gnu/libgbm.so.1 (0x00007e16bb054000)",
+      "\tlibdrm.so.2 => /lib/x86_64-linux-gnu/libdrm.so.2 (0x00007e16bb03d000)",
+      "\tlibtasn1.so.6 => /lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007e16bb027000)",
+      "\tlibhyphen.so.0 => /lib/x86_64-linux-gnu/libhyphen.so.0 (0x00007e16bb01f000)",
+      "\tlibsecret-1.so.0 => /lib/x86_64-linux-gnu/libsecret-1.so.0 (0x00007e16bafc0000)",
+      "\tlibstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007e16bac00000)",
+      "\tlibpangoft2-1.0.so.0 => /lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 (0x00007e16bafa3000)",
+      "\tlibatk-bridge-2.0.so.0 => /lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0 (0x00007e16baf67000)",
+      "\tlibpsl.so.5 => /lib/x86_64-linux-gnu/libpsl.so.5 (0x00007e16baf53000)",
+      "\tlibbrotlidec.so.1 => /lib/x86_64-linux-gnu/libbrotlidec.so.1 (0x00007e16baf45000)",
+      "\tlibgssapi_krb5.so.2 => /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007e16baeef000)",
+      "\tlibnghttp2.so.14 => /lib/x86_64-linux-gnu/libnghttp2.so.14 (0x00007e16baec4000)",
+      "\tlibmount.so.1 => /lib/x86_64-linux-gnu/libmount.so.1 (0x00007e16babb3000)",
+      "\tlibselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0x00007e16bae97000)",
+      "\tlibthai.so.0 => /lib/x86_64-linux-gnu/libthai.so.0 (0x00007e16bae8c000)",
+      "\tlibbz2.so.1.0 => /lib/x86_64-linux-gnu/libbz2.so.1.0 (0x00007e16bab9f000)",
+      "\tlibXau.so.6 => /lib/x86_64-linux-gnu/libXau.so.6 (0x00007e16bae84000)",
+      "\tlibXdmcp.so.6 => /lib/x86_64-linux-gnu/libXdmcp.so.6 (0x00007e16bab97000)",
+      "\tlibgraphite2.so.3 => /lib/x86_64-linux-gnu/libgraphite2.so.3 (0x00007e16bab71000)",
+      "\tlibcap.so.2 => /lib/x86_64-linux-gnu/libcap.so.2 (0x00007e16bab64000)",
+      "\tliblz4.so.1 => /lib/x86_64-linux-gnu/liblz4.so.1 (0x00007e16bab42000)",
+      "\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007e16bab10000)",
+      "\tlibzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007e16baa56000)",
+      "\tlibunwind.so.8 => /lib/x86_64-linux-gnu/libunwind.so.8 (0x00007e16baa3b000)",
+      "\tlibdw.so.1 => /lib/x86_64-linux-gnu/libdw.so.1 (0x00007e16ba987000)",
+      "\tliborc-0.4.so.0 => /lib/x86_64-linux-gnu/liborc-0.4.so.0 (0x00007e16ba8d5000)",
+      "\tlibGL.so.1 => /lib/x86_64-linux-gnu/libGL.so.1 (0x00007e16ba84e000)",
+      "\tlibEGL.so.1 => /lib/x86_64-linux-gnu/libEGL.so.1 (0x00007e16ba83c000)",
+      "\tlibX11-xcb.so.1 => /lib/x86_64-linux-gnu/libX11-xcb.so.1 (0x00007e16ba837000)",
+      "\tlibgudev-1.0.so.0 => /lib/x86_64-linux-gnu/libgudev-1.0.so.0 (0x00007e16ba82a000)",
+      "\tlibsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0 (0x00007e16ba822000)",
+      "\tlibevdev.so.2 => /lib/x86_64-linux-gnu/libevdev.so.2 (0x00007e16ba804000)",
+      "\tlibatspi.so.0 => /lib/x86_64-linux-gnu/libatspi.so.0 (0x00007e16ba7ca000)",
+      "\tlibdbus-1.so.3 => /lib/x86_64-linux-gnu/libdbus-1.so.3 (0x00007e16ba779000)",
+      "\tlibunistring.so.5 => /lib/x86_64-linux-gnu/libunistring.so.5 (0x00007e16ba5cc000)",
+      "\tlibidn2.so.0 => /lib/x86_64-linux-gnu/libidn2.so.0 (0x00007e16ba5aa000)",
+      "\tlibbrotlicommon.so.1 => /lib/x86_64-linux-gnu/libbrotlicommon.so.1 (0x00007e16ba587000)",
+      "\tlibkrb5.so.3 => /lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007e16ba4be000)",
+      "\tlibk5crypto.so.3 => /lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007e16ba490000)",
+      "\tlibcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007e16ba48a000)",
+      "\tlibkrb5support.so.0 => /lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007e16ba47d000)",
+      "\tlibblkid.so.1 => /lib/x86_64-linux-gnu/libblkid.so.1 (0x00007e16ba442000)",
+      "\tlibdatrie.so.1 => /lib/x86_64-linux-gnu/libdatrie.so.1 (0x00007e16ba439000)",
+      "\tlibbsd.so.0 => /lib/x86_64-linux-gnu/libbsd.so.0 (0x00007e16ba421000)",
+      "\tlibelf.so.1 => /lib/x86_64-linux-gnu/libelf.so.1 (0x00007e16ba402000)",
+      "\tlibGLdispatch.so.0 => /lib/x86_64-linux-gnu/libGLdispatch.so.0 (0x00007e16ba34a000)",
+      "\tlibGLX.so.0 => /lib/x86_64-linux-gnu/libGLX.so.0 (0x00007e16ba317000)",
+      "\tlibudev.so.1 => /lib/x86_64-linux-gnu/libudev.so.1 (0x00007e16ba2e4000)",
+      "\tlibkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007e16ba2db000)",
+      "\tlibresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007e16ba2c9000)",
+      "\tlibmd.so.0 => /lib/x86_64-linux-gnu/libmd.so.0 (0x00007e16ba2ba000)"
+    ]
+  },
+  "helper": {
+    "bytes": 1010032,
+    "sha256": "d177cbdc275804170bdf5042b9c74dbc02c93c15481e8145fa989d2356b6a689",
+    "dynamic_libraries": [
+      "\tlinux-vdso.so.1 (0x000074c9768c5000)",
+      "\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x000074c976779000)",
+      "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x000074c976400000)",
+      "\t/lib64/ld-linux-x86-64.so.2 (0x000074c9768c7000)"
+    ]
+  },
+  "gdk_backend": "x11",
+  "temporary_library_parent": "/dev/shm",
+  "completed": true,
+  "samples": [
+    {
+      "elapsed_seconds": 60.24,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 150399,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 52,
+          "start_ticks": 4395017,
+          "pss_kib": 59106,
+          "rss_kib": 192328,
+          "pss_details_kib": {
+            "Pss_Anon": 39384,
+            "Pss_File": 13956,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 6,
+          "start_ticks": 4395032,
+          "pss_kib": 9774,
+          "rss_kib": 49816,
+          "pss_details_kib": {
+            "Pss_Anon": 7608,
+            "Pss_File": 2166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 128,
+          "start_ticks": 4395042,
+          "pss_kib": 80708,
+          "rss_kib": 238432,
+          "pss_details_kib": {
+            "Pss_Anon": 61864,
+            "Pss_File": 18781,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 811,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 120.22,
+      "board": "normal",
+      "aggregate_pss_kib": 157503,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 65,
+          "start_ticks": 4395017,
+          "pss_kib": 58810,
+          "rss_kib": 192416,
+          "pss_details_kib": {
+            "Pss_Anon": 39472,
+            "Pss_File": 13572,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 10135,
+          "rss_kib": 49820,
+          "pss_details_kib": {
+            "Pss_Anon": 7612,
+            "Pss_File": 2523,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 159,
+          "start_ticks": 4395042,
+          "pss_kib": 87747,
+          "rss_kib": 242848,
+          "pss_details_kib": {
+            "Pss_Anon": 64616,
+            "Pss_File": 23068,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 811,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 180.23,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 173352,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 71,
+          "start_ticks": 4395017,
+          "pss_kib": 62709,
+          "rss_kib": 192712,
+          "pss_details_kib": {
+            "Pss_Anon": 39736,
+            "Pss_File": 17207,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 11080,
+          "rss_kib": 49820,
+          "pss_details_kib": {
+            "Pss_Anon": 7612,
+            "Pss_File": 3468,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 170,
+          "start_ticks": 4395042,
+          "pss_kib": 98750,
+          "rss_kib": 244684,
+          "pss_details_kib": {
+            "Pss_Anon": 66452,
+            "Pss_File": 32235,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 240.2,
+      "board": "normal",
+      "aggregate_pss_kib": 162984,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 84,
+          "start_ticks": 4395017,
+          "pss_kib": 60504,
+          "rss_kib": 192584,
+          "pss_details_kib": {
+            "Pss_Anon": 39608,
+            "Pss_File": 15130,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 10275,
+          "rss_kib": 49828,
+          "pss_details_kib": {
+            "Pss_Anon": 7620,
+            "Pss_File": 2655,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 195,
+          "start_ticks": 4395042,
+          "pss_kib": 91393,
+          "rss_kib": 246104,
+          "pss_details_kib": {
+            "Pss_Anon": 67744,
+            "Pss_File": 23587,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 300.2,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 162229,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 89,
+          "start_ticks": 4395017,
+          "pss_kib": 60598,
+          "rss_kib": 192680,
+          "pss_details_kib": {
+            "Pss_Anon": 39704,
+            "Pss_File": 15128,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 10268,
+          "rss_kib": 49828,
+          "pss_details_kib": {
+            "Pss_Anon": 7620,
+            "Pss_File": 2648,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 203,
+          "start_ticks": 4395042,
+          "pss_kib": 90551,
+          "rss_kib": 245280,
+          "pss_details_kib": {
+            "Pss_Anon": 66920,
+            "Pss_File": 23569,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 360.22,
+      "board": "normal",
+      "aggregate_pss_kib": 157314,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 99,
+          "start_ticks": 4395017,
+          "pss_kib": 59241,
+          "rss_kib": 192592,
+          "pss_details_kib": {
+            "Pss_Anon": 39616,
+            "Pss_File": 13859,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 9776,
+          "rss_kib": 49832,
+          "pss_details_kib": {
+            "Pss_Anon": 7624,
+            "Pss_File": 2152,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 224,
+          "start_ticks": 4395042,
+          "pss_kib": 87486,
+          "rss_kib": 246708,
+          "pss_details_kib": {
+            "Pss_Anon": 68220,
+            "Pss_File": 19204,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 811,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 420.22,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 162816,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 105,
+          "start_ticks": 4395017,
+          "pss_kib": 60638,
+          "rss_kib": 192744,
+          "pss_details_kib": {
+            "Pss_Anon": 39768,
+            "Pss_File": 15104,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 10277,
+          "rss_kib": 49832,
+          "pss_details_kib": {
+            "Pss_Anon": 7624,
+            "Pss_File": 2653,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 234,
+          "start_ticks": 4395042,
+          "pss_kib": 91089,
+          "rss_kib": 246212,
+          "pss_details_kib": {
+            "Pss_Anon": 67724,
+            "Pss_File": 23303,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 480.17,
+      "board": "normal",
+      "aggregate_pss_kib": 175608,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 117,
+          "start_ticks": 4395017,
+          "pss_kib": 62577,
+          "rss_kib": 192588,
+          "pss_details_kib": {
+            "Pss_Anon": 39612,
+            "Pss_File": 17199,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 11088,
+          "rss_kib": 49832,
+          "pss_details_kib": {
+            "Pss_Anon": 7624,
+            "Pss_File": 3464,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 264,
+          "start_ticks": 4395042,
+          "pss_kib": 101130,
+          "rss_kib": 247196,
+          "pss_details_kib": {
+            "Pss_Anon": 68708,
+            "Pss_File": 32360,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 540.18,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 175072,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 122,
+          "start_ticks": 4395017,
+          "pss_kib": 62855,
+          "rss_kib": 192860,
+          "pss_details_kib": {
+            "Pss_Anon": 39884,
+            "Pss_File": 17205,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 11092,
+          "rss_kib": 49832,
+          "pss_details_kib": {
+            "Pss_Anon": 7624,
+            "Pss_File": 3468,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 273,
+          "start_ticks": 4395042,
+          "pss_kib": 100312,
+          "rss_kib": 246372,
+          "pss_details_kib": {
+            "Pss_Anon": 67884,
+            "Pss_File": 32365,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 600.15,
+      "board": "normal",
+      "aggregate_pss_kib": 175804,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 134,
+          "start_ticks": 4395017,
+          "pss_kib": 62539,
+          "rss_kib": 192544,
+          "pss_details_kib": {
+            "Pss_Anon": 39568,
+            "Pss_File": 17205,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 7,
+          "start_ticks": 4395032,
+          "pss_kib": 11096,
+          "rss_kib": 49836,
+          "pss_details_kib": {
+            "Pss_Anon": 7628,
+            "Pss_File": 3468,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 293,
+          "start_ticks": 4395042,
+          "pss_kib": 101356,
+          "rss_kib": 247416,
+          "pss_details_kib": {
+            "Pss_Anon": 68928,
+            "Pss_File": 32365,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 660.13,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 175536,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 138,
+          "start_ticks": 4395017,
+          "pss_kib": 62883,
+          "rss_kib": 192888,
+          "pss_details_kib": {
+            "Pss_Anon": 39912,
+            "Pss_File": 17205,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11096,
+          "rss_kib": 49836,
+          "pss_details_kib": {
+            "Pss_Anon": 7628,
+            "Pss_File": 3468,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 302,
+          "start_ticks": 4395042,
+          "pss_kib": 100744,
+          "rss_kib": 246804,
+          "pss_details_kib": {
+            "Pss_Anon": 68316,
+            "Pss_File": 32365,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 720.16,
+      "board": "normal",
+      "aggregate_pss_kib": 177132,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 149,
+          "start_ticks": 4395017,
+          "pss_kib": 62563,
+          "rss_kib": 192568,
+          "pss_details_kib": {
+            "Pss_Anon": 39592,
+            "Pss_File": 17205,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11096,
+          "rss_kib": 49836,
+          "pss_details_kib": {
+            "Pss_Anon": 7628,
+            "Pss_File": 3468,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 320,
+          "start_ticks": 4395042,
+          "pss_kib": 102660,
+          "rss_kib": 248720,
+          "pss_details_kib": {
+            "Pss_Anon": 70232,
+            "Pss_File": 32365,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 780.21,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 175312,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 155,
+          "start_ticks": 4395017,
+          "pss_kib": 62794,
+          "rss_kib": 192756,
+          "pss_details_kib": {
+            "Pss_Anon": 39780,
+            "Pss_File": 17248,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11114,
+          "rss_kib": 49840,
+          "pss_details_kib": {
+            "Pss_Anon": 7632,
+            "Pss_File": 3482,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 329,
+          "start_ticks": 4395042,
+          "pss_kib": 100591,
+          "rss_kib": 246636,
+          "pss_details_kib": {
+            "Pss_Anon": 68148,
+            "Pss_File": 32381,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 840.19,
+      "board": "normal",
+      "aggregate_pss_kib": 177372,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 166,
+          "start_ticks": 4395017,
+          "pss_kib": 62702,
+          "rss_kib": 192664,
+          "pss_details_kib": {
+            "Pss_Anon": 39688,
+            "Pss_File": 17248,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11114,
+          "rss_kib": 49840,
+          "pss_details_kib": {
+            "Pss_Anon": 7632,
+            "Pss_File": 3482,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 352,
+          "start_ticks": 4395042,
+          "pss_kib": 102743,
+          "rss_kib": 248788,
+          "pss_details_kib": {
+            "Pss_Anon": 70300,
+            "Pss_File": 32381,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 900.2,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 175550,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 171,
+          "start_ticks": 4395017,
+          "pss_kib": 62893,
+          "rss_kib": 192860,
+          "pss_details_kib": {
+            "Pss_Anon": 39884,
+            "Pss_File": 17243,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11114,
+          "rss_kib": 49840,
+          "pss_details_kib": {
+            "Pss_Anon": 7632,
+            "Pss_File": 3482,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 360,
+          "start_ticks": 4395042,
+          "pss_kib": 100730,
+          "rss_kib": 246780,
+          "pss_details_kib": {
+            "Pss_Anon": 68292,
+            "Pss_File": 32376,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 960.14,
+      "board": "normal",
+      "aggregate_pss_kib": 177484,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 182,
+          "start_ticks": 4395017,
+          "pss_kib": 62696,
+          "rss_kib": 192668,
+          "pss_details_kib": {
+            "Pss_Anon": 39692,
+            "Pss_File": 17238,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11118,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3482,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 378,
+          "start_ticks": 4395042,
+          "pss_kib": 102857,
+          "rss_kib": 248912,
+          "pss_details_kib": {
+            "Pss_Anon": 70424,
+            "Pss_File": 32371,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1020.25,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 175604,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 188,
+          "start_ticks": 4395017,
+          "pss_kib": 62728,
+          "rss_kib": 192704,
+          "pss_details_kib": {
+            "Pss_Anon": 39728,
+            "Pss_File": 17233,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11118,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3482,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 393,
+          "start_ticks": 4395042,
+          "pss_kib": 100945,
+          "rss_kib": 247004,
+          "pss_details_kib": {
+            "Pss_Anon": 68516,
+            "Pss_File": 32366,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 1,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1080.33,
+      "board": "normal",
+      "aggregate_pss_kib": 177897,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 203,
+          "start_ticks": 4395017,
+          "pss_kib": 62737,
+          "rss_kib": 192720,
+          "pss_details_kib": {
+            "Pss_Anon": 39744,
+            "Pss_File": 17227,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11117,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3481,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 428,
+          "start_ticks": 4395042,
+          "pss_kib": 103230,
+          "rss_kib": 249296,
+          "pss_details_kib": {
+            "Pss_Anon": 70808,
+            "Pss_File": 32360,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 1,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1140.52,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 175771,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 213,
+          "start_ticks": 4395017,
+          "pss_kib": 62820,
+          "rss_kib": 192800,
+          "pss_details_kib": {
+            "Pss_Anon": 39824,
+            "Pss_File": 17230,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 8,
+          "start_ticks": 4395032,
+          "pss_kib": 11117,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3481,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 454,
+          "start_ticks": 4395042,
+          "pss_kib": 101021,
+          "rss_kib": 247084,
+          "pss_details_kib": {
+            "Pss_Anon": 68596,
+            "Pss_File": 32363,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 1,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1200.25,
+      "board": "normal",
+      "aggregate_pss_kib": 176814,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 238,
+          "start_ticks": 4395017,
+          "pss_kib": 62791,
+          "rss_kib": 192776,
+          "pss_details_kib": {
+            "Pss_Anon": 39800,
+            "Pss_File": 17225,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 11117,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3481,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 509,
+          "start_ticks": 4395042,
+          "pss_kib": 102093,
+          "rss_kib": 248160,
+          "pss_details_kib": {
+            "Pss_Anon": 69672,
+            "Pss_File": 32358,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 2,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1260.22,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 164494,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 246,
+          "start_ticks": 4395017,
+          "pss_kib": 60741,
+          "rss_kib": 192800,
+          "pss_details_kib": {
+            "Pss_Anon": 39824,
+            "Pss_File": 15151,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 10294,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2658,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 521,
+          "start_ticks": 4395042,
+          "pss_kib": 92647,
+          "rss_kib": 247620,
+          "pss_details_kib": {
+            "Pss_Anon": 69132,
+            "Pss_File": 23453,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 2,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1320.27,
+      "board": "normal",
+      "aggregate_pss_kib": 165210,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 266,
+          "start_ticks": 4395017,
+          "pss_kib": 60713,
+          "rss_kib": 192776,
+          "pss_details_kib": {
+            "Pss_Anon": 39800,
+            "Pss_File": 15146,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 10293,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2657,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 566,
+          "start_ticks": 4395042,
+          "pss_kib": 93392,
+          "rss_kib": 248412,
+          "pss_details_kib": {
+            "Pss_Anon": 69924,
+            "Pss_File": 23405,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 2,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1380.22,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 164500,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 275,
+          "start_ticks": 4395017,
+          "pss_kib": 60942,
+          "rss_kib": 193004,
+          "pss_details_kib": {
+            "Pss_Anon": 40028,
+            "Pss_File": 15147,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 10293,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2657,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 585,
+          "start_ticks": 4395042,
+          "pss_kib": 92453,
+          "rss_kib": 247504,
+          "pss_details_kib": {
+            "Pss_Anon": 69016,
+            "Pss_File": 23374,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1440.25,
+      "board": "normal",
+      "aggregate_pss_kib": 177073,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 291,
+          "start_ticks": 4395017,
+          "pss_kib": 62721,
+          "rss_kib": 192672,
+          "pss_details_kib": {
+            "Pss_Anon": 39696,
+            "Pss_File": 17258,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 11117,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3481,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 613,
+          "start_ticks": 4395042,
+          "pss_kib": 102422,
+          "rss_kib": 248456,
+          "pss_details_kib": {
+            "Pss_Anon": 69968,
+            "Pss_File": 32391,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1500.16,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 176744,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 299,
+          "start_ticks": 4395017,
+          "pss_kib": 62998,
+          "rss_kib": 192960,
+          "pss_details_kib": {
+            "Pss_Anon": 39984,
+            "Pss_File": 17247,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 11118,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3482,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 626,
+          "start_ticks": 4395042,
+          "pss_kib": 101815,
+          "rss_kib": 247860,
+          "pss_details_kib": {
+            "Pss_Anon": 69372,
+            "Pss_File": 32380,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1560.19,
+      "board": "normal",
+      "aggregate_pss_kib": 178686,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 313,
+          "start_ticks": 4395017,
+          "pss_kib": 62738,
+          "rss_kib": 192788,
+          "pss_details_kib": {
+            "Pss_Anon": 39812,
+            "Pss_File": 17160,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 11111,
+          "rss_kib": 49844,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3475,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 655,
+          "start_ticks": 4395042,
+          "pss_kib": 104024,
+          "rss_kib": 250156,
+          "pss_details_kib": {
+            "Pss_Anon": 71668,
+            "Pss_File": 32294,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1620.22,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 165629,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 318,
+          "start_ticks": 4395017,
+          "pss_kib": 60738,
+          "rss_kib": 186216,
+          "pss_details_kib": {
+            "Pss_Anon": 39988,
+            "Pss_File": 14984,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 10047,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2411,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 663,
+          "start_ticks": 4395042,
+          "pss_kib": 94032,
+          "rss_kib": 241320,
+          "pss_details_kib": {
+            "Pss_Anon": 69568,
+            "Pss_File": 24401,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1680.19,
+      "board": "normal",
+      "aggregate_pss_kib": 176528,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 330,
+          "start_ticks": 4395017,
+          "pss_kib": 62383,
+          "rss_kib": 186036,
+          "pss_details_kib": {
+            "Pss_Anon": 39808,
+            "Pss_File": 16809,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 10,
+          "start_ticks": 4395032,
+          "pss_kib": 10789,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 684,
+          "start_ticks": 4395042,
+          "pss_kib": 102543,
+          "rss_kib": 242280,
+          "pss_details_kib": {
+            "Pss_Anon": 70528,
+            "Pss_File": 31953,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1740.19,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 185395,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 335,
+          "start_ticks": 4395017,
+          "pss_kib": 62633,
+          "rss_kib": 186288,
+          "pss_details_kib": {
+            "Pss_Anon": 40060,
+            "Pss_File": 16807,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 11,
+          "start_ticks": 4395032,
+          "pss_kib": 10788,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3152,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 700,
+          "start_ticks": 4395042,
+          "pss_kib": 111161,
+          "rss_kib": 250900,
+          "pss_details_kib": {
+            "Pss_Anon": 79148,
+            "Pss_File": 31951,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1800.17,
+      "board": "normal",
+      "aggregate_pss_kib": 176780,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 346,
+          "start_ticks": 4395017,
+          "pss_kib": 62307,
+          "rss_kib": 185960,
+          "pss_details_kib": {
+            "Pss_Anon": 39732,
+            "Pss_File": 16809,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 11,
+          "start_ticks": 4395032,
+          "pss_kib": 10789,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 719,
+          "start_ticks": 4395042,
+          "pss_kib": 102871,
+          "rss_kib": 242608,
+          "pss_details_kib": {
+            "Pss_Anon": 70856,
+            "Pss_File": 31953,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1860.15,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 177148,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 350,
+          "start_ticks": 4395017,
+          "pss_kib": 62643,
+          "rss_kib": 186296,
+          "pss_details_kib": {
+            "Pss_Anon": 40068,
+            "Pss_File": 16809,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10789,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 726,
+          "start_ticks": 4395042,
+          "pss_kib": 102903,
+          "rss_kib": 242640,
+          "pss_details_kib": {
+            "Pss_Anon": 70888,
+            "Pss_File": 31953,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1920.17,
+      "board": "normal",
+      "aggregate_pss_kib": 176879,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 362,
+          "start_ticks": 4395017,
+          "pss_kib": 62274,
+          "rss_kib": 185920,
+          "pss_details_kib": {
+            "Pss_Anon": 39692,
+            "Pss_File": 16815,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10802,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 744,
+          "start_ticks": 4395042,
+          "pss_kib": 102990,
+          "rss_kib": 242720,
+          "pss_details_kib": {
+            "Pss_Anon": 70968,
+            "Pss_File": 31959,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 1980.18,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 176623,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 367,
+          "start_ticks": 4395017,
+          "pss_kib": 62458,
+          "rss_kib": 186104,
+          "pss_details_kib": {
+            "Pss_Anon": 39876,
+            "Pss_File": 16815,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10802,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 753,
+          "start_ticks": 4395042,
+          "pss_kib": 102550,
+          "rss_kib": 242280,
+          "pss_details_kib": {
+            "Pss_Anon": 70528,
+            "Pss_File": 31959,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2040.13,
+      "board": "normal",
+      "aggregate_pss_kib": 178031,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 379,
+          "start_ticks": 4395017,
+          "pss_kib": 62386,
+          "rss_kib": 186032,
+          "pss_details_kib": {
+            "Pss_Anon": 39804,
+            "Pss_File": 16815,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10802,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 770,
+          "start_ticks": 4395042,
+          "pss_kib": 104030,
+          "rss_kib": 243760,
+          "pss_details_kib": {
+            "Pss_Anon": 72008,
+            "Pss_File": 31959,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2100.19,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 176687,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 382,
+          "start_ticks": 4395017,
+          "pss_kib": 62582,
+          "rss_kib": 186228,
+          "pss_details_kib": {
+            "Pss_Anon": 40000,
+            "Pss_File": 16815,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10802,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 778,
+          "start_ticks": 4395042,
+          "pss_kib": 102490,
+          "rss_kib": 242220,
+          "pss_details_kib": {
+            "Pss_Anon": 70468,
+            "Pss_File": 31959,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 3,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2160.23,
+      "board": "normal",
+      "aggregate_pss_kib": 177271,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 394,
+          "start_ticks": 4395017,
+          "pss_kib": 62398,
+          "rss_kib": 186048,
+          "pss_details_kib": {
+            "Pss_Anon": 39820,
+            "Pss_File": 16812,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10802,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 795,
+          "start_ticks": 4395042,
+          "pss_kib": 103258,
+          "rss_kib": 242992,
+          "pss_details_kib": {
+            "Pss_Anon": 71240,
+            "Pss_File": 31956,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2220.15,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 176931,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 400,
+          "start_ticks": 4395017,
+          "pss_kib": 62588,
+          "rss_kib": 186244,
+          "pss_details_kib": {
+            "Pss_Anon": 40016,
+            "Pss_File": 16805,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10800,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3164,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 805,
+          "start_ticks": 4395042,
+          "pss_kib": 102731,
+          "rss_kib": 242472,
+          "pss_details_kib": {
+            "Pss_Anon": 70720,
+            "Pss_File": 31949,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2280.13,
+      "board": "normal",
+      "aggregate_pss_kib": 166019,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 412,
+          "start_ticks": 4395017,
+          "pss_kib": 60385,
+          "rss_kib": 186036,
+          "pss_details_kib": {
+            "Pss_Anon": 39808,
+            "Pss_File": 14811,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10058,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2422,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 826,
+          "start_ticks": 4395042,
+          "pss_kib": 94764,
+          "rss_kib": 243156,
+          "pss_details_kib": {
+            "Pss_Anon": 71404,
+            "Pss_File": 23297,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2340.2,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 165395,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 417,
+          "start_ticks": 4395017,
+          "pss_kib": 60574,
+          "rss_kib": 186232,
+          "pss_details_kib": {
+            "Pss_Anon": 40004,
+            "Pss_File": 14803,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10058,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2422,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 833,
+          "start_ticks": 4395042,
+          "pss_kib": 93951,
+          "rss_kib": 242520,
+          "pss_details_kib": {
+            "Pss_Anon": 70768,
+            "Pss_File": 23120,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2400.15,
+      "board": "normal",
+      "aggregate_pss_kib": 166978,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 429,
+          "start_ticks": 4395017,
+          "pss_kib": 60376,
+          "rss_kib": 186036,
+          "pss_details_kib": {
+            "Pss_Anon": 39808,
+            "Pss_File": 14801,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10052,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2416,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 852,
+          "start_ticks": 4395042,
+          "pss_kib": 95738,
+          "rss_kib": 244356,
+          "pss_details_kib": {
+            "Pss_Anon": 72604,
+            "Pss_File": 23071,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2460.2,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 165957,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 434,
+          "start_ticks": 4395017,
+          "pss_kib": 60382,
+          "rss_kib": 186024,
+          "pss_details_kib": {
+            "Pss_Anon": 39796,
+            "Pss_File": 14819,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10060,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 2424,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 860,
+          "start_ticks": 4395042,
+          "pss_kib": 94703,
+          "rss_kib": 243036,
+          "pss_details_kib": {
+            "Pss_Anon": 71284,
+            "Pss_File": 23356,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2520.18,
+      "board": "normal",
+      "aggregate_pss_kib": 177755,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 445,
+          "start_ticks": 4395017,
+          "pss_kib": 62399,
+          "rss_kib": 186056,
+          "pss_details_kib": {
+            "Pss_Anon": 39828,
+            "Pss_File": 16805,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10785,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3149,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 878,
+          "start_ticks": 4395042,
+          "pss_kib": 103758,
+          "rss_kib": 243500,
+          "pss_details_kib": {
+            "Pss_Anon": 71748,
+            "Pss_File": 31947,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2580.17,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 177442,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 451,
+          "start_ticks": 4395017,
+          "pss_kib": 62648,
+          "rss_kib": 186304,
+          "pss_details_kib": {
+            "Pss_Anon": 40076,
+            "Pss_File": 16805,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 12,
+          "start_ticks": 4395032,
+          "pss_kib": 10786,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3150,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 886,
+          "start_ticks": 4395042,
+          "pss_kib": 103195,
+          "rss_kib": 242936,
+          "pss_details_kib": {
+            "Pss_Anon": 71184,
+            "Pss_File": 31948,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2640.14,
+      "board": "normal",
+      "aggregate_pss_kib": 177618,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 462,
+          "start_ticks": 4395017,
+          "pss_kib": 62317,
+          "rss_kib": 185968,
+          "pss_details_kib": {
+            "Pss_Anon": 39740,
+            "Pss_File": 16810,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 13,
+          "start_ticks": 4395032,
+          "pss_kib": 10789,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 903,
+          "start_ticks": 4395042,
+          "pss_kib": 103699,
+          "rss_kib": 243436,
+          "pss_details_kib": {
+            "Pss_Anon": 71684,
+            "Pss_File": 31953,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2700.19,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 177462,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 467,
+          "start_ticks": 4395017,
+          "pss_kib": 62653,
+          "rss_kib": 186304,
+          "pss_details_kib": {
+            "Pss_Anon": 40076,
+            "Pss_File": 16810,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 13,
+          "start_ticks": 4395032,
+          "pss_kib": 10789,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 910,
+          "start_ticks": 4395042,
+          "pss_kib": 103207,
+          "rss_kib": 242944,
+          "pss_details_kib": {
+            "Pss_Anon": 71192,
+            "Pss_File": 31953,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2760.18,
+      "board": "normal",
+      "aggregate_pss_kib": 178858,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 478,
+          "start_ticks": 4395017,
+          "pss_kib": 62317,
+          "rss_kib": 185968,
+          "pss_details_kib": {
+            "Pss_Anon": 39740,
+            "Pss_File": 16810,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 14,
+          "start_ticks": 4395032,
+          "pss_kib": 10789,
+          "rss_kib": 46692,
+          "pss_details_kib": {
+            "Pss_Anon": 7636,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 928,
+          "start_ticks": 4395042,
+          "pss_kib": 104939,
+          "rss_kib": 244676,
+          "pss_details_kib": {
+            "Pss_Anon": 72924,
+            "Pss_File": 31952,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2820.1,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 177050,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 482,
+          "start_ticks": 4395017,
+          "pss_kib": 62657,
+          "rss_kib": 186308,
+          "pss_details_kib": {
+            "Pss_Anon": 40080,
+            "Pss_File": 16810,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 14,
+          "start_ticks": 4395032,
+          "pss_kib": 10793,
+          "rss_kib": 46696,
+          "pss_details_kib": {
+            "Pss_Anon": 7640,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 936,
+          "start_ticks": 4395042,
+          "pss_kib": 102787,
+          "rss_kib": 242524,
+          "pss_details_kib": {
+            "Pss_Anon": 70772,
+            "Pss_File": 31952,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2880.24,
+      "board": "normal",
+      "aggregate_pss_kib": 179013,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 494,
+          "start_ticks": 4395017,
+          "pss_kib": 62335,
+          "rss_kib": 185984,
+          "pss_details_kib": {
+            "Pss_Anon": 39756,
+            "Pss_File": 16813,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 14,
+          "start_ticks": 4395032,
+          "pss_kib": 10809,
+          "rss_kib": 46700,
+          "pss_details_kib": {
+            "Pss_Anon": 7644,
+            "Pss_File": 3165,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 954,
+          "start_ticks": 4395042,
+          "pss_kib": 105057,
+          "rss_kib": 244792,
+          "pss_details_kib": {
+            "Pss_Anon": 73040,
+            "Pss_File": 31955,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 2940.17,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 177587,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 500,
+          "start_ticks": 4395017,
+          "pss_kib": 62513,
+          "rss_kib": 186164,
+          "pss_details_kib": {
+            "Pss_Anon": 39936,
+            "Pss_File": 16810,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 14,
+          "start_ticks": 4395032,
+          "pss_kib": 10814,
+          "rss_kib": 46704,
+          "pss_details_kib": {
+            "Pss_Anon": 7648,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 963,
+          "start_ticks": 4395042,
+          "pss_kib": 103447,
+          "rss_kib": 243184,
+          "pss_details_kib": {
+            "Pss_Anon": 71432,
+            "Pss_File": 31952,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3000.13,
+      "board": "normal",
+      "aggregate_pss_kib": 178229,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 513,
+          "start_ticks": 4395017,
+          "pss_kib": 62422,
+          "rss_kib": 186064,
+          "pss_details_kib": {
+            "Pss_Anon": 39836,
+            "Pss_File": 16819,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 14,
+          "start_ticks": 4395032,
+          "pss_kib": 10818,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 986,
+          "start_ticks": 4395042,
+          "pss_kib": 104176,
+          "rss_kib": 243904,
+          "pss_details_kib": {
+            "Pss_Anon": 72152,
+            "Pss_File": 31961,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3060.14,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 178425,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 518,
+          "start_ticks": 4395017,
+          "pss_kib": 62606,
+          "rss_kib": 186248,
+          "pss_details_kib": {
+            "Pss_Anon": 40020,
+            "Pss_File": 16819,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 14,
+          "start_ticks": 4395032,
+          "pss_kib": 10818,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 993,
+          "start_ticks": 4395042,
+          "pss_kib": 104188,
+          "rss_kib": 243916,
+          "pss_details_kib": {
+            "Pss_Anon": 72164,
+            "Pss_File": 31961,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3120.13,
+      "board": "normal",
+      "aggregate_pss_kib": 168258,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 529,
+          "start_ticks": 4395017,
+          "pss_kib": 60429,
+          "rss_kib": 186052,
+          "pss_details_kib": {
+            "Pss_Anon": 39824,
+            "Pss_File": 14838,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 10077,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 2425,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1021,
+          "start_ticks": 4395042,
+          "pss_kib": 96940,
+          "rss_kib": 244740,
+          "pss_details_kib": {
+            "Pss_Anon": 72988,
+            "Pss_File": 23889,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 812,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3180.19,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 178752,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 534,
+          "start_ticks": 4395017,
+          "pss_kib": 62602,
+          "rss_kib": 186248,
+          "pss_details_kib": {
+            "Pss_Anon": 40020,
+            "Pss_File": 16815,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 10817,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 3165,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1029,
+          "start_ticks": 4395042,
+          "pss_kib": 104520,
+          "rss_kib": 244252,
+          "pss_details_kib": {
+            "Pss_Anon": 72500,
+            "Pss_File": 31957,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 4,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3240.19,
+      "board": "normal",
+      "aggregate_pss_kib": 179173,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 545,
+          "start_ticks": 4395017,
+          "pss_kib": 62406,
+          "rss_kib": 186052,
+          "pss_details_kib": {
+            "Pss_Anon": 39824,
+            "Pss_File": 16815,
+            "Pss_Shmem": 5766
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 10818,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 3166,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1048,
+          "start_ticks": 4395042,
+          "pss_kib": 105136,
+          "rss_kib": 244868,
+          "pss_details_kib": {
+            "Pss_Anon": 73116,
+            "Pss_File": 31957,
+            "Pss_Shmem": 62
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 813,
+          "cpu_ticks": 5,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3300.2,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 217211,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 550,
+          "start_ticks": 4395017,
+          "pss_kib": 73318,
+          "rss_kib": 186248,
+          "pss_details_kib": {
+            "Pss_Anon": 40020,
+            "Pss_File": 27531,
+            "Pss_Shmem": 5767
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 12316,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 4664,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1055,
+          "start_ticks": 4395042,
+          "pss_kib": 130323,
+          "rss_kib": 244296,
+          "pss_details_kib": {
+            "Pss_Anon": 72544,
+            "Pss_File": 57716,
+            "Pss_Shmem": 63
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 1254,
+          "cpu_ticks": 5,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3360.2,
+      "board": "normal",
+      "aggregate_pss_kib": 187643,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 560,
+          "start_ticks": 4395017,
+          "pss_kib": 69064,
+          "rss_kib": 186084,
+          "pss_details_kib": {
+            "Pss_Anon": 39856,
+            "Pss_File": 23440,
+            "Pss_Shmem": 5767
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 10802,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 3150,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1073,
+          "start_ticks": 4395042,
+          "pss_kib": 106524,
+          "rss_kib": 244888,
+          "pss_details_kib": {
+            "Pss_Anon": 73136,
+            "Pss_File": 33324,
+            "Pss_Shmem": 63
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 1253,
+          "cpu_ticks": 5,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3420.16,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 230928,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 566,
+          "start_ticks": 4395017,
+          "pss_kib": 73284,
+          "rss_kib": 186204,
+          "pss_details_kib": {
+            "Pss_Anon": 39976,
+            "Pss_File": 27541,
+            "Pss_Shmem": 5767
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 12317,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 4665,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1099,
+          "start_ticks": 4395042,
+          "pss_kib": 144073,
+          "rss_kib": 258036,
+          "pss_details_kib": {
+            "Pss_Anon": 86284,
+            "Pss_File": 57726,
+            "Pss_Shmem": 63
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 1254,
+          "cpu_ticks": 5,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3480.15,
+      "board": "normal",
+      "aggregate_pss_kib": 219540,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 577,
+          "start_ticks": 4395017,
+          "pss_kib": 73136,
+          "rss_kib": 186056,
+          "pss_details_kib": {
+            "Pss_Anon": 39828,
+            "Pss_File": 27541,
+            "Pss_Shmem": 5767
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 12317,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 4665,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1116,
+          "start_ticks": 4395042,
+          "pss_kib": 132833,
+          "rss_kib": 246796,
+          "pss_details_kib": {
+            "Pss_Anon": 75044,
+            "Pss_File": 57726,
+            "Pss_Shmem": 63
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 1254,
+          "cpu_ticks": 5,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3540.21,
+      "board": "Soak companion board",
+      "aggregate_pss_kib": 189193,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 582,
+          "start_ticks": 4395017,
+          "pss_kib": 69168,
+          "rss_kib": 186132,
+          "pss_details_kib": {
+            "Pss_Anon": 39904,
+            "Pss_File": 23497,
+            "Pss_Shmem": 5767
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 10809,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 3157,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1125,
+          "start_ticks": 4395042,
+          "pss_kib": 107963,
+          "rss_kib": 244728,
+          "pss_details_kib": {
+            "Pss_Anon": 72976,
+            "Pss_File": 34924,
+            "Pss_Shmem": 63
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 1253,
+          "cpu_ticks": 5,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    },
+    {
+      "elapsed_seconds": 3600.22,
+      "board": "normal",
+      "aggregate_pss_kib": 189883,
+      "processes": [
+        {
+          "pid": 567359,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 567355,
+          "cpu_ticks": 593,
+          "start_ticks": 4395017,
+          "pss_kib": 68998,
+          "rss_kib": 185984,
+          "pss_details_kib": {
+            "Pss_Anon": 39756,
+            "Pss_File": 23474,
+            "Pss_Shmem": 5767
+          }
+        },
+        {
+          "pid": 567389,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 15,
+          "start_ticks": 4395032,
+          "pss_kib": 10805,
+          "rss_kib": 46708,
+          "pss_details_kib": {
+            "Pss_Anon": 7652,
+            "Pss_File": 3153,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 567494,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 567359,
+          "cpu_ticks": 1146,
+          "start_ticks": 4395042,
+          "pss_kib": 108827,
+          "rss_kib": 247096,
+          "pss_details_kib": {
+            "Pss_Anon": 75344,
+            "Pss_File": 33420,
+            "Pss_Shmem": 63
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 567674,
+          "pss_kib": 1253,
+          "cpu_ticks": 6,
+          "webview_children": []
+        }
+      ],
+      "reachable_retired_editor_and_canvas_wrappers": [
+        0,
+        0
+      ]
+    }
+  ],
+  "switches": 60,
+  "reconnects": 120,
+  "semantic_edits": 30,
+  "drawing_checkpoints": 30,
+  "transport_retries": 0,
+  "extra_pen_attempts": 0,
+  "drawing_retries": 0
+}

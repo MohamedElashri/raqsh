@@ -1,0 +1,85 @@
+{
+  "css": [
+    1024,
+    671
+  ],
+  "pixel_ratio": 1,
+  "color_scheme": "light",
+  "background": "rgb(246, 245, 239)",
+  "backing": [
+    1024,
+    671
+  ],
+  "cards": 10,
+  "compact_layout": [
+    480,
+    311
+  ],
+  "keyboard_actions": [
+    "select",
+    "edit",
+    "add and cancel",
+    "numeric geometry",
+    "link",
+    "roving card list",
+    "shortcuts",
+    "return to board library"
+  ],
+  "workspace_controls": true,
+  "native_arabic_ime_clipboard": null,
+  "atspi": {
+    "board": {
+      "Close board": {
+        "name": "Close board",
+        "role": "push button",
+        "description": "",
+        "focused": false
+      },
+      "Drawing canvas": {
+        "name": "Drawing canvas",
+        "role": "canvas",
+        "description": "Arrow keys select cards. Enter edits the selected card or links it in Dependency mode.",
+        "focused": true
+      },
+      "Add card": {
+        "name": "Add card",
+        "role": "push button",
+        "description": "Add card (Insert)",
+        "focused": false
+      },
+      "Shortcuts": {
+        "name": "Shortcuts",
+        "role": "push button",
+        "description": "Shortcuts",
+        "focused": false
+      }
+    },
+    "editor": {
+      "Edit card": {
+        "name": "Edit card",
+        "role": "dialog",
+        "description": "",
+        "focused": false
+      },
+      "Save card": {
+        "name": "Save card",
+        "role": "push button",
+        "description": "",
+        "focused": false
+      },
+      "X position": {
+        "name": "X position 80",
+        "role": "entry",
+        "description": "",
+        "focused": false
+      },
+      "Width": {
+        "name": "Width 216",
+        "role": "entry",
+        "description": "",
+        "focused": false
+      }
+    }
+  },
+  "binary_sha256": "1cc1d9953f8ff18c8692384cb4a76c488982f7fa42a3e45c480afbbaeee35da9"
+}

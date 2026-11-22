@@ -1,0 +1,121 @@
+{
+  "css": [
+    1024,
+    720
+  ],
+  "pixel_ratio": 2,
+  "color_scheme": "dark",
+  "background": "rgb(31, 31, 28)",
+  "backing": [
+    2048,
+    1440
+  ],
+  "cards": 10,
+  "board_typography": {
+    "presence": "Excalifont, Nunito, system-ui, sans-serif",
+    "note": "Excalifont, Nunito, system-ui, sans-serif",
+    "card": "Nunito, system-ui, sans-serif",
+    "face_status": "loaded"
+  },
+  "layout": {
+    "menu": [
+      16,
+      16,
+      38,
+      38
+    ],
+    "zoom": [
+      16,
+      666,
+      134,
+      38
+    ],
+    "toolbar": [
+      237,
+      16,
+      550,
+      44
+    ],
+    "presence": [
+      462.5,
+      672,
+      99,
+      30
+    ],
+    "library": [
+      924.921875,
+      16,
+      83.078125,
+      38
+    ],
+    "help": [
+      970,
+      666,
+      38,
+      38
+    ]
+  },
+  "shape_history": true,
+  "compact_layout": [
+    480,
+    360
+  ],
+  "keyboard_actions": [
+    "select",
+    "edit",
+    "add and cancel",
+    "numeric geometry",
+    "link",
+    "roving card list",
+    "shortcuts",
+    "return to board library"
+  ],
+  "workspace_controls": true,
+  "native_arabic_ime_clipboard": {
+    "composition_events": [
+      [
+        "compositionstart",
+        "",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u0",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u06",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u064",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u0645",
+        true
+      ],
+      [
+        "compositionend",
+        "",
+        true
+      ],
+      [
+        "compositionend",
+        "\u0645",
+        true
+      ]
+    ],
+    "native_clipboard_roundtrip": "\u0645"
+  },
+  "atspi": {},
+  "binary_sha256": "7f0fd136d480401f5f2dfab20aa9845694e6308aac9292c78bbb5ae7519ab491"
+}

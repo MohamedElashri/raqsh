@@ -1,0 +1,11 @@
+[package]
+name = "visual-board-mcp"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+board-ipc = { path = "../ipc" }
+board-domain = { path = "../domain" }
+serde.workspace = true
+serde_json.workspace = true

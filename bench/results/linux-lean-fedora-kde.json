@@ -1,0 +1,48 @@
+{
+  "distribution": "Fedora 43 x86_64",
+  "compositor": "KWin 6.7.6 virtual Wayland",
+  "software_rendering": true,
+  "installed_packages": [
+    "visual-board-0.1.0-1.x86_64",
+    "kwin-6.7.6-1.fc43.x86_64",
+    "webkit2gtk4.1-2.54.2-1.fc43.x86_64",
+    "webkitgtk6.0-2.54.2-1.fc43.x86_64"
+  ],
+  "fixture_checks": {
+    "binary_sha256": "4e164f8a72df874f1097242d5bdc22996efa8af71b3a0eb65467f5c723cd80ea",
+    "interfaces": [
+      "lo",
+      "eth0"
+    ],
+    "held_drag_samples": 10,
+    "native_batches_before_release": 0,
+    "native_batches_after_release": 1,
+    "undo_and_backend_delta": true,
+    "viewport_native_batches_and_drawing_changes": [
+      0,
+      0
+    ],
+    "saved_fixture_reopened": true,
+    "keyboard_card_edit": true,
+    "freehand_and_text_annotation": true,
+    "native_input": null,
+    "svg": {
+      "paths": 401,
+      "cards": 200,
+      "bytes": 185089,
+      "firstEdge": "296,123 398,123 387.1946347717679,117.78041359066523 398,123 387.1946347717679,128.21958640933477",
+      "type": "image/svg+xml",
+      "external": 0,
+      "rtl": [
+        "خطة الإطلاق — Task 42"
+      ]
+    },
+    "png": {
+      "type": "image/png",
+      "width": 1004,
+      "magic": 2303741511,
+      "bytes": 588509,
+      "height": 4096
+    }
+  }
+}

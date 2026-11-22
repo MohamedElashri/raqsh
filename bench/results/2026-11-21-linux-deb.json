@@ -1,0 +1,32 @@
+{
+  "tauri-shell": {
+    "deb_bytes": 2435066,
+    "sha256": "568adb2948bc701435cc2c4b96227b6b418dd6c181ce7e4520c58d2cd2353459",
+    "package": "visual-board",
+    "installed_package_kib": 6572,
+    "declared_dependencies": [
+      "libwebkit2gtk-4.1-0",
+      "libgtk-3-0"
+    ]
+  },
+  "excalidraw": {
+    "deb_bytes": 17880568,
+    "sha256": "7b87a49c2cda787cb4b11a45805169b8a215c43e8c9bb1983d3cd87eaf916fc5",
+    "package": "visual-board",
+    "installed_package_kib": 21684,
+    "declared_dependencies": [
+      "libwebkit2gtk-4.1-0",
+      "libgtk-3-0"
+    ]
+  },
+  "host_direct_runtime_dependencies": {
+    "libwebkit2gtk-4.1-0:amd64": {
+      "version": "2.52.6-0ubuntu0.24.04.2",
+      "installed_kib": 93416
+    },
+    "libgtk-3-0t64:amd64": {
+      "version": "3.24.41-4ubuntu1.3",
+      "installed_kib": 9772
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "binary_sha256": "7f0fd136d480401f5f2dfab20aa9845694e6308aac9292c78bbb5ae7519ab491",
+  "fonts": [
+    {
+      "file": "Assistant-Regular.woff2",
+      "bytes": 20232,
+      "sha256": "76945f09225aae65bdbd204cb4ac40d4caa4ff67150e5074bab1a04d1b778fc3"
+    },
+    {
+      "file": "Excalifont-Regular.woff2",
+      "bytes": 52296,
+      "sha256": "ee41ec4c06bfa0728665499de6f4b4019e7953119ab20b5aeb5917f1609c3b2a"
+    },
+    {
+      "file": "Nunito-Latin.woff2",
+      "bytes": 16476,
+      "sha256": "6d1626aac658786e37e78e0adce3ffffddbd75abc923d72e45a7168bd80053da"
+    }
+  ],
+  "frontend_assets_bytes": 304339,
+  "frontend_assets_per_file_gzip_bytes": 159434,
+  "deb_icon_matches_generated": true,
+  "deb_desktop_entry_validation": true,
+  "deb_font_notices_match": true,
+  "packages": [
+    {
+      "file": "visual-board_0.1.0_amd64.deb",
+      "bytes": 4785774,
+      "sha256": "e728eaaa2c78c3e7c192fdc7958cdaa8e023cbee96faa6188b7012dda3e304eb"
+    },
+    {
+      "file": "visual-board-0.1.0-1.x86_64.rpm",
+      "bytes": 4791853,
+      "sha256": "e7248cf0b11386d52e92708764e0aae430df18220c4f7e84f15495d096040d3e"
+    }
+  ]
+}

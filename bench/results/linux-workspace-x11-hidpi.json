@@ -1,0 +1,76 @@
+{
+  "css": [
+    1024,
+    671
+  ],
+  "pixel_ratio": 2,
+  "color_scheme": "dark",
+  "background": "rgb(26, 34, 40)",
+  "backing": [
+    2048,
+    1342
+  ],
+  "cards": 10,
+  "compact_layout": [
+    480,
+    311
+  ],
+  "keyboard_actions": [
+    "select",
+    "edit",
+    "add and cancel",
+    "numeric geometry",
+    "link",
+    "roving card list",
+    "shortcuts",
+    "return to board library"
+  ],
+  "workspace_controls": true,
+  "native_arabic_ime_clipboard": {
+    "composition_events": [
+      [
+        "compositionstart",
+        "",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u0",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u06",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u064",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u0645",
+        true
+      ],
+      [
+        "compositionend",
+        "",
+        true
+      ],
+      [
+        "compositionend",
+        "\u0645",
+        true
+      ]
+    ],
+    "native_clipboard_roundtrip": "\u0645"
+  },
+  "atspi": {},
+  "binary_sha256": "1cc1d9953f8ff18c8692384cb4a76c488982f7fa42a3e45c480afbbaeee35da9"
+}

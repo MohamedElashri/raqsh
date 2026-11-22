@@ -1,0 +1,19 @@
+{
+  "name": "visual-board-workspace",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=26.13.1 <27"
+  },
+  "scripts": {
+    "brand:generate": "node scripts/generate-brand.mjs",
+    "brand:check": "node scripts/check-brand.mjs",
+    "desktop:dev": "pnpm brand:generate && pnpm --filter visual-board-desktop exec tauri dev",
+    "desktop:build": "pnpm brand:generate && pnpm --filter visual-board-desktop exec tauri build --no-bundle -- --locked && cargo build --release --locked -p visual-board-mcp",
+    "desktop:bundle": "pnpm brand:generate && bash scripts/bundle-desktop.sh",
+    "desktop:check": "pnpm brand:generate && pnpm --filter visual-board-desktop typecheck && cargo check --workspace --locked"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.6"
+  }
+}

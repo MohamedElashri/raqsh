@@ -1,0 +1,37 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "identifier": "dev.local.visualboard",
+  "productName": "visual-board",
+  "build": {
+    "beforeDevCommand": "pnpm frontend:dev",
+    "beforeBuildCommand": "pnpm frontend:build",
+    "devUrl": "http://127.0.0.1:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      { "label": "main", "create": false, "width": 1024, "height": 720, "minWidth": 480, "minHeight": 360 }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'none'; form-action 'none'",
+      "devCsp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ws://127.0.0.1:1420; object-src 'none'; base-uri 'none'; form-action 'none'",
+      "capabilities": ["board-editor"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "resources": {
+      "../src/lean/fonts/OFL-Assistant.txt": "licenses/OFL-Assistant.txt",
+      "../src/lean/fonts/OFL-Excalifont.txt": "licenses/OFL-Excalifont.txt",
+      "../src/lean/fonts/OFL-Nunito.txt": "licenses/OFL-Nunito.txt"
+    },
+    "icon": ["icons/32x32.png", "icons/64x64.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns"],
+    "category": "Productivity",
+    "shortDescription": "A visual planning board for developers and coding agents",
+    "linux": {
+      "deb": { "desktopTemplate": "generated/main.desktop" },
+      "rpm": { "desktopTemplate": "generated/main.desktop" }
+    },
+    "macOS": { "infoPlist": "generated/Info.plist" }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "interfaces": [
+    "lo"
+  ],
+  "desktop_sha256": "f5c3bb224bf5c67344e21005639266cb75b93b43ccb062449557782ffb7a0f28",
+  "helper_sha256": "d177cbdc275804170bdf5042b9c74dbc02c93c15481e8145fa989d2356b6a689",
+  "codex": {
+    "version": "codex-cli 0.171.0",
+    "tools_discovered": 9,
+    "cross_board_access_denied": true,
+    "feedback_offered_acknowledged_and_answered": true,
+    "model_turn_started": false
+  },
+  "claude_code": {
+    "version": "2.1.323 (Claude Code)",
+    "unapproved_project_server_pending": true,
+    "stdio_health_connected": true,
+    "local_registration_removed": true,
+    "model_turn_started": false
+  }
+}

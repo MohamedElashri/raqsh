@@ -1,0 +1,21 @@
+{
+  "deb": {
+    "file": "visual-board_0.1.0_amd64.deb",
+    "bytes": 3936420,
+    "sha256": "f7124250155caf289a70591e3ac7fbe6148ef4c2d648169bdc784cce1f0c14c9",
+    "package": "visual-board",
+    "depends": "libwebkit2gtk-4.1-0, libgtk-3-0",
+    "launcher": "Raqsh",
+    "unresolved_libraries": []
+  },
+  "rpm": {
+    "file": "visual-board-0.1.0-1.x86_64.rpm",
+    "bytes": 3941752,
+    "sha256": "58d940f8c29fe08956a41707e4c2128241c80a45bb00e2c5bbe66a05b8dbc1e2",
+    "package": "visual-board",
+    "native_desktop_libraries": [
+      "libgtk-3.so.0()(64bit)",
+      "libwebkit2gtk-4.1.so.0()(64bit)"
+    ]
+  }
+}

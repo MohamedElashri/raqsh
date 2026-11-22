@@ -1,0 +1,244 @@
+{
+  "typed_commits": 12,
+  "held_drag_moves": 10,
+  "drag_ipc_during_gesture": 0,
+  "pen_ipc_during_gesture": 0,
+  "coalesced_generations": 2,
+  "viewport_checkpoints": 0,
+  "stale_editor_rejected": true,
+  "close_failure_retry": true,
+  "semantic_ack": {
+    "p50_ms": 23.0,
+    "p95_ms": 121.0,
+    "p99_ms": 121.0
+  },
+  "reducer": {
+    "p50_ms": 0.02,
+    "p95_ms": 0.04,
+    "p99_ms": 0.04
+  },
+  "hard_kill_semantic_revision": 12,
+  "hard_kill_drawing_checkpoint": 2,
+  "metadata_rename_delete": true,
+  "one_snapshot_in_flight": true,
+  "freeform_arrow_and_undo": true,
+  "normal_board_commits": {
+    "samples": 30,
+    "ipc_and_disk": {
+      "p50_ms": 19,
+      "p95_ms": 122,
+      "p99_ms": 150
+    },
+    "reducer_without_disk": {
+      "p50_ms": 0.12,
+      "p95_ms": 0.34,
+      "p99_ms": 0.63
+    },
+    "queue": {
+      "p50_ms": 0.02,
+      "p95_ms": 0.03,
+      "p99_ms": 0.03
+    },
+    "storage": {
+      "p50_ms": 16.96,
+      "p95_ms": 121.86,
+      "p99_ms": 149.53
+    },
+    "sqlite_commit": {
+      "p50_ms": 16.41,
+      "p95_ms": 120.97,
+      "p99_ms": 148.44
+    },
+    "ack_minus_sqlite_commit": {
+      "p50_ms": 1.59,
+      "p95_ms": 3.39,
+      "p99_ms": 3.7
+    },
+    "samples_ms": [
+      {
+        "ipc": 20,
+        "queue": 0.023,
+        "storage": 16.934,
+        "sqlite_commit": 16.305
+      },
+      {
+        "ipc": 18.000000000000114,
+        "queue": 0.016,
+        "storage": 16.954,
+        "sqlite_commit": 16.409
+      },
+      {
+        "ipc": 19,
+        "queue": 0.017,
+        "storage": 17.099,
+        "sqlite_commit": 16.417
+      },
+      {
+        "ipc": 120,
+        "queue": 0.018,
+        "storage": 119.22,
+        "sqlite_commit": 118.199
+      },
+      {
+        "ipc": 19,
+        "queue": 0.011,
+        "storage": 17.472,
+        "sqlite_commit": 17.003
+      },
+      {
+        "ipc": 17,
+        "queue": 0.011,
+        "storage": 16.645,
+        "sqlite_commit": 16.164
+      },
+      {
+        "ipc": 118,
+        "queue": 0.014,
+        "storage": 117.007,
+        "sqlite_commit": 116.458
+      },
+      {
+        "ipc": 23,
+        "queue": 0.023,
+        "storage": 22.43,
+        "sqlite_commit": 21.242
+      },
+      {
+        "ipc": 18,
+        "queue": 0.014,
+        "storage": 16.788,
+        "sqlite_commit": 15.99
+      },
+      {
+        "ipc": 117.99999999999977,
+        "queue": 0.028,
+        "storage": 117.24,
+        "sqlite_commit": 116.414
+      },
+      {
+        "ipc": 17,
+        "queue": 0.014,
+        "storage": 16.353,
+        "sqlite_commit": 15.883
+      },
+      {
+        "ipc": 19,
+        "queue": 0.023,
+        "storage": 17.694,
+        "sqlite_commit": 16.784
+      },
+      {
+        "ipc": 150,
+        "queue": 0.024,
+        "storage": 149.532,
+        "sqlite_commit": 148.442
+      },
+      {
+        "ipc": 20,
+        "queue": 0.022,
+        "storage": 18.15,
+        "sqlite_commit": 16.614
+      },
+      {
+        "ipc": 119,
+        "queue": 0.02,
+        "storage": 118.632,
+        "sqlite_commit": 117.913
+      },
+      {
+        "ipc": 17,
+        "queue": 0.012,
+        "storage": 16.179,
+        "sqlite_commit": 15.635
+      },
+      {
+        "ipc": 17,
+        "queue": 0.018,
+        "storage": 16.173,
+        "sqlite_commit": 15.659
+      },
+      {
+        "ipc": 119,
+        "queue": 0.015,
+        "storage": 118.114,
+        "sqlite_commit": 117.572
+      },
+      {
+        "ipc": 17.000000000000227,
+        "queue": 0.017,
+        "storage": 16.266,
+        "sqlite_commit": 15.64
+      },
+      {
+        "ipc": 17.999999999999773,
+        "queue": 0.018,
+        "storage": 16.87,
+        "sqlite_commit": 15.972
+      },
+      {
+        "ipc": 122,
+        "queue": 0.031,
+        "storage": 121.858,
+        "sqlite_commit": 120.965
+      },
+      {
+        "ipc": 17,
+        "queue": 0.01,
+        "storage": 16.117,
+        "sqlite_commit": 15.637
+      },
+      {
+        "ipc": 17,
+        "queue": 0.013,
+        "storage": 16.087,
+        "sqlite_commit": 15.612
+      },
+      {
+        "ipc": 118,
+        "queue": 0.021,
+        "storage": 116.654,
+        "sqlite_commit": 115.747
+      },
+      {
+        "ipc": 17,
+        "queue": 0.014,
+        "storage": 16.23,
+        "sqlite_commit": 15.73
+      },
+      {
+        "ipc": 18,
+        "queue": 0.012,
+        "storage": 16.453,
+        "sqlite_commit": 15.938
+      },
+      {
+        "ipc": 118,
+        "queue": 0.013,
+        "storage": 116.931,
+        "sqlite_commit": 116.364
+      },
+      {
+        "ipc": 18,
+        "queue": 0.019,
+        "storage": 16.96,
+        "sqlite_commit": 16.175
+      },
+      {
+        "ipc": 19,
+        "queue": 0.018,
+        "storage": 17.83,
+        "sqlite_commit": 17.026
+      },
+      {
+        "ipc": 18,
+        "queue": 0.018,
+        "storage": 16.896,
+        "sqlite_commit": 16.019
+      }
+    ]
+  },
+  "binary_sha256": "fc2c9ef387960f3598286f721a086156d1ec2d9b693dad3c327c27091fd232d6",
+  "interfaces": [
+    "lo"
+  ]
+}

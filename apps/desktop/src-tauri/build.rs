@@ -1,0 +1,29 @@
+fn main() {
+    tauri_build::try_build(tauri_build::Attributes::new().app_manifest(
+        tauri_build::AppManifest::new().commands(&[
+            "list_projects",
+            "choose_project",
+            "list_boards",
+            "create_board",
+            "rename_board",
+            "delete_board",
+            "open_board",
+            "close_board",
+            "apply_operation",
+            "save_drawing",
+            "import_board",
+            "export_board",
+            "export_preview",
+            "open_benchmark",
+            "finish_close",
+            "pair_client",
+            "list_bindings",
+            "revoke_client",
+            "queue_feedback",
+            "list_feedback",
+            "cancel_feedback",
+            "board_deltas",
+        ]),
+    ))
+    .expect("build desktop capabilities");
+}

@@ -1,0 +1,94 @@
+{
+  "native_text_input": {
+    "composition_events": [
+      [
+        "compositionstart",
+        "",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u0",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u06",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u064",
+        true
+      ],
+      [
+        "compositionupdate",
+        "u0645",
+        true
+      ],
+      [
+        "compositionend",
+        "",
+        true
+      ],
+      [
+        "compositionend",
+        "م",
+        true
+      ]
+    ],
+    "native_clipboard_roundtrip": "م"
+  },
+  "exports": {
+    "roundtrip": true,
+    "svg_viewbox": [
+      52.0,
+      72.0,
+      749.0,
+      224.0
+    ],
+    "svg_bytes": 1515,
+    "png_dimensions": [
+      749,
+      224
+    ],
+    "png_bytes": 7711
+  },
+  "typed_commits": 12,
+  "held_drag_moves": 10,
+  "drag_ipc_during_gesture": 0,
+  "pen_ipc_during_gesture": 0,
+  "coalesced_generations": 2,
+  "viewport_checkpoints": 0,
+  "stale_editor_rejected": true,
+  "close_failure_retry": true,
+  "semantic_ack": {
+    "p50_ms": 19,
+    "p95_ms": 131,
+    "p99_ms": 131
+  },
+  "reducer": {
+    "p50_ms": 0.02,
+    "p95_ms": 0.03,
+    "p99_ms": 0.03
+  },
+  "hard_kill_semantic_revision": 12,
+  "hard_kill_drawing_checkpoint": 2,
+  "metadata_rename_delete": true,
+  "one_snapshot_in_flight": true,
+  "freeform_arrow_and_undo": true,
+  "native_window_flush_revision": 5,
+  "binary_sha256": "1cc1d9953f8ff18c8692384cb4a76c488982f7fa42a3e45c480afbbaeee35da9",
+  "interfaces": [
+    "lo",
+    "enp2s0",
+    "wlp3s0",
+    "tailscale0",
+    "docker0"
+  ]
+}

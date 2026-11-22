@@ -1,0 +1,21 @@
+{
+  "gtk_version": [
+    3,
+    24,
+    41
+  ],
+  "states": [
+    {
+      "request": "no hint",
+      "above": false,
+      "focused": true,
+      "backend": "GdkWaylandWindow"
+    },
+    {
+      "request": "keep above",
+      "above": false,
+      "focused": true,
+      "backend": "GdkWaylandWindow"
+    }
+  ]
+}

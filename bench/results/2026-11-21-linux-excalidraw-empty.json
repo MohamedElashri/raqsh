@@ -1,0 +1,106 @@
+{
+  "label": "excalidraw-empty",
+  "recorded_at_utc": "2026-11-21T19:45:47.431641+00:00",
+  "app_args": [
+    "--fixture=empty"
+  ],
+  "platform": {
+    "system": "Zorin OS 18.1",
+    "kernel": "7.0.0-43-generic",
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 7 7735H  with Radeon Graphics",
+    "memory": "62473188 kB",
+    "desktop": "zorin:GNOME",
+    "session": "wayland",
+    "gdk_backend_override": "wayland",
+    "display": "GNOME/Mutter Wayland, scale 1.0, 1920x1080 60 Hz, AMD Radeon 680M (radeonsi), balanced power",
+    "webkitgtk": "2.52.6",
+    "gtk": "3.24.41"
+  },
+  "toolchains": {
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "node": "v26.13.1",
+    "pnpm": "11.17.0"
+  },
+  "lockfiles_sha256": {
+    "Cargo.lock": "7bd5de68c85e20e8448f62c12ac83fcf8b49ded7b1bba193031ba863c74f2a3c",
+    "pnpm-lock.yaml": "2336aa0dc91c19b2f54886d2932b2ff9b24934b081901a38122d7f51c7994836"
+  },
+  "executable": {
+    "bytes": 22136176,
+    "sha256": "ed1e09f16a545e1c9498a17ec8f46a722cc8b567f7a31c70f3f8b213879cb072"
+  },
+  "frontend": {
+    ".woff2": {
+      "bytes": 13188212,
+      "gzip_bytes": 13196997
+    },
+    ".css": {
+      "bytes": 143423,
+      "gzip_bytes": 22787
+    },
+    ".js": {
+      "bytes": 7698336,
+      "gzip_bytes": 2536531
+    },
+    ".html": {
+      "bytes": 480,
+      "gzip_bytes": 299
+    }
+  },
+  "measurement": {
+    "settle_seconds": 15,
+    "idle_seconds": 60.04670162300317,
+    "idle_cpu_percent_of_one_core": 2.8311296941391872,
+    "median_pss_kib": 264775,
+    "max_observed_idle_pss_kib": 268999,
+    "inventory": [
+      {
+        "pid": 294172,
+        "name": "visual-board",
+        "state": "S",
+        "parent": 294133,
+        "cpu_ticks": 84,
+        "start_ticks": 3150677,
+        "pss_kib": 77632,
+        "rss_kib": 194116
+      },
+      {
+        "pid": 294183,
+        "name": "WebKitNetworkPr",
+        "state": "S",
+        "parent": 294172,
+        "cpu_ticks": 4,
+        "start_ticks": 3150687,
+        "pss_kib": 14835,
+        "rss_kib": 49512
+      },
+      {
+        "pid": 294215,
+        "name": "WebKitWebProces",
+        "state": "S",
+        "parent": 294172,
+        "cpu_ticks": 265,
+        "start_ticks": 3150694,
+        "pss_kib": 173639,
+        "rss_kib": 286504
+      }
+    ],
+    "pss_samples_kib": [
+      259777,
+      259773,
+      260125,
+      260405,
+      260113,
+      266063,
+      268943,
+      268999,
+      265223,
+      264751,
+      264775,
+      266135,
+      266106
+    ]
+  },
+  "measurement_notes": "Linux descendant PSS and CPU ticks; idle samples only, no display-server or driver-level attribution."
+}

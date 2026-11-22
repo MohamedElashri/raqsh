@@ -1,0 +1,42 @@
+{
+  "typed_commits": 12,
+  "held_drag_moves": 10,
+  "drag_ipc_during_gesture": 0,
+  "pen_ipc_during_gesture": 0,
+  "coalesced_generations": 2,
+  "viewport_checkpoints": 0,
+  "stale_editor_rejected": true,
+  "close_failure_retry": true,
+  "semantic_ack": {
+    "p50_ms": 18,
+    "p95_ms": 118.0,
+    "p99_ms": 118.0
+  },
+  "reducer": {
+    "p50_ms": 0.01,
+    "p95_ms": 0.02,
+    "p99_ms": 0.02
+  },
+  "hard_kill_semantic_revision": 12,
+  "hard_kill_drawing_checkpoint": 2,
+  "metadata_rename_delete": true,
+  "one_snapshot_in_flight": true,
+  "freeform_arrow_and_undo": true,
+  "normal_board_commits": {
+    "samples": 30,
+    "ipc_and_disk": {
+      "p50_ms": 19,
+      "p95_ms": 120,
+      "p99_ms": 130.0
+    },
+    "reducer_without_disk": {
+      "p50_ms": 0.14,
+      "p95_ms": 0.21,
+      "p99_ms": 0.28
+    }
+  },
+  "binary_sha256": "ae70388056b118c388c6cc59a198240fb17ab0bd18518f6f22490d0d70d4a667",
+  "interfaces": [
+    "lo"
+  ]
+}

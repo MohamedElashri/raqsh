@@ -1,0 +1,496 @@
+[
+  {
+    "name": "board_list",
+    "description": "List boards authorized by this pairing. Follow nextOffset for additional pages.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_open",
+    "description": "Inspect an authorized board by ID. An explicitly project-wide grant can create a board using a title and a new operationId.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "boardId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "operationId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_get",
+    "description": "Read a typed nodes or edges page. Pass the returned semanticRevision as revision on subsequent offsets. Or read committed operations after sinceRevision.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "boardId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "section": {
+          "type": "string",
+          "enum": [
+            "nodes",
+            "edges"
+          ]
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sinceRevision": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "boardId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_apply",
+    "description": "Commit a typed card or edge batch against expectedRevision. Keep operation.id and the exact payload on retries. Use fresh UUIDs for new objects and revision 0 for new cards or edges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "boardId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "operation": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Stable board or operation UUID"
+            },
+            "expectedRevision": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "changes": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 64,
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "setNode"
+                      },
+                      "node": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Stable board or operation UUID"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "task",
+                              "decision",
+                              "question",
+                              "blocker",
+                              "group",
+                              "note"
+                            ]
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 1024
+                          },
+                          "description": {
+                            "type": "string",
+                            "maxLength": 16384
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "todo",
+                              "inProgress",
+                              "blocked",
+                              "done"
+                            ]
+                          },
+                          "statusSource": { "type": "string", "format": "uuid", "description": "Server-owned status provenance" },
+                        "priority": {
+                            "type": "string",
+                            "enum": [
+                              "low",
+                              "normal",
+                              "high"
+                            ]
+                          },
+                          "dropped": {
+                            "type": "boolean"
+                          },
+                          "x": {
+                            "type": "number",
+                            "minimum": -100000,
+                            "maximum": 100000
+                          },
+                          "y": {
+                            "type": "number",
+                            "minimum": -100000,
+                            "maximum": 100000
+                          },
+                          "width": {
+                            "type": "number",
+                            "minimum": 48,
+                            "maximum": 4096
+                          },
+                          "height": {
+                            "type": "number",
+                            "minimum": 32,
+                            "maximum": 4096
+                          },
+                          "parent": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "Stable board or operation UUID"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "order": {
+                            "type": "integer",
+                            "minimum": -1000000000,
+                            "maximum": 1000000000
+                          },
+                          "revision": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "title",
+                          "description",
+                          "status",
+                          "priority",
+                          "dropped",
+                          "x",
+                          "y",
+                          "width",
+                          "height",
+                          "order",
+                          "revision"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "node"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "removeNode"
+                      },
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable board or operation UUID"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "id"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "setEdge"
+                      },
+                      "edge": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Stable board or operation UUID"
+                          },
+                          "from": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Stable board or operation UUID"
+                          },
+                          "to": {
+                            "type": "string",
+                            "format": "uuid",
+                            "description": "Stable board or operation UUID"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "dependency",
+                              "annotation"
+                            ]
+                          },
+                          "revision": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "from",
+                          "to",
+                          "kind",
+                          "revision"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "edge"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "removeEdge"
+                      },
+                      "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Stable board or operation UUID"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "id"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            }
+          },
+          "required": [
+            "id",
+            "expectedRevision",
+            "changes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "boardId",
+        "operation"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_get_feedback",
+    "description": "Read feedback offered to this pairing and board. Advance after only when ready. Reuse the previous cursor after a lost reply.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "boardId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "after": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "boardId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_ack_feedback",
+    "description": "Acknowledge an offered item. Keep operationId stable on retries. Acknowledgement does not report task completion.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "boardId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "feedbackId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "operationId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        }
+      },
+      "required": [
+        "boardId",
+        "feedbackId",
+        "operationId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_post_response",
+    "description": "Record a response to acknowledged feedback. Supply the ackId and a new stable response operationId.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "boardId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "feedbackId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "ackId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "operationId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "boardId",
+        "feedbackId",
+        "ackId",
+        "operationId",
+        "text"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_set_task_status",
+    "description": "Set an existing task's status with this pairing recorded as the source. Keep operationId and payload stable on retry.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "boardId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "taskId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "todo",
+            "inProgress",
+            "blocked",
+            "done"
+          ]
+        },
+        "operationId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable board or operation UUID"
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "boardId",
+        "taskId",
+        "status",
+        "operationId",
+        "expectedRevision"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "board_session_state",
+    "description": "Inspect this pairing and its portable feedback capabilities.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    }
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "process_recovery": {
+    "elapsed_seconds": 3.000627862995316,
+    "processes_paused": [
+      "visual-board",
+      "WebKitNetworkPr",
+      "WebKitWebProces"
+    ],
+    "semantic_revision": 1,
+    "checkpoint_after_continue": "Drawing saved \u00b7 checkpoint 1",
+    "canvas_after_continue_crc32": "9e98ed8d"
+  },
+  "window": {
+    "visibility_before": "visible",
+    "webdriver_minimize": {
+      "x": 0,
+      "y": 0,
+      "width": 1024,
+      "height": 720
+    },
+    "visibility_when_minimized": "hidden",
+    "idle_seconds": 60.093739238000126,
+    "idle_cpu_percent_one_core": 0.06656267442699938,
+    "minimized_desktop_pss_kib": 173687,
+    "webdriver_restore_maximized": {
+      "x": 0,
+      "y": 0,
+      "width": 2014,
+      "height": 1054
+    },
+    "visibility_after": "visible",
+    "visibility_change_events": [
+      "hidden",
+      "visible"
+    ],
+    "same_canvas_at_original_size": true
+  },
+  "binary_sha256": "b775176baca2942bc5600b7228cca90f2addfab20b1f5dd075443901e803754b"
+}

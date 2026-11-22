@@ -1,0 +1,25 @@
+{
+  "deb": {
+    "file": "visual-board_0.1.0_amd64.deb",
+    "bytes": 2451480,
+    "sha256": "e9e270bc3702e48923ecd0eb5de29182e9ff79e8328763a4c3825e31c8c1d2cf",
+    "clean_ubuntu_24_04_5_container": {
+      "installed": true,
+      "package_name": "visual-board",
+      "launcher_name": "Raqsh",
+      "new_dependency_packages": 218,
+      "new_dependency_installed_kib": 531593,
+      "recommends": false,
+      "unresolved_ldd_libraries": 0
+    }
+  },
+  "rpm": {
+    "file": "visual-board-0.1.0-1.x86_64.rpm",
+    "bytes": 2457163,
+    "sha256": "a4a82f4050621536d5ba730dab322f27ed7219af35676ac0c567e9d5e099345c",
+    "requires_native_libraries": [
+      "libgtk-3.so.0()(64bit)",
+      "libwebkit2gtk-4.1.so.0()(64bit)"
+    ]
+  }
+}

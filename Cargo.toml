@@ -1,0 +1,14 @@
+[workspace]
+members = ["apps/desktop/src-tauri", "crates/domain", "crates/store", "crates/ipc", "crates/mcp"]
+resolver = "3"
+
+[workspace.dependencies]
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = { version = "=1.0.154", features = ["float_roundtrip"] }
+uuid = { version = "=1.29.3", features = ["serde", "v4"] }
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

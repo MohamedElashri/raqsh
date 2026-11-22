@@ -1,0 +1,45 @@
+{
+  "method": "Loopback-only WebKit Inspector. Inspector snapshots describe live JavaScript allocations and run full collection. Canvas RGBA bytes are nominal dimensions. This diagnostic run is separate from release timing and process memory gates.",
+  "excalidraw": {
+    "binary_sha256": "dec505b6981c30ff7da19c6f03514d1589e5febf7e08d94a8358a3cd71b71d28",
+    "normal": {
+      "described_js_bytes": 18730442,
+      "nodes": 73344
+    },
+    "closed": {
+      "described_js_bytes": 8955971,
+      "nodes": 40220
+    },
+    "viewport_callback_delta": 1,
+    "normal_canvas_sizes_px": [
+      [
+        1024,
+        667
+      ],
+      [
+        1024,
+        667
+      ]
+    ],
+    "nominal_normal_canvas_rgba_bytes": 5464064
+  },
+  "canvas2d": {
+    "binary_sha256": "437082985d8607ec42fc41252e53410d8e9b90e0eac68ed52dfd48f16a59b018",
+    "normal": {
+      "described_js_bytes": 5030697,
+      "nodes": 22991
+    },
+    "closed": {
+      "described_js_bytes": 2140441,
+      "nodes": 12907
+    },
+    "viewport_callback_delta": 0,
+    "normal_canvas_sizes_px": [
+      [
+        1024,
+        667
+      ]
+    ],
+    "nominal_normal_canvas_rgba_bytes": 2732032
+  }
+}

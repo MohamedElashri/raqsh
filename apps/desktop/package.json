@@ -1,0 +1,21 @@
+{
+  "name": "visual-board-desktop",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "frontend:dev": "vite",
+    "frontend:build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.12.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "typescript": "7.0.2",
+    "vite": "8.3.8"
+  }
+}

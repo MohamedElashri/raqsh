@@ -1,0 +1,187 @@
+{
+  "label": "optimized-excalidraw-tiny",
+  "recorded_at_utc": "2026-11-21T20:27:29.360098+00:00",
+  "app_args": [
+    "--fixture=tiny"
+  ],
+  "platform": {
+    "system": "Zorin OS 18.1",
+    "kernel": "7.0.0-43-generic",
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 7 7735H  with Radeon Graphics",
+    "memory": "62473188 kB",
+    "desktop": "zorin:GNOME",
+    "session": "wayland",
+    "gdk_backend_override": "wayland",
+    "display": "GNOME/Mutter Wayland, scale 1.0, 1920x1080 60 Hz, AMD Radeon 680M (radeonsi), balanced power",
+    "webkitgtk": "2.52.6",
+    "gtk": "3.24.41"
+  },
+  "toolchains": {
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "node": "v26.13.1",
+    "pnpm": "11.17.0"
+  },
+  "lockfiles_sha256": {
+    "Cargo.lock": "ca800c2d0447fc6376eb97544b9d85686d3521405a7957f9b3cdae4bc12f1030",
+    "pnpm-lock.yaml": "b69493e52a0d4865c8023c8d6aea10c0c91e8f971c68ce7cc0b20d941e68a5de"
+  },
+  "executable": {
+    "bytes": 22166480,
+    "sha256": "dec505b6981c30ff7da19c6f03514d1589e5febf7e08d94a8358a3cd71b71d28"
+  },
+  "frontend": {
+    ".woff2": {
+      "bytes": 13188212,
+      "gzip_bytes": 13196997
+    },
+    ".css": {
+      "bytes": 143423,
+      "gzip_bytes": 22787
+    },
+    ".js": {
+      "bytes": 7698515,
+      "gzip_bytes": 2536454
+    },
+    ".html": {
+      "bytes": 480,
+      "gzip_bytes": 299
+    }
+  },
+  "measurement": {
+    "settle_seconds": 15,
+    "idle_seconds": 20.043019602999266,
+    "idle_cpu_percent_of_one_core": 2.644312137082828,
+    "median_pss_kib": 276353,
+    "max_observed_idle_pss_kib": 276370,
+    "inventory": [
+      {
+        "pid": 342071,
+        "name": "visual-board",
+        "state": "S",
+        "parent": 342034,
+        "cpu_ticks": 44,
+        "start_ticks": 3400873,
+        "pss_kib": 79396,
+        "rss_kib": 196220,
+        "pss_details_kib": {
+          "Pss_Anon": 54092,
+          "Pss_File": 25051,
+          "Pss_Shmem": 252
+        },
+        "drm_clients": {
+          "1299": {
+            "drm-driver": "amdgpu",
+            "drm-shared-cpu": "0",
+            "drm-resident-cpu": "0",
+            "drm-shared-gtt": "0",
+            "drm-resident-gtt": "16136 KiB",
+            "drm-shared-vram": "18344 KiB",
+            "drm-resident-vram": "34776 KiB",
+            "drm-shared-gds": "0",
+            "drm-resident-gds": "0",
+            "drm-shared-gws": "0",
+            "drm-resident-gws": "0",
+            "drm-shared-oa": "0",
+            "drm-resident-oa": "0",
+            "drm-shared-doorbell": "0",
+            "drm-resident-doorbell": "0",
+            "drm-shared-mmioremap": "0",
+            "drm-resident-mmioremap": "0",
+            "drm-memory-vram": "34776 KiB",
+            "drm-memory-gtt": "16136 KiB",
+            "drm-memory-cpu": "0 KiB"
+          },
+          "1301": {
+            "drm-driver": "amdgpu",
+            "drm-shared-cpu": "0",
+            "drm-resident-cpu": "0",
+            "drm-shared-gtt": "0",
+            "drm-resident-gtt": "2 MiB",
+            "drm-shared-vram": "0",
+            "drm-resident-vram": "12 KiB",
+            "drm-shared-gds": "0",
+            "drm-resident-gds": "0",
+            "drm-shared-gws": "0",
+            "drm-resident-gws": "0",
+            "drm-shared-oa": "0",
+            "drm-resident-oa": "0",
+            "drm-shared-doorbell": "0",
+            "drm-resident-doorbell": "0",
+            "drm-shared-mmioremap": "0",
+            "drm-resident-mmioremap": "0",
+            "drm-memory-vram": "12 KiB",
+            "drm-memory-gtt": "2048 KiB",
+            "drm-memory-cpu": "0 KiB"
+          }
+        },
+        "idle_cpu_ticks": 12
+      },
+      {
+        "pid": 342082,
+        "name": "WebKitNetworkPr",
+        "state": "S",
+        "parent": 342071,
+        "cpu_ticks": 2,
+        "start_ticks": 3400883,
+        "pss_kib": 15502,
+        "rss_kib": 49904,
+        "pss_details_kib": {
+          "Pss_Anon": 7616,
+          "Pss_File": 7886,
+          "Pss_Shmem": 0
+        },
+        "drm_clients": {},
+        "idle_cpu_ticks": 0
+      },
+      {
+        "pid": 342116,
+        "name": "WebKitWebProces",
+        "state": "S",
+        "parent": 342071,
+        "cpu_ticks": 192,
+        "start_ticks": 3400890,
+        "pss_kib": 181472,
+        "rss_kib": 294536,
+        "pss_details_kib": {
+          "Pss_Anon": 113204,
+          "Pss_File": 68268,
+          "Pss_Shmem": 0
+        },
+        "drm_clients": {
+          "1302": {
+            "drm-driver": "amdgpu",
+            "drm-shared-cpu": "0",
+            "drm-resident-cpu": "0",
+            "drm-shared-gtt": "0",
+            "drm-resident-gtt": "22560 KiB",
+            "drm-shared-vram": "6176 KiB",
+            "drm-resident-vram": "128412 KiB",
+            "drm-shared-gds": "0",
+            "drm-resident-gds": "0",
+            "drm-shared-gws": "0",
+            "drm-resident-gws": "0",
+            "drm-shared-oa": "0",
+            "drm-resident-oa": "0",
+            "drm-shared-doorbell": "0",
+            "drm-resident-doorbell": "0",
+            "drm-shared-mmioremap": "0",
+            "drm-resident-mmioremap": "0",
+            "drm-memory-vram": "128412 KiB",
+            "drm-memory-gtt": "22560 KiB",
+            "drm-memory-cpu": "0 KiB"
+          }
+        },
+        "idle_cpu_ticks": 41
+      }
+    ],
+    "pss_samples_kib": [
+      276041,
+      276025,
+      276353,
+      276369,
+      276370
+    ]
+  },
+  "measurement_notes": "Linux descendant PSS and CPU ticks. Per-process DRM client counters are reported separately when the kernel exposes them. Compositor memory is outside the app process family."
+}

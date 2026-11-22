@@ -1,0 +1,91 @@
+{
+  "css": [
+    1024,
+    671
+  ],
+  "pixel_ratio": 1,
+  "color_scheme": "light",
+  "background": "rgb(243, 241, 234)",
+  "backing": [
+    1024,
+    671
+  ],
+  "cards": 10,
+  "board_typography": {
+    "note": "Excalifont, system-ui, sans-serif",
+    "card": "system-ui, sans-serif",
+    "heading": "Excalifont, system-ui, sans-serif",
+    "face_status": "loaded"
+  },
+  "compact_layout": [
+    480,
+    311
+  ],
+  "keyboard_actions": [
+    "select",
+    "edit",
+    "add and cancel",
+    "numeric geometry",
+    "link",
+    "roving card list",
+    "shortcuts",
+    "return to board library"
+  ],
+  "workspace_controls": true,
+  "native_arabic_ime_clipboard": null,
+  "atspi": {
+    "board": {
+      "Close board": {
+        "name": "Close board",
+        "role": "push button",
+        "description": "",
+        "focused": false
+      },
+      "Drawing canvas": {
+        "name": "Drawing canvas",
+        "role": "canvas",
+        "description": "Arrow keys select cards. Enter edits the selected card or links it in Dependency mode.",
+        "focused": true
+      },
+      "Add card": {
+        "name": "Add card",
+        "role": "push button",
+        "description": "Add card (Insert)",
+        "focused": false
+      },
+      "Shortcuts": {
+        "name": "Shortcuts",
+        "role": "push button",
+        "description": "Shortcuts",
+        "focused": false
+      }
+    },
+    "editor": {
+      "Edit card": {
+        "name": "Edit card",
+        "role": "dialog",
+        "description": "",
+        "focused": false
+      },
+      "Save card": {
+        "name": "Save card",
+        "role": "push button",
+        "description": "",
+        "focused": false
+      },
+      "X position": {
+        "name": "X position 80",
+        "role": "entry",
+        "description": "",
+        "focused": false
+      },
+      "Width": {
+        "name": "Width 216",
+        "role": "entry",
+        "description": "",
+        "focused": false
+      }
+    }
+  },
+  "binary_sha256": "79e2ba788b99cb271f5fd2fa402eab65dc802a7723e0b15acb19ef10fe833a22"
+}

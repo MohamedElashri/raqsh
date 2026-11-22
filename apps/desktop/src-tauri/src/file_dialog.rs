@@ -1,0 +1,68 @@
+use std::path::PathBuf;
+use tauri::WebviewWindow;
+
+#[cfg(target_os = "linux")]
+pub async fn choose(
+    window: WebviewWindow,
+    suffix: Option<&'static str>,
+) -> Result<Option<PathBuf>, String> {
+    use gtk::{FileChooserAction, FileChooserNative, prelude::*};
+    use tokio::sync::oneshot;
+
+    let (send, reply) = oneshot::channel();
+    let main = window.clone();
+    main.run_on_main_thread(move || {
+        gtk::glib::MainContext::default().spawn_local(async move {
+            let result = match window.gtk_window() {
+                Ok(parent) => {
+                    let (title, action) = if suffix.is_some() {
+                        ("Export board", FileChooserAction::Save)
+                    } else {
+                        (
+                            "Choose a project or worktree",
+                            FileChooserAction::SelectFolder,
+                        )
+                    };
+                    let dialog =
+                        FileChooserNative::new(Some(title), Some(&parent), action, None, None);
+                    dialog.set_modal(true);
+                    dialog.set_local_only(true);
+                    if let Some(suffix) = suffix {
+                        dialog.set_current_name(&format!("board.{suffix}"));
+                        dialog.set_do_overwrite_confirmation(true);
+                    }
+                    let selected = dialog.run_future().await == gtk::ResponseType::Accept;
+                    Ok(selected.then(|| dialog.filename()).flatten())
+                }
+                Err(error) => Err(error.to_string()),
+            };
+            let _ = send.send(result);
+        });
+    })
+    .map_err(|error| error.to_string())?;
+    reply
+        .await
+        .map_err(|_| "File chooser closed unexpectedly.".to_owned())?
+}
+
+#[cfg(not(target_os = "linux"))]
+pub async fn choose(
+    _window: WebviewWindow,
+    suffix: Option<&'static str>,
+) -> Result<Option<PathBuf>, String> {
+    let dialog = rfd::AsyncFileDialog::new();
+    let selection = if let Some(suffix) = suffix {
+        dialog
+            .set_title("Export board")
+            .add_filter(suffix, &[suffix])
+            .set_file_name(format!("board.{suffix}"))
+            .save_file()
+            .await
+    } else {
+        dialog
+            .set_title("Choose a project or worktree")
+            .pick_folder()
+            .await
+    };
+    Ok(selection.map(|file| file.path().to_owned()))
+}

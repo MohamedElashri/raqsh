@@ -1,0 +1,124 @@
+{
+  "label": "optimized-excalidraw-empty",
+  "recorded_at_utc": "2026-11-21T20:18:17.546668+00:00",
+  "app_args": [
+    "--fixture=empty"
+  ],
+  "platform": {
+    "system": "Zorin OS 18.1",
+    "kernel": "7.0.0-43-generic",
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 7 7735H  with Radeon Graphics",
+    "memory": "62473188 kB",
+    "desktop": "zorin:GNOME",
+    "session": "wayland",
+    "gdk_backend_override": "wayland",
+    "display": "GNOME/Mutter Wayland, scale 1.0, 1920x1080 60 Hz, AMD Radeon 680M (radeonsi), balanced power",
+    "webkitgtk": "2.52.6",
+    "gtk": "3.24.41"
+  },
+  "toolchains": {
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "node": "v26.13.1",
+    "pnpm": "11.17.0"
+  },
+  "lockfiles_sha256": {
+    "Cargo.lock": "ca800c2d0447fc6376eb97544b9d85686d3521405a7957f9b3cdae4bc12f1030",
+    "pnpm-lock.yaml": "b69493e52a0d4865c8023c8d6aea10c0c91e8f971c68ce7cc0b20d941e68a5de"
+  },
+  "executable": {
+    "bytes": 22166480,
+    "sha256": "dec505b6981c30ff7da19c6f03514d1589e5febf7e08d94a8358a3cd71b71d28"
+  },
+  "frontend": {
+    ".woff2": {
+      "bytes": 13188212,
+      "gzip_bytes": 13196997
+    },
+    ".css": {
+      "bytes": 143423,
+      "gzip_bytes": 22787
+    },
+    ".js": {
+      "bytes": 7698515,
+      "gzip_bytes": 2536454
+    },
+    ".html": {
+      "bytes": 480,
+      "gzip_bytes": 299
+    }
+  },
+  "measurement": {
+    "settle_seconds": 15,
+    "idle_seconds": 60.03922815599799,
+    "idle_cpu_percent_of_one_core": 2.5649896697516956,
+    "median_pss_kib": 262763,
+    "max_observed_idle_pss_kib": 264149,
+    "inventory": [
+      {
+        "pid": 333806,
+        "name": "visual-board",
+        "state": "S",
+        "parent": 333773,
+        "cpu_ticks": 67,
+        "start_ticks": 3345691,
+        "pss_kib": 75133,
+        "rss_kib": 191840,
+        "pss_details_kib": {
+          "Pss_Anon": 50448,
+          "Pss_File": 24432,
+          "Pss_Shmem": 252
+        },
+        "idle_cpu_ticks": 33
+      },
+      {
+        "pid": 333822,
+        "name": "WebKitNetworkPr",
+        "state": "S",
+        "parent": 333806,
+        "cpu_ticks": 3,
+        "start_ticks": 3345701,
+        "pss_kib": 15430,
+        "rss_kib": 49816,
+        "pss_details_kib": {
+          "Pss_Anon": 7624,
+          "Pss_File": 7806,
+          "Pss_Shmem": 0
+        },
+        "idle_cpu_ticks": 0
+      },
+      {
+        "pid": 333856,
+        "name": "WebKitWebProces",
+        "state": "S",
+        "parent": 333806,
+        "cpu_ticks": 263,
+        "start_ticks": 3345709,
+        "pss_kib": 173586,
+        "rss_kib": 286624,
+        "pss_details_kib": {
+          "Pss_Anon": 104960,
+          "Pss_File": 68626,
+          "Pss_Shmem": 0
+        },
+        "idle_cpu_ticks": 121
+      }
+    ],
+    "pss_samples_kib": [
+      262615,
+      262619,
+      262991,
+      263007,
+      262933,
+      262948,
+      262739,
+      262747,
+      262755,
+      262763,
+      262753,
+      264129,
+      264149
+    ]
+  },
+  "measurement_notes": "Linux descendant PSS and CPU ticks; idle samples only, no display-server or driver-level attribution."
+}

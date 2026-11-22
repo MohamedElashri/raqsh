@@ -1,0 +1,43 @@
+{
+  "windows": 1,
+  "launcher": [
+    "Raqsh",
+    "Raqsh",
+    "tauri://localhost"
+  ],
+  "boards": {
+    "empty": {
+      "elements": 0,
+      "canvases": 2
+    },
+    "tiny": {
+      "elements": 25,
+      "canvases": 2
+    },
+    "ordinary": {
+      "elements": 180,
+      "canvases": 2
+    },
+    "normal": {
+      "elements": 800,
+      "canvases": 2
+    }
+  },
+  "extra_open_close_cycles": 0,
+  "local_editor_font": {
+    "base": "tauri://localhost/",
+    "loaded": [
+      "loaded"
+    ]
+  },
+  "blocked_upstream_font_fallbacks": 230,
+  "input_checks": [
+    "card drag",
+    "freehand",
+    "text entry",
+    "zoom",
+    "pan"
+  ],
+  "executable_sha256": "ed1e09f16a545e1c9498a17ec8f46a722cc8b567f7a31c70f3f8b213879cb072",
+  "driver": "tauri-driver and WebKitWebDriver on native Wayland"
+}

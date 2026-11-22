@@ -1,0 +1,346 @@
+{
+  "recorded_at_utc": "2026-11-21T22:48:36.951542+00:00",
+  "desktop": {
+    "bytes": 10665312,
+    "sha256": "f5c3bb224bf5c67344e21005639266cb75b93b43ccb062449557782ffb7a0f28",
+    "dynamic_libraries": [
+      "\tlinux-vdso.so.1 (0x00007ef085fdd000)",
+      "\tlibgdk-3.so.0 => /lib/x86_64-linux-gnu/libgdk-3.so.0 (0x00007ef085ebe000)",
+      "\tlibgdk_pixbuf-2.0.so.0 => /lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0 (0x00007ef085e90000)",
+      "\tlibcairo.so.2 => /lib/x86_64-linux-gnu/libcairo.so.2 (0x00007ef0852bc000)",
+      "\tlibgobject-2.0.so.0 => /lib/x86_64-linux-gnu/libgobject-2.0.so.0 (0x00007ef085259000)",
+      "\tlibglib-2.0.so.0 => /lib/x86_64-linux-gnu/libglib-2.0.so.0 (0x00007ef085110000)",
+      "\tlibwebkit2gtk-4.1.so.0 => /lib/x86_64-linux-gnu/libwebkit2gtk-4.1.so.0 (0x00007ef07f600000)",
+      "\tlibgtk-3.so.0 => /lib/x86_64-linux-gnu/libgtk-3.so.0 (0x00007ef07ee00000)",
+      "\tlibsoup-3.0.so.0 => /lib/x86_64-linux-gnu/libsoup-3.0.so.0 (0x00007ef07ed66000)",
+      "\tlibgio-2.0.so.0 => /lib/x86_64-linux-gnu/libgio-2.0.so.0 (0x00007ef07eb96000)",
+      "\tlibjavascriptcoregtk-4.1.so.0 => /lib/x86_64-linux-gnu/libjavascriptcoregtk-4.1.so.0 (0x00007ef07cc00000)",
+      "\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007ef085e60000)",
+      "\tlibm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ef07eaad000)",
+      "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ef07c800000)",
+      "\t/lib64/ld-linux-x86-64.so.2 (0x00007ef085fdf000)",
+      "\tlibpango-1.0.so.0 => /lib/x86_64-linux-gnu/libpango-1.0.so.0 (0x00007ef07cb95000)",
+      "\tlibfribidi.so.0 => /lib/x86_64-linux-gnu/libfribidi.so.0 (0x00007ef085e40000)",
+      "\tlibcairo-gobject.so.2 => /lib/x86_64-linux-gnu/libcairo-gobject.so.2 (0x00007ef085e34000)",
+      "\tlibepoxy.so.0 => /lib/x86_64-linux-gnu/libepoxy.so.0 (0x00007ef07ca72000)",
+      "\tlibfontconfig.so.1 => /lib/x86_64-linux-gnu/libfontconfig.so.1 (0x00007ef0850bd000)",
+      "\tlibpangocairo-1.0.so.0 => /lib/x86_64-linux-gnu/libpangocairo-1.0.so.0 (0x00007ef07f5ef000)",
+      "\tlibxkbcommon.so.0 => /lib/x86_64-linux-gnu/libxkbcommon.so.0 (0x00007ef07ca29000)",
+      "\tlibwayland-client.so.0 => /lib/x86_64-linux-gnu/libwayland-client.so.0 (0x00007ef07f5df000)",
+      "\tlibwayland-cursor.so.0 => /lib/x86_64-linux-gnu/libwayland-cursor.so.0 (0x00007ef0850b3000)",
+      "\tlibwayland-egl.so.1 => /lib/x86_64-linux-gnu/libwayland-egl.so.1 (0x00007ef07f5da000)",
+      "\tlibX11.so.6 => /lib/x86_64-linux-gnu/libX11.so.6 (0x00007ef07c6c2000)",
+      "\tlibXi.so.6 => /lib/x86_64-linux-gnu/libXi.so.6 (0x00007ef07ca16000)",
+      "\tlibXext.so.6 => /lib/x86_64-linux-gnu/libXext.so.6 (0x00007ef07c6ae000)",
+      "\tlibXcursor.so.1 => /lib/x86_64-linux-gnu/libXcursor.so.1 (0x00007ef07f5ce000)",
+      "\tlibXdamage.so.1 => /lib/x86_64-linux-gnu/libXdamage.so.1 (0x00007ef07eaa8000)",
+      "\tlibXfixes.so.3 => /lib/x86_64-linux-gnu/libXfixes.so.3 (0x00007ef07c6a6000)",
+      "\tlibXcomposite.so.1 => /lib/x86_64-linux-gnu/libXcomposite.so.1 (0x00007ef07c6a1000)",
+      "\tlibXrandr.so.2 => /lib/x86_64-linux-gnu/libXrandr.so.2 (0x00007ef07c694000)",
+      "\tlibXinerama.so.1 => /lib/x86_64-linux-gnu/libXinerama.so.1 (0x00007ef07c68f000)",
+      "\tlibgmodule-2.0.so.0 => /lib/x86_64-linux-gnu/libgmodule-2.0.so.0 (0x00007ef07c688000)",
+      "\tlibpng16.so.16 => /lib/x86_64-linux-gnu/libpng16.so.16 (0x00007ef07c650000)",
+      "\tlibjpeg.so.8 => /lib/x86_64-linux-gnu/libjpeg.so.8 (0x00007ef07c5cd000)",
+      "\tlibz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007ef07c5b1000)",
+      "\tlibfreetype.so.6 => /lib/x86_64-linux-gnu/libfreetype.so.6 (0x00007ef07c4e5000)",
+      "\tlibXrender.so.1 => /lib/x86_64-linux-gnu/libXrender.so.1 (0x00007ef07c4d9000)",
+      "\tlibxcb.so.1 => /lib/x86_64-linux-gnu/libxcb.so.1 (0x00007ef07c4b0000)",
+      "\tlibxcb-render.so.0 => /lib/x86_64-linux-gnu/libxcb-render.so.0 (0x00007ef07c4a1000)",
+      "\tlibxcb-shm.so.0 => /lib/x86_64-linux-gnu/libxcb-shm.so.0 (0x00007ef07c49c000)",
+      "\tlibpixman-1.so.0 => /lib/x86_64-linux-gnu/libpixman-1.so.0 (0x00007ef07c3ed000)",
+      "\tlibffi.so.8 => /lib/x86_64-linux-gnu/libffi.so.8 (0x00007ef07c3e1000)",
+      "\tlibpcre2-8.so.0 => /lib/x86_64-linux-gnu/libpcre2-8.so.0 (0x00007ef07c347000)",
+      "\tlibatomic.so.1 => /lib/x86_64-linux-gnu/libatomic.so.1 (0x00007ef07c33c000)",
+      "\tlibharfbuzz.so.0 => /lib/x86_64-linux-gnu/libharfbuzz.so.0 (0x00007ef07c22d000)",
+      "\tlibatk-1.0.so.0 => /lib/x86_64-linux-gnu/libatk-1.0.so.0 (0x00007ef07c203000)",
+      "\tlibwebpmux.so.3 => /lib/x86_64-linux-gnu/libwebpmux.so.3 (0x00007ef07c1f5000)",
+      "\tlibexpat.so.1 => /lib/x86_64-linux-gnu/libexpat.so.1 (0x00007ef07c1c7000)",
+      "\tlibicudata.so.74 => /lib/x86_64-linux-gnu/libicudata.so.74 (0x00007ef07a400000)",
+      "\tlibicui18n.so.74 => /lib/x86_64-linux-gnu/libicui18n.so.74 (0x00007ef07a000000)",
+      "\tlibsystemd.so.0 => /lib/x86_64-linux-gnu/libsystemd.so.0 (0x00007ef079f20000)",
+      "\tlibicuuc.so.74 => /lib/x86_64-linux-gnu/libicuuc.so.74 (0x00007ef079c00000)",
+      "\tlibxml2.so.2 => /lib/x86_64-linux-gnu/libxml2.so.2 (0x00007ef079a1e000)",
+      "\tlibsqlite3.so.0 => /lib/x86_64-linux-gnu/libsqlite3.so.0 (0x00007ef0798b6000)",
+      "\tlibxslt.so.1 => /lib/x86_64-linux-gnu/libxslt.so.1 (0x00007ef07c184000)",
+      "\tliblcms2.so.2 => /lib/x86_64-linux-gnu/liblcms2.so.2 (0x00007ef07a39e000)",
+      "\tlibgcrypt.so.20 => /lib/x86_64-linux-gnu/libgcrypt.so.20 (0x00007ef07976d000)",
+      "\tlibgpg-error.so.0 => /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007ef07a379000)",
+      "\tlibgstallocators-1.0.so.0 => /lib/x86_64-linux-gnu/libgstallocators-1.0.so.0 (0x00007ef07c178000)",
+      "\tlibgstapp-1.0.so.0 => /lib/x86_64-linux-gnu/libgstapp-1.0.so.0 (0x00007ef07c162000)",
+      "\tlibgstbase-1.0.so.0 => /lib/x86_64-linux-gnu/libgstbase-1.0.so.0 (0x00007ef079e9b000)",
+      "\tlibgstreamer-1.0.so.0 => /lib/x86_64-linux-gnu/libgstreamer-1.0.so.0 (0x00007ef07961a000)",
+      "\tlibgstpbutils-1.0.so.0 => /lib/x86_64-linux-gnu/libgstpbutils-1.0.so.0 (0x00007ef079e58000)",
+      "\tlibgstaudio-1.0.so.0 => /lib/x86_64-linux-gnu/libgstaudio-1.0.so.0 (0x00007ef079595000)",
+      "\tlibgsttag-1.0.so.0 => /lib/x86_64-linux-gnu/libgsttag-1.0.so.0 (0x00007ef079e17000)",
+      "\tlibgstvideo-1.0.so.0 => /lib/x86_64-linux-gnu/libgstvideo-1.0.so.0 (0x00007ef0794c0000)",
+      "\tlibgstgl-1.0.so.0 => /lib/x86_64-linux-gnu/libgstgl-1.0.so.0 (0x00007ef07942d000)",
+      "\tlibgstfft-1.0.so.0 => /lib/x86_64-linux-gnu/libgstfft-1.0.so.0 (0x00007ef07a36e000)",
+      "\tlibwebpdemux.so.2 => /lib/x86_64-linux-gnu/libwebpdemux.so.2 (0x00007ef07a365000)",
+      "\tlibwebp.so.7 => /lib/x86_64-linux-gnu/libwebp.so.7 (0x00007ef0793b2000)",
+      "\tlibharfbuzz-icu.so.0 => /lib/x86_64-linux-gnu/libharfbuzz-icu.so.0 (0x00007ef07a360000)",
+      "\tlibwayland-server.so.0 => /lib/x86_64-linux-gnu/libwayland-server.so.0 (0x00007ef07939c000)",
+      "\tlibmanette-0.2.so.0 => /lib/x86_64-linux-gnu/libmanette-0.2.so.0 (0x00007ef07936c000)",
+      "\tlibseccomp.so.2 => /lib/x86_64-linux-gnu/libseccomp.so.2 (0x00007ef07934c000)",
+      "\tlibenchant-2.so.2 => /lib/x86_64-linux-gnu/libenchant-2.so.2 (0x00007ef07a351000)",
+      "\tlibgbm.so.1 => /lib/x86_64-linux-gnu/libgbm.so.1 (0x00007ef079e10000)",
+      "\tlibdrm.so.2 => /lib/x86_64-linux-gnu/libdrm.so.2 (0x00007ef079335000)",
+      "\tlibtasn1.so.6 => /lib/x86_64-linux-gnu/libtasn1.so.6 (0x00007ef07931f000)",
+      "\tlibhyphen.so.0 => /lib/x86_64-linux-gnu/libhyphen.so.0 (0x00007ef079317000)",
+      "\tlibsecret-1.so.0 => /lib/x86_64-linux-gnu/libsecret-1.so.0 (0x00007ef0792b8000)",
+      "\tlibstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007ef079000000)",
+      "\tlibpangoft2-1.0.so.0 => /lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 (0x00007ef07929d000)",
+      "\tlibatk-bridge-2.0.so.0 => /lib/x86_64-linux-gnu/libatk-bridge-2.0.so.0 (0x00007ef078fc4000)",
+      "\tlibpsl.so.5 => /lib/x86_64-linux-gnu/libpsl.so.5 (0x00007ef079289000)",
+      "\tlibbrotlidec.so.1 => /lib/x86_64-linux-gnu/libbrotlidec.so.1 (0x00007ef078fb6000)",
+      "\tlibgssapi_krb5.so.2 => /lib/x86_64-linux-gnu/libgssapi_krb5.so.2 (0x00007ef078f62000)",
+      "\tlibnghttp2.so.14 => /lib/x86_64-linux-gnu/libnghttp2.so.14 (0x00007ef078f37000)",
+      "\tlibmount.so.1 => /lib/x86_64-linux-gnu/libmount.so.1 (0x00007ef078eea000)",
+      "\tlibselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0x00007ef078ebd000)",
+      "\tlibthai.so.0 => /lib/x86_64-linux-gnu/libthai.so.0 (0x00007ef07927e000)",
+      "\tlibbz2.so.1.0 => /lib/x86_64-linux-gnu/libbz2.so.1.0 (0x00007ef078ea7000)",
+      "\tlibXau.so.6 => /lib/x86_64-linux-gnu/libXau.so.6 (0x00007ef078ea1000)",
+      "\tlibXdmcp.so.6 => /lib/x86_64-linux-gnu/libXdmcp.so.6 (0x00007ef078e99000)",
+      "\tlibgraphite2.so.3 => /lib/x86_64-linux-gnu/libgraphite2.so.3 (0x00007ef078e73000)",
+      "\tlibcap.so.2 => /lib/x86_64-linux-gnu/libcap.so.2 (0x00007ef078e64000)",
+      "\tliblz4.so.1 => /lib/x86_64-linux-gnu/liblz4.so.1 (0x00007ef078e42000)",
+      "\tliblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007ef078e10000)",
+      "\tlibzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 (0x00007ef078d56000)",
+      "\tlibunwind.so.8 => /lib/x86_64-linux-gnu/libunwind.so.8 (0x00007ef078d3b000)",
+      "\tlibdw.so.1 => /lib/x86_64-linux-gnu/libdw.so.1 (0x00007ef078c85000)",
+      "\tliborc-0.4.so.0 => /lib/x86_64-linux-gnu/liborc-0.4.so.0 (0x00007ef078bd3000)",
+      "\tlibGL.so.1 => /lib/x86_64-linux-gnu/libGL.so.1 (0x00007ef078b4c000)",
+      "\tlibEGL.so.1 => /lib/x86_64-linux-gnu/libEGL.so.1 (0x00007ef078b3a000)",
+      "\tlibX11-xcb.so.1 => /lib/x86_64-linux-gnu/libX11-xcb.so.1 (0x00007ef078b35000)",
+      "\tlibgudev-1.0.so.0 => /lib/x86_64-linux-gnu/libgudev-1.0.so.0 (0x00007ef078b26000)",
+      "\tlibsharpyuv.so.0 => /lib/x86_64-linux-gnu/libsharpyuv.so.0 (0x00007ef078b1e000)",
+      "\tlibevdev.so.2 => /lib/x86_64-linux-gnu/libevdev.so.2 (0x00007ef078b00000)",
+      "\tlibatspi.so.0 => /lib/x86_64-linux-gnu/libatspi.so.0 (0x00007ef078ac6000)",
+      "\tlibdbus-1.so.3 => /lib/x86_64-linux-gnu/libdbus-1.so.3 (0x00007ef078a75000)",
+      "\tlibunistring.so.5 => /lib/x86_64-linux-gnu/libunistring.so.5 (0x00007ef0788c8000)",
+      "\tlibidn2.so.0 => /lib/x86_64-linux-gnu/libidn2.so.0 (0x00007ef0788a6000)",
+      "\tlibbrotlicommon.so.1 => /lib/x86_64-linux-gnu/libbrotlicommon.so.1 (0x00007ef078883000)",
+      "\tlibkrb5.so.3 => /lib/x86_64-linux-gnu/libkrb5.so.3 (0x00007ef0787ba000)",
+      "\tlibk5crypto.so.3 => /lib/x86_64-linux-gnu/libk5crypto.so.3 (0x00007ef07878c000)",
+      "\tlibcom_err.so.2 => /lib/x86_64-linux-gnu/libcom_err.so.2 (0x00007ef078786000)",
+      "\tlibkrb5support.so.0 => /lib/x86_64-linux-gnu/libkrb5support.so.0 (0x00007ef078779000)",
+      "\tlibblkid.so.1 => /lib/x86_64-linux-gnu/libblkid.so.1 (0x00007ef07873e000)",
+      "\tlibdatrie.so.1 => /lib/x86_64-linux-gnu/libdatrie.so.1 (0x00007ef078735000)",
+      "\tlibbsd.so.0 => /lib/x86_64-linux-gnu/libbsd.so.0 (0x00007ef07871d000)",
+      "\tlibelf.so.1 => /lib/x86_64-linux-gnu/libelf.so.1 (0x00007ef0786fe000)",
+      "\tlibGLdispatch.so.0 => /lib/x86_64-linux-gnu/libGLdispatch.so.0 (0x00007ef078646000)",
+      "\tlibGLX.so.0 => /lib/x86_64-linux-gnu/libGLX.so.0 (0x00007ef078613000)",
+      "\tlibudev.so.1 => /lib/x86_64-linux-gnu/libudev.so.1 (0x00007ef0785e0000)",
+      "\tlibkeyutils.so.1 => /lib/x86_64-linux-gnu/libkeyutils.so.1 (0x00007ef0785d7000)",
+      "\tlibresolv.so.2 => /lib/x86_64-linux-gnu/libresolv.so.2 (0x00007ef0785c5000)",
+      "\tlibmd.so.0 => /lib/x86_64-linux-gnu/libmd.so.0 (0x00007ef0785b6000)"
+    ]
+  },
+  "helper": {
+    "bytes": 1010032,
+    "sha256": "d177cbdc275804170bdf5042b9c74dbc02c93c15481e8145fa989d2356b6a689",
+    "dynamic_libraries": [
+      "\tlinux-vdso.so.1 (0x0000790f47d70000)",
+      "\tlibgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x0000790f47c24000)",
+      "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x0000790f47a00000)",
+      "\t/lib64/ld-linux-x86-64.so.2 (0x0000790f47d72000)"
+    ]
+  },
+  "measurement": {
+    "before_stream": {
+      "desktop_pss_kib": 181707,
+      "helper_pss_kib": 845,
+      "desktop_processes": [
+        {
+          "pid": 531161,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 531149,
+          "cpu_ticks": 93,
+          "start_ticks": 4247530,
+          "pss_kib": 83023,
+          "rss_kib": 225580,
+          "pss_details_kib": {
+            "Pss_Anon": 66428,
+            "Pss_File": 16372,
+            "Pss_Shmem": 222
+          }
+        },
+        {
+          "pid": 531179,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 531161,
+          "cpu_ticks": 6,
+          "start_ticks": 4247548,
+          "pss_kib": 11016,
+          "rss_kib": 49600,
+          "pss_details_kib": {
+            "Pss_Anon": 7576,
+            "Pss_File": 3440,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 531216,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 531161,
+          "cpu_ticks": 164,
+          "start_ticks": 4247567,
+          "pss_kib": 87668,
+          "rss_kib": 230044,
+          "pss_details_kib": {
+            "Pss_Anon": 56524,
+            "Pss_File": 31144,
+            "Pss_Shmem": 0
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 531319,
+          "pss_kib": 845,
+          "cpu_ticks": 0,
+          "webview_children": []
+        }
+      ]
+    },
+    "initial_revision": 0,
+    "target_updates_per_second": 10,
+    "target_seconds": 60,
+    "acknowledged_operations": 600,
+    "elapsed_seconds": 143.08773508299782,
+    "within_window": 156,
+    "transport_retries": 1,
+    "tool_response": {
+      "p50_ms": 169.55,
+      "p95_ms": 745.08,
+      "p99_ms": 1236.24
+    },
+    "final_revision": 600,
+    "projection": {
+      "canvasRepaints": 0,
+      "boardSignals": 600,
+      "deltaRequests": 431
+    },
+    "immediately_after": {
+      "desktop_pss_kib": 215276,
+      "helper_pss_kib": 845,
+      "desktop_processes": [
+        {
+          "pid": 531161,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 531149,
+          "cpu_ticks": 437,
+          "start_ticks": 4247530,
+          "pss_kib": 81976,
+          "rss_kib": 226736,
+          "pss_details_kib": {
+            "Pss_Anon": 67520,
+            "Pss_File": 14234,
+            "Pss_Shmem": 222
+          }
+        },
+        {
+          "pid": 531179,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 531161,
+          "cpu_ticks": 19,
+          "start_ticks": 4247548,
+          "pss_kib": 10279,
+          "rss_kib": 49832,
+          "pss_details_kib": {
+            "Pss_Anon": 7616,
+            "Pss_File": 2663,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 531216,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 531161,
+          "cpu_ticks": 604,
+          "start_ticks": 4247567,
+          "pss_kib": 123021,
+          "rss_kib": 275364,
+          "pss_details_kib": {
+            "Pss_Anon": 99988,
+            "Pss_File": 23032,
+            "Pss_Shmem": 0
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 531319,
+          "pss_kib": 845,
+          "cpu_ticks": 35,
+          "webview_children": []
+        }
+      ]
+    },
+    "after_idle": {
+      "desktop_pss_kib": 223582,
+      "helper_pss_kib": 845,
+      "desktop_processes": [
+        {
+          "pid": 531161,
+          "name": "visual-board",
+          "state": "S",
+          "parent": 531149,
+          "cpu_ticks": 450,
+          "start_ticks": 4247530,
+          "pss_kib": 80568,
+          "rss_kib": 223332,
+          "pss_details_kib": {
+            "Pss_Anon": 63924,
+            "Pss_File": 16422,
+            "Pss_Shmem": 222
+          }
+        },
+        {
+          "pid": 531179,
+          "name": "WebKitNetworkPr",
+          "state": "S",
+          "parent": 531161,
+          "cpu_ticks": 19,
+          "start_ticks": 4247548,
+          "pss_kib": 11065,
+          "rss_kib": 49832,
+          "pss_details_kib": {
+            "Pss_Anon": 7616,
+            "Pss_File": 3449,
+            "Pss_Shmem": 0
+          }
+        },
+        {
+          "pid": 531216,
+          "name": "WebKitWebProces",
+          "state": "S",
+          "parent": 531161,
+          "cpu_ticks": 605,
+          "start_ticks": 4247567,
+          "pss_kib": 131949,
+          "rss_kib": 275272,
+          "pss_details_kib": {
+            "Pss_Anon": 99896,
+            "Pss_File": 32053,
+            "Pss_Shmem": 0
+          }
+        }
+      ],
+      "helpers": [
+        {
+          "pid": 531319,
+          "pss_kib": 845,
+          "cpu_ticks": 35,
+          "webview_children": []
+        }
+      ]
+    },
+    "idle_seconds": 300
+  }
+}

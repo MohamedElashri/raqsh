@@ -1,0 +1,144 @@
+{
+  "cargo_lock_sha256": "16ddef5f333375a6136365237a54fd17f5d064c89537f890d9ccacee2de5c031",
+  "pnpm_lock_sha256": "ad368efea2420ee50f725dd3fd7558b4eadf8ba2ead759df2b6f5a7891a12f99",
+  "rustsec_commit": "55e1c3dfbd834237a05bbbf7b50ba3b5be27b662",
+  "cargo_audit_target": "x86_64-linux",
+  "rust_vulnerabilities": [],
+  "rust_warnings": {
+    "unmaintained": [
+      {
+        "id": "RUSTSEC-2026-0543",
+        "package": "chrono",
+        "version": "0.4.45",
+        "linux_normal_graph": false,
+        "patched": []
+      },
+      {
+        "id": "RUSTSEC-2024-0370",
+        "package": "proc-macro-error",
+        "version": "1.0.4",
+        "linux_normal_graph": true,
+        "patched": []
+      }
+    ],
+    "unsound": [
+      {
+        "id": "RUSTSEC-2024-0429",
+        "package": "glib",
+        "version": "0.18.5",
+        "linux_normal_graph": true,
+        "patched": [
+          ">=0.20.0"
+        ]
+      }
+    ]
+  },
+  "linux_normal_rust_graph_count": 253,
+  "linux_normal_rust_licenses": {
+    "(MIT OR Apache-2.0) AND Unicode-3.0": 1,
+    "0BSD OR MIT OR Apache-2.0": 1,
+    "Apache-2.0": 1,
+    "Apache-2.0 / MIT": 1,
+    "Apache-2.0 AND MIT": 1,
+    "Apache-2.0 OR MIT": 22,
+    "BSD-3-Clause": 3,
+    "BSD-3-Clause AND MIT": 1,
+    "BSD-3-Clause/MIT": 1,
+    "CC0-1.0 OR MIT-0 OR Apache-2.0": 1,
+    "MIT": 67,
+    "MIT OR Apache-2.0": 112,
+    "MIT OR Apache-2.0 OR Zlib": 1,
+    "MIT OR Zlib OR Apache-2.0": 2,
+    "MIT/Apache-2.0": 5,
+    "MPL-2.0": 5,
+    "Unicode-3.0": 18,
+    "Unlicense OR MIT": 3,
+    "Unlicense/MIT": 2,
+    "Zlib": 1,
+    "workspace": 4
+  },
+  "tauri_optional_plugins": [],
+  "npm_production": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "dependencies": 6,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 6
+  },
+  "npm_full": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "dependencies": 6,
+    "devDependencies": 84,
+    "optionalDependencies": 65,
+    "totalDependencies": 90
+  },
+  "frontend_chunks": [
+    {
+      "file": "Assistant-Regular-DVxZuzxb.woff2",
+      "bytes": 20232,
+      "gzip_bytes": 20260
+    },
+    {
+      "file": "Excalifont-Regular-C9eKQy_N.woff2",
+      "bytes": 52296,
+      "gzip_bytes": 52303
+    },
+    {
+      "file": "LeanEditor-B59kOBu1.css",
+      "bytes": 10679,
+      "gzip_bytes": 3222
+    },
+    {
+      "file": "LeanEditor-CKigTgEk.js",
+      "bytes": 41591,
+      "gzip_bytes": 13600
+    },
+    {
+      "file": "Nunito-Latin-DqUjjPte.woff2",
+      "bytes": 16476,
+      "gzip_bytes": 16504
+    },
+    {
+      "file": "benchmark-F10KjzYY.js",
+      "bytes": 1987,
+      "gzip_bytes": 1089
+    },
+    {
+      "file": "index-BONXTNXB.js",
+      "bytes": 155460,
+      "gzip_bytes": 50125
+    },
+    {
+      "file": "index-BRUxfGCq.css",
+      "bytes": 5022,
+      "gzip_bytes": 1743
+    },
+    {
+      "file": "model-D1LiT64W.js",
+      "bytes": 680,
+      "gzip_bytes": 451
+    },
+    {
+      "file": "index.html",
+      "bytes": 392,
+      "gzip_bytes": 265
+    }
+  ],
+  "font_notice_files": [
+    "OFL-Assistant.txt",
+    "OFL-Excalifont.txt",
+    "OFL-Nunito.txt"
+  ]
+}

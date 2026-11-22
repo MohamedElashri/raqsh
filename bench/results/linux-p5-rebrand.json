@@ -1,0 +1,13 @@
+{
+  "before": "Raqsh",
+  "after": "Planning Board",
+  "isolated_installed_title_and_launcher": true,
+  "launcher_executable_and_icon_names_preserved": true,
+  "packaged_icon_changed": true,
+  "before_icon_sha256": "6e2fe784afef0c69ebef25cd5f1cd27464fc75f6ad08e69e76a145c72a98a769",
+  "after_icon_sha256": "3dda43795bf23d146f8b0f98fcbff4f7827ad298090b8dcd48c4f3a459124bea",
+  "old_board_export_imported": true,
+  "original_pairing_works": true,
+  "rollback_purge_reinstall": true,
+  "production_brand_unchanged": true
+}

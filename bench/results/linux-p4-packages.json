@@ -1,0 +1,78 @@
+{
+  "release_desktop": {
+    "file": "visual-board",
+    "bytes": 10665312,
+    "sha256": "f5c3bb224bf5c67344e21005639266cb75b93b43ccb062449557782ffb7a0f28"
+  },
+  "deb": {
+    "file": "visual-board_0.1.0_amd64.deb",
+    "bytes": 4688338,
+    "sha256": "f86f1ec1130b891b386ca3ac89bd633b4939caccf09c691f9aca0fe2b352ddfb",
+    "installed_kib": 11469,
+    "depends": "libwebkit2gtk-4.1-0, libgtk-3-0",
+    "executables": [
+      {
+        "bytes": 10665312,
+        "sha256": "76dc256902ce2ccb17cbfba73421677b30685c914a76e836733c6b609c299788",
+        "path": "/usr/bin/visual-board"
+      },
+      {
+        "bytes": 1010032,
+        "sha256": "d177cbdc275804170bdf5042b9c74dbc02c93c15481e8145fa989d2356b6a689",
+        "path": "/usr/bin/visual-board-mcp"
+      }
+    ],
+    "desktop_entry_validated": true
+  },
+  "rpm": {
+    "file": "visual-board-0.1.0-1.x86_64.rpm",
+    "bytes": 4694021,
+    "sha256": "937d6b0e2bc4fcf79ff432a990561232d39b2f4a4e332569adb122d722fa6e9e",
+    "installed_bytes": 11682855,
+    "requires": [
+      "libgtk-3.so.0()(64bit)",
+      "libwebkit2gtk-4.1.so.0()(64bit)",
+      "rpmlib(CompressedFileNames) <= 3.0.4-1",
+      "rpmlib(FileDigests) <= 4.6.0-1",
+      "rpmlib(PayloadFilesHavePrefix) <= 4.0-1"
+    ],
+    "executables": [
+      {
+        "bytes": 10665312,
+        "sha256": "ab062393d13657544648a897bbb01b0e6e8d17a2422bde02c7841a38805f2c65",
+        "path": "/usr/bin/visual-board"
+      },
+      {
+        "bytes": 1010032,
+        "sha256": "d177cbdc275804170bdf5042b9c74dbc02c93c15481e8145fa989d2356b6a689",
+        "path": "/usr/bin/visual-board-mcp"
+      }
+    ]
+  },
+  "reference_host_runtime_packages": [
+    {
+      "package": "libgtk-3-0t64:amd64",
+      "version": "3.24.41-4ubuntu1.3",
+      "installed_kib": 9772
+    },
+    {
+      "package": "libwebkit2gtk-4.1-0:amd64",
+      "version": "2.52.6-0ubuntu0.24.04.2",
+      "installed_kib": 93416
+    }
+  ],
+  "embedded_frontend": {
+    ".css": {
+      "bytes": 8708,
+      "gzip_bytes": 3076
+    },
+    ".js": {
+      "bytes": 187024,
+      "gzip_bytes": 61892
+    },
+    ".html": {
+      "bytes": 392,
+      "gzip_bytes": 265
+    }
+  }
+}

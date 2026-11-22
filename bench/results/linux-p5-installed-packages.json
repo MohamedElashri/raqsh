@@ -1,0 +1,351 @@
+{
+  "build": {
+    "profile": "size-thin-lto",
+    "gui": {
+      "filename": "visual-board",
+      "bytes": 7009400,
+      "sha256": "b775176baca2942bc5600b7228cca90f2addfab20b1f5dd075443901e803754b"
+    },
+    "helper": {
+      "filename": "visual-board-mcp",
+      "bytes": 836584,
+      "sha256": "2a57e97088b99860cf92c1e616c52f88733e8745345877cd3d45ecc766ba0029"
+    },
+    "deb_helper_icon_and_notices_match": true,
+    "desktop_entry_validated": true
+  },
+  "ubuntu": {
+    "release": "24.04",
+    "container_network": "none",
+    "package": {
+      "filename": "visual-board_0.1.0_amd64.deb",
+      "bytes": 3376212,
+      "sha256": "7ca7c7fbaa3d844b4a9d6bc8519c541608d1c92310957068829b28031de57162"
+    },
+    "dependencies": "libwebkit2gtk-4.1-0, libgtk-3-0",
+    "packages": [
+      "libgtk-3-0t64:amd64\t3.24.41-4ubuntu1.3",
+      "libwebkit2gtk-4.1-0:amd64\t2.52.6-0ubuntu0.24.04.2"
+    ],
+    "predecessor_version_fixture": "0.0.99",
+    "compositor": "mutter 46.2",
+    "lifecycle_steps": [
+      {
+        "phase": "seed",
+        "board_and_pairing": true,
+        "old_export_import": false,
+        "desktop_offline_after_exit": true
+      },
+      {
+        "phase": "import",
+        "board_and_pairing": true,
+        "old_export_import": true,
+        "desktop_offline_after_exit": true
+      },
+      {
+        "phase": "verify",
+        "board_and_pairing": true,
+        "old_export_import": false,
+        "desktop_offline_after_exit": true
+      },
+      {
+        "phase": "verify",
+        "board_and_pairing": true,
+        "old_export_import": false,
+        "desktop_offline_after_exit": true
+      }
+    ],
+    "package_paths_removed_on_purge": true,
+    "data_and_registration_preserved": true,
+    "x11": {
+      "css": [
+        1024,
+        720
+      ],
+      "pixel_ratio": 1,
+      "color_scheme": "light",
+      "background": "rgb(240, 240, 237)",
+      "backing": [
+        1024,
+        720
+      ],
+      "cards": 10,
+      "board_typography": {
+        "presence": "Excalifont, Nunito, system-ui, sans-serif",
+        "note": "Excalifont, Nunito, system-ui, sans-serif",
+        "card": "Nunito, system-ui, sans-serif",
+        "face_status": "loaded"
+      },
+      "layout": {
+        "menu": [
+          16,
+          16,
+          38,
+          38
+        ],
+        "zoom": [
+          16,
+          666,
+          134,
+          38
+        ],
+        "toolbar": [
+          237,
+          16,
+          550,
+          44
+        ],
+        "presence": [
+          462.5,
+          672,
+          99,
+          30
+        ],
+        "library": [
+          924.921875,
+          16,
+          83.078125,
+          38
+        ],
+        "help": [
+          970,
+          666,
+          38,
+          38
+        ]
+      },
+      "shape_history": true,
+      "compact_layout": [
+        480,
+        360
+      ],
+      "keyboard_actions": [
+        "select",
+        "edit",
+        "add and cancel",
+        "numeric geometry",
+        "link",
+        "roving card list",
+        "shortcuts",
+        "return to board library"
+      ],
+      "workspace_controls": true,
+      "native_arabic_ime_clipboard": {
+        "composition_events": [
+          [
+            "compositionstart",
+            "",
+            true
+          ],
+          [
+            "compositionupdate",
+            "u",
+            true
+          ],
+          [
+            "compositionupdate",
+            "u0",
+            true
+          ],
+          [
+            "compositionupdate",
+            "u06",
+            true
+          ],
+          [
+            "compositionupdate",
+            "u064",
+            true
+          ],
+          [
+            "compositionupdate",
+            "u0645",
+            true
+          ],
+          [
+            "compositionend",
+            "",
+            true
+          ],
+          [
+            "compositionend",
+            "\u0645",
+            true
+          ]
+        ],
+        "native_clipboard_roundtrip": "\u0645"
+      },
+      "atspi": {},
+      "binary_sha256": "6cdcedaa1ef113ee0b4ae5d492b3d2a744d1a1d46943a9d52d618727d5b9c5a6"
+    },
+    "wayland": {
+      "css": [
+        1024,
+        720
+      ],
+      "pixel_ratio": 1,
+      "color_scheme": "light",
+      "background": "rgb(240, 240, 237)",
+      "backing": [
+        1024,
+        720
+      ],
+      "cards": 10,
+      "board_typography": {
+        "presence": "Excalifont, Nunito, system-ui, sans-serif",
+        "note": "Excalifont, Nunito, system-ui, sans-serif",
+        "card": "Nunito, system-ui, sans-serif",
+        "face_status": "loaded"
+      },
+      "layout": {
+        "menu": [
+          16,
+          16,
+          38,
+          38
+        ],
+        "zoom": [
+          16,
+          666,
+          134,
+          38
+        ],
+        "toolbar": [
+          237,
+          16,
+          550,
+          44
+        ],
+        "presence": [
+          464,
+          672,
+          96.25,
+          30
+        ],
+        "library": [
+          924.046875,
+          16,
+          83.953125,
+          38
+        ],
+        "help": [
+          970,
+          666,
+          38,
+          38
+        ]
+      },
+      "shape_history": true,
+      "compact_layout": [
+        480,
+        360
+      ],
+      "keyboard_actions": [
+        "select",
+        "edit",
+        "add and cancel",
+        "numeric geometry",
+        "link",
+        "roving card list",
+        "shortcuts",
+        "return to board library"
+      ],
+      "workspace_controls": true,
+      "native_arabic_ime_clipboard": null,
+      "atspi": {},
+      "binary_sha256": "6cdcedaa1ef113ee0b4ae5d492b3d2a744d1a1d46943a9d52d618727d5b9c5a6"
+    }
+  },
+  "fedora": {
+    "release": 43,
+    "package": {
+      "filename": "visual-board-0.1.0-1.x86_64.rpm",
+      "bytes": 3382033,
+      "sha256": "3d133c4819825f92a2ae42909ae1fbf9dddecfff666319da38ce57fd15007699"
+    },
+    "packages": [
+      "visual-board-0.1.0-1.x86_64",
+      "kwin-6.7.6-1.fc43.x86_64",
+      "webkit2gtk4.1-2.54.2-1.fc43.x86_64",
+      "webkitgtk6.0-2.54.2-1.fc43.x86_64"
+    ],
+    "compositor": "kwin 6.7.6",
+    "wayland": {
+      "css": [
+        1024,
+        720
+      ],
+      "cards": 10,
+      "background": "rgb(240, 240, 237)",
+      "backing": [
+        1024,
+        720
+      ],
+      "pixel_ratio": 1,
+      "color_scheme": "light",
+      "board_typography": {
+        "note": "Excalifont, Nunito, system-ui, sans-serif",
+        "face_status": "loaded",
+        "presence": "Excalifont, Nunito, system-ui, sans-serif",
+        "card": "Nunito, system-ui, sans-serif"
+      },
+      "layout": {
+        "toolbar": [
+          237,
+          16,
+          550,
+          44
+        ],
+        "presence": [
+          462.5,
+          672,
+          99,
+          30
+        ],
+        "zoom": [
+          16,
+          666,
+          134,
+          38
+        ],
+        "menu": [
+          16,
+          16,
+          38,
+          38
+        ],
+        "help": [
+          970,
+          666,
+          38,
+          38
+        ],
+        "library": [
+          924.921875,
+          16,
+          83.078125,
+          38
+        ]
+      },
+      "shape_history": true,
+      "compact_layout": [
+        480,
+        360
+      ],
+      "keyboard_actions": [
+        "select",
+        "edit",
+        "add and cancel",
+        "numeric geometry",
+        "link",
+        "roving card list",
+        "shortcuts",
+        "return to board library"
+      ],
+      "workspace_controls": true,
+      "native_arabic_ime_clipboard": null,
+      "atspi": {},
+      "binary_sha256": "2285a06a7065b4df78d60574c332b949668593625bfb86c8c7b08c7d8de8f975"
+    }
+  }
+}
