@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      providers:
+        description: Run authenticated Codex and Claude Code live tests on macOS
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libxdo-dev librsvg2-dev
+      - name: Install pinned toolchains and dependencies
+        run: |
+          npm install --global "$(node -p 'require("./package.json").packageManager')"
+          pnpm install --frozen-lockfile
+          rustup show
+      - run: pnpm test:unit
+      - name: Run the macOS WebKit and MCP suite
+        if: runner.os == 'macOS'
+        run: pnpm test:macos
+      - name: Build the Linux desktop and MCP helper
+        if: runner.os == 'Linux'
+        run: pnpm desktop:build
+      - name: Build and verify the native app bundle
+        if: runner.os == 'macOS'
+        env:
+          APPLE_SIGNING_IDENTITY: '-'
+        run: |
+          pnpm desktop:build
+          pnpm desktop:bundle --bundles app
+          app=target/release/bundle/macos/visual-board.app
+          codesign --verify --deep --strict "$app"
+          lipo -verify_arch "$(uname -m)" "$app/Contents/MacOS/visual-board"
+          lipo -verify_arch "$(uname -m)" "$app/Contents/MacOS/visual-board-mcp"
+      - name: Install the provider CLIs
+        if: runner.os == 'macOS' && github.event_name == 'workflow_dispatch' && inputs.providers
+        run: npm install --global @openai/codex@0.171.0 @anthropic-ai/claude-code@2.1.311
+      - name: Run a Codex model turn against Raqsh
+        if: runner.os == 'macOS' && github.event_name == 'workflow_dispatch' && inputs.providers
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          : "${OPENAI_API_KEY:?Set the OPENAI_API_KEY repository secret}"
+          printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
+          pnpm test:macos --provider codex
+      - name: Run a Claude Code model turn against Raqsh
+        if: runner.os == 'macOS' && github.event_name == 'workflow_dispatch' && inputs.providers
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          : "${ANTHROPIC_API_KEY:?Set the ANTHROPIC_API_KEY repository secret}"
+          pnpm test:macos --provider claude-code

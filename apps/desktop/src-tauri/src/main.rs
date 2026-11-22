@@ -15,6 +15,7 @@ fn main() -> tauri::Result<()> {
     #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
     let live_test = std::env::args().find_map(|arg| match arg.as_str() {
         "--macos-live=edit" => Some("edit"),
+        "--macos-live=provider" => Some("provider"),
         "--macos-live=reopen" => Some("reopen"),
         "--macos-live=stress" => Some("stress"),
         _ => None,

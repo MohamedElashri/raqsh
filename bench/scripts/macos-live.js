@@ -8,8 +8,8 @@
   const check = (condition, message) => {
     if (!condition) throw new Error(message);
   };
-  async function waitFor(test, description) {
-    const deadline = performance.now() + 10_000;
+  async function waitFor(test, description, timeout = 10_000) {
+    const deadline = performance.now() + timeout;
     do {
       const result = test();
       if (result) return result;
@@ -94,7 +94,8 @@
     button("Approve pairing").click();
     const binding = await waitFor(() => find(".agent-panel select")?.value, "a pairing ID");
     report("paired", { binding, task: card.dataset.cardId, revision: Number(editor.dataset.semanticRevision) });
-    await waitFor(() => find(".lean-card")?.dataset.status === "done", "the status update from the MCP process");
+    await waitFor(() => find(".lean-card")?.dataset.status === "done", "the status update from the MCP process",
+      mode === "provider" ? 120_000 : 10_000);
 
     key("p");
     await waitFor(() => canvas().classList.contains("tool-pen"), "the drawing tool");
