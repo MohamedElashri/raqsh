@@ -8,6 +8,7 @@
     "allow-apply-operation", "allow-save-drawing", "allow-import-board", "allow-export-board",
     "allow-export-preview", "allow-open-benchmark", "allow-finish-close",
     "allow-pair-client", "allow-mcp-clients", "allow-connect-client", "allow-client-config",
+    "allow-install-board-skill", "allow-save-board-skill",
     "allow-list-bindings", "allow-revoke-client", "allow-queue-feedback",
     "allow-list-feedback", "allow-cancel-feedback", "allow-board-deltas",
     "allow-update-info", "allow-check-update", "allow-download-update", "allow-install-update", "allow-restart-updated",

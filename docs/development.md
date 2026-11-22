@@ -29,6 +29,18 @@ Each client uses the same local stdio helper. The portable feedback workflow req
 | Goose CLI | Stdio extension config | Config generation tested |
 | Amp CLI | Workspace settings and server approval | Config generation tested |
 
+### Raqsh skill
+
+The optional [Raqsh skill](../skills/raqsh-board/SKILL.md) gives paired agents guidance on board selection, writes, and feedback. In **Agents**, choose a client and open **Raqsh skill** to install the file in the active project. The paths are relative to the project root.
+
+| Clients | Skill path |
+| --- | --- |
+| Codex, OpenCode, Pi, Copilot CLI, Cursor, Antigravity, Qwen Code, Amp | `.agents/skills/raqsh-board/SKILL.md` |
+| Claude Code | `.claude/skills/raqsh-board/SKILL.md` |
+| Kiro CLI | `.kiro/skills/raqsh-board/SKILL.md` |
+
+For other clients, choose **Save SKILL.md** and place the file in a directory named `raqsh-board` under the client’s skill folder. Restart the client from the project after installation. Remove the skill file to uninstall it. Pairings are managed separately in Agents.
+
 ### Maintaining profiles
 
 The profile modules live in `crates/harnesses/src/`. For a new client, add its module with a stable ID and include it in `REGISTRY` in `lib.rs`. Change the client's module to update detection, registration, setup instructions or removal commands. Set its registry flag to `false` to hide it from the desktop and disable its named format in `raqsh-mcp setup` and `probe`. Keep the adapter registered so Raqsh can still revoke existing pairings and remove past automatic registrations.

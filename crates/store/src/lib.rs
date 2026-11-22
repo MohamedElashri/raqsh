@@ -6,7 +6,7 @@ use rusqlite::{Connection, OptionalExtension, Row, params};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::{
     fs,
-    path::Path,
+    path::{Path, PathBuf},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
@@ -284,7 +284,7 @@ impl Store {
             .ok_or_else(|| "Project no longer exists.".into())
     }
 
-    fn project_available(&self, project: Id) -> Result<()> {
+    fn project_available(&self, project: Id) -> Result<String> {
         let root: String = self
             .db
             .query_row(
@@ -299,7 +299,7 @@ impl Store {
                 "Project folder moved or is unavailable. Use Locate folder to reconnect it.".into(),
             );
         }
-        Ok(())
+        Ok(root)
     }
 
     pub fn boards(&self, project: Id, offset: u32) -> Result<Page<Board>> {
@@ -456,6 +456,11 @@ impl Store {
             .as_ref()
             .filter(|active| active.scope == scope)
             .ok_or_else(|| "This editor instance no longer owns the open board.".into())
+    }
+
+    pub fn open_project_root(&self, scope: Scope) -> Result<PathBuf> {
+        self.scoped(scope)?;
+        self.project_available(scope.project_id).map(PathBuf::from)
     }
 
     pub fn close_board(&mut self, scope: Scope) -> Result<()> {

@@ -238,6 +238,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix="raqsh-", dir="/tmp") as directory:
         root = Path(directory)
         (root / "project").mkdir()
+        (root / "outside").mkdir()
+        (root / "project/.kiro").symlink_to(root / "outside", target_is_directory=True)
         (root / "runtime").mkdir(mode=0o700)
         env = dict(os.environ, RAQSH_BENCH_PROJECT=str(root / "project"),
                    RAQSH_RUNTIME_DIR=str(root / "runtime"), RAQSH_TEST_LIBRARY=str(root / "library"))
@@ -246,6 +248,11 @@ def main():
             modes = ("stress",)
         for mode in modes:
             report = run_app(args.desktop.resolve(), args.helper.resolve(), root, env, mode, args.provider)
+            if mode == "edit":
+                skill = Path(__file__).resolve().parents[2] / "skills/raqsh-board/SKILL.md"
+                installed = root / "project/.agents/skills/raqsh-board/SKILL.md"
+                require(installed.read_bytes() == skill.read_bytes(), "The installed skill must match the bundled source")
+                require(not list((root / "outside").iterdir()), "The skill installer must stay inside the open project")
             if mode in ("reopen", "reopen-edits"):
                 verify_reopened_drawing(root, rich=mode == "reopen-edits")
             if mode == "stress":

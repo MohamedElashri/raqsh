@@ -18,6 +18,8 @@ pub struct Client {
     name: &'static str,
     installed: bool,
     automatic: bool,
+    #[serde(rename = "skillPath")]
+    skill_path: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -68,6 +70,13 @@ fn find_client(harness: &Harness) -> Option<PathBuf> {
 pub fn clients() -> Vec<Client> {
     enabled_harnesses()
         .map(|harness| Client {
+            skill_path: harness.skill_directory().map(|directory| {
+                format!(
+                    "{directory}/skills/{}/{}",
+                    crate::board_skill::FOLDER,
+                    crate::board_skill::FILE
+                )
+            }),
             id: harness.id,
             name: harness.name,
             installed: find_client(harness).is_some(),

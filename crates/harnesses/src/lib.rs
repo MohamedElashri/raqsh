@@ -48,6 +48,19 @@ pub struct Harness {
     pub automatic: Option<Commands>,
 }
 
+impl Harness {
+    pub fn skill_directory(&self) -> Option<&'static str> {
+        match self.id {
+            "codex" | "opencode" | "pi" | "copilot" | "cursor" | "antigravity" | "qwen" | "amp" => {
+                Some(".agents")
+            }
+            "claude" => Some(".claude"),
+            "kiro" => Some(".kiro"),
+            _ => None,
+        }
+    }
+}
+
 pub struct Commands {
     pub add: fn(&Setup) -> Vec<String>,
     pub remove: fn(&str) -> Vec<String>,

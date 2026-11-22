@@ -105,14 +105,19 @@
   <section id="integrations" class="section wrap" aria-labelledby="agents">
     <div class="section-split integrations">
       <div>
-        <h2 id="agents">Works with Codex and Claude Code.</h2>
+        <h2 id="agents">Bring your coding agent.</h2>
         <p class="lede">Raqsh bundles a local MCP server. Within the access you grant, paired clients can read and edit cards, connect dependencies, update statuses, and respond to feedback.</p>
       </div>
       <div class="pairing">
         <h3>Pair an agent</h3>
-        <p>Open <strong>Agents</strong>, choose Codex or Claude Code, and approve the pairing. Raqsh adds its MCP server to the client’s settings. Start a new session in that client to use the board tools.</p>
+        <p>Open <strong>Agents</strong> and choose your client. Raqsh can set up MCP for Codex, Claude Code, and Pi, and provides configuration for OpenCode, Cursor, and other clients. Start a new session after pairing.</p>
         <p>Pairings are board-scoped by default. You can explicitly approve project-wide access or revoke a pairing in the app.</p>
         <p>Boards are stored on your device. Paired clients may connect to their own services.</p>
+        <div class="pairing-skill" id="agent-skill">
+          <h3>Give your agent the Raqsh skill</h3>
+          <p>The optional skill teaches agents how to find the right board, update tasks, and respond to feedback. Open <strong>Agents → Raqsh skill</strong> to install it in your project or save the file for manual setup.</p>
+          <p><a href="{{ $downloads.source }}/blob/main/skills/raqsh-board/SKILL.md">Read the Raqsh skill</a></p>
+        </div>
       </div>
     </div>
   </section>
@@ -180,7 +185,7 @@
         </details>
         <details>
           <summary>Which coding agents can I pair?</summary>
-          <p class="disclosure-body">Raqsh sets up MCP for Codex and Claude Code from the Agents panel. Start a new client session after approving the pairing.</p>
+          <p class="disclosure-body">Raqsh supports Codex, Claude Code, Pi, OpenCode, GitHub Copilot CLI, Cursor, and other MCP clients. See <a href="#integrations">pairing and skill setup</a> to get started.</p>
         </details>
         <details>
           <summary>Where are my boards stored?</summary>

@@ -180,6 +180,15 @@
     const [entry] = Object.values(JSON.parse(text).mcp.servers);
     check(entry.type === "local" && entry.command[0].endsWith("/raqsh-mcp") && entry.command.at(-1) === binding,
       "OpenCode must use the packaged stdio helper for the selected pairing");
+    find(".agent-skill summary").click();
+    check(find(".agent-skill code").textContent === ".agents/skills/raqsh-board/SKILL.md",
+      "OpenCode must use the shared project skill directory");
+    button("Install skill").click();
+    await waitFor(() => find('.agent-panel [role="status"]')?.textContent.includes("Skill installed"),
+      "the project skill to install");
+    button("Install skill").click();
+    await waitFor(() => find('.agent-panel [role="status"]')?.textContent.includes("was kept"),
+      "a repeated install to preserve the existing skill");
     const cline = picker.querySelector('option[value="cline"]');
     if (cline) {
       picker.value = cline.value;
@@ -194,6 +203,18 @@
       check(server.args.at(-1) === binding, "Cline must use the selected pairing");
     }
     button("MCP configuration").click();
+    picker.value = "kiro";
+    picker.dispatchEvent(new Event("change", { bubbles: true }));
+    await waitFor(() => find(".agent-skill code")?.textContent === ".kiro/skills/raqsh-board/SKILL.md",
+      "the Kiro project skill directory");
+    button("Install skill").click();
+    await waitFor(() => find('.agent-panel [role="alert"]')?.textContent.includes("Could not install"),
+      "installation through a symlink to be rejected");
+    picker.value = "generic";
+    picker.dispatchEvent(new Event("change", { bubbles: true }));
+    await waitFor(() => !find(".agent-skill code"), "the generic skill options");
+    check(!button("Install skill") && button("Save SKILL.md"), "The generic profile must offer manual setup");
+    find(".agent-skill summary").click();
   }
 
   async function run() {

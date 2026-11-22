@@ -1,11 +1,14 @@
 use std::path::PathBuf;
 use tauri::WebviewWindow;
 
+pub struct Save {
+    pub title: &'static str,
+    pub filename: &'static str,
+    pub suffix: &'static str,
+}
+
 #[cfg(target_os = "linux")]
-pub async fn choose(
-    window: WebviewWindow,
-    suffix: Option<&'static str>,
-) -> Result<Option<PathBuf>, String> {
+pub async fn choose(window: WebviewWindow, save: Option<Save>) -> Result<Option<PathBuf>, String> {
     use gtk::{FileChooserAction, FileChooserNative, prelude::*};
     use tokio::sync::oneshot;
 
@@ -15,8 +18,8 @@ pub async fn choose(
         gtk::glib::MainContext::default().spawn_local(async move {
             let result = match window.gtk_window() {
                 Ok(parent) => {
-                    let (title, action) = if suffix.is_some() {
-                        ("Export board", FileChooserAction::Save)
+                    let (title, action) = if let Some(save) = &save {
+                        (save.title, FileChooserAction::Save)
                     } else {
                         (
                             "Choose a project or worktree",
@@ -27,8 +30,11 @@ pub async fn choose(
                         FileChooserNative::new(Some(title), Some(&parent), action, None, None);
                     dialog.set_modal(true);
                     dialog.set_local_only(true);
-                    if let Some(suffix) = suffix {
-                        dialog.set_current_name(&format!("board.{suffix}"));
+                    if let Some(save) = save {
+                        dialog.set_current_name(save.filename);
+                        let filter = gtk::FileFilter::new();
+                        filter.add_pattern(&format!("*.{}", save.suffix));
+                        dialog.add_filter(filter);
                         dialog.set_do_overwrite_confirmation(true);
                     }
                     let selected = dialog.run_future().await == gtk::ResponseType::Accept;
@@ -46,16 +52,13 @@ pub async fn choose(
 }
 
 #[cfg(not(target_os = "linux"))]
-pub async fn choose(
-    _window: WebviewWindow,
-    suffix: Option<&'static str>,
-) -> Result<Option<PathBuf>, String> {
+pub async fn choose(_window: WebviewWindow, save: Option<Save>) -> Result<Option<PathBuf>, String> {
     let dialog = rfd::AsyncFileDialog::new();
-    let selection = if let Some(suffix) = suffix {
+    let selection = if let Some(save) = save {
         dialog
-            .set_title("Export board")
-            .add_filter(suffix, &[suffix])
-            .set_file_name(format!("board.{suffix}"))
+            .set_title(save.title)
+            .add_filter(save.suffix, &[save.suffix])
+            .set_file_name(save.filename)
             .save_file()
             .await
     } else {
