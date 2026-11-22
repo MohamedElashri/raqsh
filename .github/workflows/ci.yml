@@ -60,8 +60,8 @@ jobs:
           pnpm desktop:bundle --bundles app
           app=target/release/bundle/macos/visual-board.app
           codesign --verify --deep --strict "$app"
-          lipo -verify_arch "$(uname -m)" "$app/Contents/MacOS/visual-board"
-          lipo -verify_arch "$(uname -m)" "$app/Contents/MacOS/visual-board-mcp"
+          lipo "$app/Contents/MacOS/visual-board" -verify_arch "$(uname -m)"
+          lipo "$app/Contents/MacOS/visual-board-mcp" -verify_arch "$(uname -m)"
       - name: Install the provider CLIs
         if: runner.os == 'macOS' && github.event_name == 'workflow_dispatch' && inputs.providers
         run: npm install --global @openai/codex@0.171.0 @anthropic-ai/claude-code@2.1.311
