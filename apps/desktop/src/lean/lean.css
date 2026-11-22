@@ -334,6 +334,25 @@
   margin-inline-start: 8px;
 }
 
+.excalidraw-surface .excalidraw [data-prevent-outside-click]:has(.color-picker-content) {
+  --island-bg-color: #e7efe5;
+  --popup-bg-color: var(--island-bg-color);
+  --default-border-color: color-mix(in srgb, var(--island-bg-color), var(--ink) 24%);
+  --text-primary-color: var(--ink);
+  --focus-highlight-color: var(--focus);
+  --color-primary-darkest: var(--focus);
+  color: var(--ink);
+}
+.excalidraw-surface .excalidraw.theme--dark [data-prevent-outside-click]:has(.color-picker-content) {
+  --island-bg-color: #304139;
+}
+.excalidraw-surface .excalidraw .Island:has(.color-picker-content) {
+  box-shadow: 0 0 0 1px var(--default-border-color), var(--shadow);
+}
+.excalidraw-surface .excalidraw .color-picker-content .color-picker__input-label {
+  background: color-mix(in srgb, var(--island-bg-color) 44%, var(--toolbar-surface));
+}
+
 .excalidraw-surface[data-typed-selection="true"] .selected-shape-actions {
   display: none;
 }
