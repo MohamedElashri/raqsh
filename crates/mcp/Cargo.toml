@@ -7,5 +7,6 @@ publish = false
 [dependencies]
 board-ipc = { path = "../ipc" }
 board-domain = { path = "../domain" }
+raqsh-harnesses = { path = "../harnesses" }
 serde.workspace = true
 serde_json.workspace = true

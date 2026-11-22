@@ -2746,6 +2746,7 @@ dependencies = [
  "board-ipc",
  "board-store",
  "gtk",
+ "raqsh-harnesses",
  "raqsh-mcp",
  "rfd",
  "serde",
@@ -2758,11 +2759,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "raqsh-harnesses"
+version = "0.1.0"
+dependencies = [
+ "board-domain",
+ "serde_json",
+]
+
+[[package]]
 name = "raqsh-mcp"
 version = "0.1.0"
 dependencies = [
  "board-domain",
  "board-ipc",
+ "raqsh-harnesses",
  "serde",
  "serde_json",
 ]

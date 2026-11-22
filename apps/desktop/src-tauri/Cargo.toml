@@ -12,6 +12,7 @@ serde.workspace = true
 board-domain = { path = "../../../crates/domain" }
 board-store = { path = "../../../crates/store" }
 board-ipc = { path = "../../../crates/ipc" }
+raqsh-harnesses = { path = "../../../crates/harnesses" }
 raqsh-mcp = { path = "../../../crates/mcp", optional = true }
 serde_json.workspace = true
 tokio = { version = "=1.54.1", default-features = false, features = ["rt-multi-thread", "sync", "net", "io-util", "time", "macros", "process"] }
@@ -28,4 +29,4 @@ rfd = { version = "=0.17.2", default-features = false }
 [features]
 custom-protocol = ["tauri/custom-protocol"]
 combined-mcp = ["dep:raqsh-mcp"]
-macos-live-test = ["board-ipc/live-test"]
+macos-live-test = ["board-ipc/live-test", "raqsh-harnesses/live-test"]

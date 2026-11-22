@@ -1,5 +1,8 @@
 use board_domain::Id;
-use serde::{Deserialize, Serialize};
+use raqsh_harnesses::{
+    Harness, Setup, enabled_harness, enabled_harnesses, generic, registered_harnesses, server_name,
+};
+use serde::Serialize;
 use std::{
     env, fs,
     os::unix::fs::PermissionsExt,
@@ -9,37 +12,27 @@ use std::{
 };
 use tokio::{process::Command, time::timeout};
 
-#[derive(Clone, Copy, Deserialize, Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Provider {
-    Codex,
-    Claude,
+#[derive(Serialize)]
+pub struct Client {
+    id: &'static str,
+    name: &'static str,
+    installed: bool,
+    automatic: bool,
 }
 
-impl Provider {
-    fn executable(self) -> &'static str {
-        match self {
-            Self::Codex => "codex",
-            Self::Claude => "claude",
-        }
-    }
-
-    fn name(self) -> &'static str {
-        match self {
-            Self::Codex => "Codex",
-            Self::Claude => "Claude Code",
-        }
-    }
+#[derive(Serialize)]
+pub struct Configuration {
+    text: String,
+    instructions: Option<&'static str>,
+    server: String,
 }
-
-const PROVIDERS: [Provider; 2] = [Provider::Codex, Provider::Claude];
 
 fn executable_file(path: &Path) -> bool {
     path.metadata()
         .is_ok_and(|file| file.is_file() && file.permissions().mode() & 0o111 != 0)
 }
 
-fn find_client(provider: Provider) -> Option<PathBuf> {
+fn client_directories() -> Vec<PathBuf> {
     let path = env::var_os("PATH").unwrap_or_default();
     let home = env::var_os("HOME").map(PathBuf::from);
     env::split_paths(&path)
@@ -54,17 +47,37 @@ fn find_client(provider: Provider) -> Option<PathBuf> {
             PathBuf::from("/opt/homebrew/bin"),
             PathBuf::from("/usr/local/bin"),
             PathBuf::from("/usr/bin"),
+            PathBuf::from("/bin"),
         ])
         .filter(|directory| directory.is_absolute())
-        .map(|directory| directory.join(provider.executable()))
+        .collect()
+}
+
+fn find_client(harness: &Harness) -> Option<PathBuf> {
+    client_directories()
+        .into_iter()
+        .flat_map(|directory| {
+            harness
+                .executables
+                .iter()
+                .map(move |name| directory.join(name))
+        })
         .find(|path| executable_file(path))
 }
 
-pub fn installed_clients() -> Vec<Provider> {
-    PROVIDERS
-        .into_iter()
-        .filter(|provider| find_client(*provider).is_some())
+pub fn clients() -> Vec<Client> {
+    enabled_harnesses()
+        .map(|harness| Client {
+            id: harness.id,
+            name: harness.name,
+            installed: find_client(harness).is_some(),
+            automatic: harness.automatic.is_some(),
+        })
         .collect()
+}
+
+pub fn named(id: &str) -> Result<&'static Harness, String> {
+    enabled_harness(id).ok_or_else(|| format!("Raqsh setup is unavailable for {id}."))
 }
 
 fn helper_path() -> Result<PathBuf, String> {
@@ -76,158 +89,147 @@ fn helper_path() -> Result<PathBuf, String> {
     })
 }
 
-fn server_name(binding: Id) -> String {
-    format!("raqsh-{binding}")
-}
-
-fn forwarded_environment() -> serde_json::Map<String, serde_json::Value> {
-    let names = [
-        "XDG_DATA_HOME",
-        "XDG_RUNTIME_DIR",
-        "RAQSH_RUNTIME_DIR",
-        #[cfg(feature = "macos-live-test")]
-        "RAQSH_TEST_LIBRARY",
-    ];
-    names
-        .into_iter()
-        .filter_map(|key| env::var(key).ok().map(|value| (key.into(), value.into())))
-        .collect()
-}
-
-fn entry(binding: Id) -> Result<serde_json::Value, String> {
-    let helper = helper_path()?;
-    let command = helper
-        .to_str()
-        .ok_or("The path to Raqsh must be valid UTF-8.")?;
-    Ok(serde_json::json!({
-        "command": command, "args": ["serve", "--pairing", binding], "env": forwarded_environment(),
-    }))
-}
-
-pub fn generic_config(binding: Id) -> Result<String, String> {
-    serde_json::to_string_pretty(
-        &serde_json::json!({ "mcpServers": { (server_name(binding)): entry(binding)? } }),
+fn setup(binding: Id, harness: Option<&Harness>) -> Result<Setup, String> {
+    Setup::new(
+        &helper_path()?,
+        binding,
+        false,
+        server_name(binding, harness),
     )
     .map_err(|error| error.to_string())
 }
 
-fn marker(library: &Path, binding: Id, provider: Provider) -> PathBuf {
-    library
-        .join("pairings")
-        .join(format!("{binding}.{}", provider.executable()))
+pub fn configuration(binding: Id, harness: Option<&Harness>) -> Result<Configuration, String> {
+    let setup = setup(binding, harness)?;
+    let text = match harness {
+        Some(harness) => (harness.render)(&setup),
+        None => generic(&setup),
+    }
+    .map_err(|error| error.to_string())?;
+    Ok(Configuration {
+        text,
+        instructions: harness.map(|harness| harness.instructions),
+        server: setup.server,
+    })
 }
 
-async fn run(provider: Provider, mut command: Command) -> Result<(), String> {
-    command
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .kill_on_drop(true);
+fn marker(library: &Path, binding: Id, harness: &Harness) -> PathBuf {
+    library
+        .join("pairings")
+        .join(format!("{binding}.{}", harness.id))
+}
+
+fn command(harness: &Harness) -> Result<Command, String> {
+    let program = find_client(harness)
+        .ok_or_else(|| format!("Install {} before connecting it to Raqsh.", harness.name))?;
+    let mut command = Command::new(program);
+    // A GUI-launched process may need these paths for the provider's shebang.
+    if let Ok(path) = env::join_paths(client_directories()) {
+        command.env("PATH", path);
+    }
+    command.stdin(Stdio::null()).kill_on_drop(true);
+    Ok(command)
+}
+
+async fn registration_command(harness: &Harness) -> Result<Command, String> {
+    let command = command(harness)?;
+    if let Some(check) = harness
+        .automatic
+        .as_ref()
+        .and_then(|commands| commands.check_version)
+    {
+        let mut version = self::command(harness)?;
+        let output = timeout(
+            Duration::from_secs(3),
+            version.arg("--version").stderr(Stdio::null()).output(),
+        )
+        .await;
+        if !matches!(output, Ok(Ok(output)) if output.status.success() && check(&output.stdout)) {
+            return Err(format!("Update {} to use automatic setup.", harness.name));
+        }
+    }
+    Ok(command)
+}
+
+async fn run(harness: &Harness, command: &mut Command) -> Result<(), String> {
+    command.stdout(Stdio::null()).stderr(Stdio::null());
     let status = timeout(Duration::from_secs(12), command.status())
         .await
-        .map_err(|_| {
-            format!(
-                "{} took too long to update its MCP settings.",
-                provider.name()
-            )
-        })?
-        .map_err(|error| format!("Could not start {}. {error}", provider.name()))?;
+        .map_err(|_| format!("{} took too long to update its MCP settings.", harness.name))?
+        .map_err(|error| format!("Could not start {}. {error}", harness.name))?;
     if status.success() {
         Ok(())
     } else {
         Err(format!(
             "{} could not update its MCP settings.",
-            provider.name()
+            harness.name
         ))
     }
 }
 
-fn command(provider: Provider) -> Result<Command, String> {
-    let program = find_client(provider)
-        .ok_or_else(|| format!("Install {} before connecting it to Raqsh.", provider.name()))?;
-    let mut command = Command::new(program);
-    // GUI-launched apps may lack the Node path needed by a provider's shebang.
-    let path = env::var_os("PATH").unwrap_or_default();
-    let home = env::var_os("HOME").map(PathBuf::from);
-    let directories = env::split_paths(&path)
-        .chain(home.into_iter().map(|root| root.join(".local/bin")))
-        .chain([
-            PathBuf::from("/opt/homebrew/bin"),
-            PathBuf::from("/usr/local/bin"),
-            PathBuf::from("/usr/bin"),
-            PathBuf::from("/bin"),
-        ])
-        .filter(|directory| directory.is_absolute());
-    if let Ok(path) = env::join_paths(directories) {
-        command.env("PATH", path);
-    }
-    command.arg("mcp");
-    Ok(command)
-}
-
-pub async fn configure(library: &Path, binding: Id, provider: Provider) -> Result<(), String> {
-    let entry = entry(binding)?;
-    let mut command = command(provider)?;
-    let name = server_name(binding);
-    let marker = marker(library, binding, provider);
-    if marker.is_file() {
+pub async fn configure(library: &Path, binding: Id, harness: &Harness) -> Result<(), String> {
+    let automatic = harness
+        .automatic
+        .as_ref()
+        .ok_or_else(|| format!("Use MCP configuration to set up {}.", harness.name))?;
+    let registration = marker(library, binding, harness);
+    if registration.is_file() {
         return Ok(());
     }
-    match provider {
-        Provider::Codex => {
-            command.args(["add", &name]);
-            for (key, value) in forwarded_environment() {
-                command.args([
-                    "--env",
-                    &format!("{key}={}", value.as_str().unwrap_or_default()),
-                ]);
-            }
-            command.args([
-                "--",
-                entry["command"].as_str().expect("generated command"),
-                "serve",
-                "--pairing",
-                &binding.to_string(),
-            ]);
-        }
-        Provider::Claude => {
-            let mut entry = entry;
-            entry["type"] = "stdio".into();
-            command.args(["add-json", "--scope", "user", &name, &entry.to_string()]);
-        }
+    let setup = setup(binding, Some(harness))?;
+    let mut command = registration_command(harness).await?;
+    let pending = registration.with_added_extension("pending");
+    if !pending.is_file() {
+        fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&pending)
+            .map_err(|error| error.to_string())?;
     }
-    // The marker makes cleanup possible even if the provider exits during registration.
-    fs::OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(&marker)
-        .map_err(|error| error.to_string())?;
-    if let Err(error) = run(provider, command).await {
-        let _ = remove(library, binding, provider).await;
-        let _ = fs::remove_file(marker);
-        return Err(error);
+    // The pending marker survives an interruption, so revoke can still find the entry.
+    if let Err(error) = run(harness, command.args((automatic.add)(&setup))).await {
+        return match remove(library, binding, harness).await {
+            Ok(()) => Err(error),
+            Err(cleanup) => Err(format!("{error} {cleanup}")),
+        };
+    }
+    fs::rename(pending, registration).map_err(|error| error.to_string())
+}
+
+async fn remove(library: &Path, binding: Id, harness: &Harness) -> Result<(), String> {
+    let registration = marker(library, binding, harness);
+    let pending = registration.with_added_extension("pending");
+    if !registration.is_file() && !pending.is_file() {
+        return Ok(());
+    }
+    let Some(automatic) = &harness.automatic else {
+        return Ok(());
+    };
+    let name = server_name(binding, Some(harness));
+    let result = match registration_command(harness).await {
+        Ok(mut command) => run(harness, command.args((automatic.remove)(&name))).await,
+        Err(error) => Err(error),
+    };
+    result.map_err(|error| {
+        format!(
+            "{error} Remove {name} from {}'s MCP settings.",
+            harness.name
+        )
+    })?;
+    for path in [registration, pending] {
+        if let Err(error) = fs::remove_file(path)
+            && error.kind() != std::io::ErrorKind::NotFound
+        {
+            return Err(error.to_string());
+        }
     }
     Ok(())
 }
 
-async fn remove(library: &Path, binding: Id, provider: Provider) -> Result<(), String> {
-    let marker = marker(library, binding, provider);
-    if !marker.is_file() {
-        return Ok(());
-    }
-    let mut command = command(provider)?;
-    command.args(["remove", &server_name(binding)]);
-    if matches!(provider, Provider::Claude) {
-        command.args(["--scope", "user"]);
-    }
-    run(provider, command).await?;
-    fs::remove_file(marker).map_err(|error| error.to_string())
-}
-
 pub async fn unregister(library: &Path, binding: Id) -> Result<(), String> {
     let mut failures = Vec::new();
-    for provider in PROVIDERS {
-        if let Err(error) = remove(library, binding, provider).await {
+    for harness in registered_harnesses() {
+        if let Err(error) = remove(library, binding, harness).await {
             failures.push(error);
         }
     }
