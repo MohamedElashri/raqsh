@@ -34,6 +34,7 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
   const loadFeedback = async () => setRecent(await invoke<Feedback[]>("list_feedback", { scope, before: null }));
   const selectedProvider = provider ?? clients.find((client) => client.installed)?.id ?? "generic";
   const selectedClient = clients.find((client) => client.id === selectedProvider);
+  const shownConfig = config?.provider === selectedProvider && config.binding === binding?.id ? config : undefined;
 
   useEffect(() => {
     let alive = true;
@@ -168,16 +169,16 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
       </select></label>
       <div className="agent-actions">
         <button type="button" disabled={busy} onClick={() => {
-          if (config?.binding === binding.id && config.provider === selectedProvider) { setConfig(undefined); return; }
+          if (shownConfig) { setConfig(undefined); return; }
           run(() => showConfig(binding.id, selectedClient));
         }}>MCP configuration</button>
         <button type="button" disabled={busy} onClick={() => setRevoking(binding.id)}>Revoke access</button>
       </div>
-      {config?.binding === binding.id && <>
-        {config.instructions && <p>{config.instructions} Keep any existing server entries.</p>}
-        <textarea aria-label="MCP configuration" rows={5} spellCheck={false} readOnly value={config.text}
+      {shownConfig && <>
+        {shownConfig.instructions && <p>{shownConfig.instructions} Keep any existing server entries.</p>}
+        <textarea aria-label="MCP configuration" rows={5} spellCheck={false} readOnly value={shownConfig.text}
           onFocus={(event) => event.target.select()} />
-        {config.instructions && <p>For manual cleanup, remove only <code>{config.server}</code> from the client configuration.</p>}
+        {shownConfig.instructions && <p>For manual cleanup, remove only <code>{shownConfig.server}</code> from the client configuration.</p>}
         <div className="agent-actions">{clients.filter((client) => client.automatic && client.installed).map((client) =>
           <button key={client.id} type="button" disabled={busy} onClick={() => run(async () => {
             await invoke("connect_client", { scope, binding: binding.id, provider: client.id });

@@ -75,6 +75,19 @@
     const [entry] = Object.values(JSON.parse(text).mcp.servers);
     check(entry.type === "local" && entry.command[0].endsWith("/raqsh-mcp") && entry.command.at(-1) === binding,
       "OpenCode must use the packaged stdio helper for the selected pairing");
+    const cline = picker.querySelector('option[value="cline"]');
+    if (cline) {
+      picker.value = cline.value;
+      picker.dispatchEvent(new Event("change", { bubbles: true }));
+      await waitFor(() => find('.agent-panel input[name="label"]')?.placeholder === "Cline CLI", "the Cline profile");
+      check(!find('.agent-panel textarea[aria-label="MCP configuration"]'),
+        "Changing clients must hide the previous client's setup snippet");
+      button("MCP configuration").click();
+      const next = await waitFor(() => find('.agent-panel textarea[aria-label="MCP configuration"]')?.value,
+        "the Cline setup snippet");
+      const [server] = Object.values(JSON.parse(next).mcpServers);
+      check(server.args.at(-1) === binding, "Cline must use the selected pairing");
+    }
     button("MCP configuration").click();
   }
 
