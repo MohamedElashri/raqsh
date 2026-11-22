@@ -168,7 +168,7 @@ def main():
 
             edit_card(session, top)
             native_input = x11_composition_and_clipboard(session) if settings.x11_input else None
-            session.evaluate('document.querySelector("textarea").value = "خطة الإطلاق — Task 42";')
+            session.evaluate('document.querySelector("textarea").value = "خطة الإطلاق (Task 42)";')
             assert session.evaluate('return getComputedStyle(document.querySelector("textarea")).direction;') == "rtl"
             button(session, "Apply text")
             wait_until(lambda: session.evaluate(f"return {panel}.nativeBatches === '3';"), "text commit")
@@ -176,7 +176,7 @@ def main():
             session.call("POST", "/actions", {"actions": [{"type": "key", "id": "keyboard", "actions": [
                 {"type": "keyDown", "value": "\ue007"}, {"type": "keyUp", "value": "\ue007"},
             ]}]})
-            wait_until(lambda: session.evaluate('return document.querySelector("textarea")?.value === "خطة الإطلاق — Task 42";'), "keyboard card editing")
+            wait_until(lambda: session.evaluate('return document.querySelector("textarea")?.value === "خطة الإطلاق (Task 42)";'), "keyboard card editing")
             button(session, "Cancel")
 
             session.click('[data-tool="pen"]')
@@ -194,7 +194,7 @@ def main():
             close_board(session)
             session.click(".board-picker button")
             wait_until(lambda: session.evaluate('return document.querySelector(".lean-editor")?.dataset.editorReady;'), "fixture reopen")
-            assert session.evaluate('return document.querySelector(\'[data-card-id="task-1"]\').textContent;') == "خطة الإطلاق — Task 42"
+            assert session.evaluate('return document.querySelector(\'[data-card-id="task-1"]\').textContent;') == "خطة الإطلاق (Task 42)"
             assert session.evaluate('return document.querySelector(\'[data-card-id="task-2"]\').textContent;') == "Backend-confirmed label"
             assert session.evaluate('return document.querySelector(".lean-label")?.textContent;') == "Release annotation"
 
@@ -204,7 +204,7 @@ def main():
             assert session.evaluate(f"return [Number({panel}.nativeBatches ?? 0), Number({panel}.drawingChanges ?? 0)];") == [0, 0]
             svg, png = exported(session, "svg"), exported(session, "png")
             assert svg["type"] == "image/svg+xml" and svg["cards"] == 200 and svg["paths"] == 401 and svg["external"] == 0
-            assert "خطة الإطلاق — Task 42" in svg["rtl"], svg["rtl"]
+            assert "خطة الإطلاق (Task 42)" in svg["rtl"], svg["rtl"]
             assert png["type"] == "image/png" and png["magic"] == 0x89504E47 and max(png["width"], png["height"]) == 4096
 
     with settings.binary.open("rb") as source:

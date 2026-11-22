@@ -1,14 +1,15 @@
-base_url = "http://127.0.0.1:1702/"
+base_url = "https://melashri.net/raqsh/"
 title = "Raqsh"
 description = "A local-first whiteboard for planning with Codex and Claude Code."
 language = "en"
 minify_html = true
+robots_meta = "max-image-preview:large"
 
 [feed]
 enabled = false
 
 [sitemap]
-enabled = false
+enabled = true
 
 [robots]
 enabled = false

@@ -1,6 +1,6 @@
 // Injected by the macOS live-test build into the real Tauri webview.
 (() => {
-  const title = "macOS live test — مراجعة";
+  const title = "macOS live test (مراجعة)";
   const find = (selector) => document.querySelector(selector);
   const report = (event, details = {}) => {
     document.title = `raqsh-live:${JSON.stringify({ event, ...details })}`;

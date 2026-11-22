@@ -3,11 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="{{ .Description }}">
   <meta name="theme-color" content="#fdfdfc">
-  <meta property="og:title" content="{{ .Config.Title }} — {{ .Title }}">
-  <meta property="og:description" content="{{ .Description }}">
-  <title>{{ .Config.Title }} — {{ .Title }}</title>
+  {{ template "site-seo" . }}
   <link rel="icon" type="image/png" href="{{ asset "images/raqsh-mark.png" }}">
   <link rel="stylesheet" href="{{ asset "css/site.css" }}">
 </head>

@@ -35,7 +35,8 @@ h1, h2, p, pre, figure { margin: 0; }
 .intro h1 { font-size: clamp(1.25rem, 3.5vw, 1.5rem); font-weight: 650; line-height: 1.25; }
 .intro p { max-width: 52ch; margin: .65rem auto 0; color: var(--muted); font-size: .9375rem; }
 
-.install { margin-top: 1.5rem; scroll-margin-top: 1rem; }
+.install { margin-top: clamp(1.75rem, 5vw, 2.75rem); scroll-margin-top: 1rem; }
+.install h2 { margin-bottom: .75rem; }
 .install-box { border: 1px solid var(--line); border-radius: .4rem; background: #f7f7f5; }
 .install-tools { display: flex; align-items: center; justify-content: space-between; padding: 0 .875rem; border-bottom: 1px solid var(--line); font-size: .8125rem; }
 .install-methods { display: flex; gap: .1rem; }
@@ -48,7 +49,6 @@ h1, h2, p, pre, figure { margin: 0; }
 .install-box pre + pre { border-top: 1px solid var(--line); }
 .install code { font: .8125rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .install-links { display: flex; flex-wrap: wrap; justify-content: center; column-gap: .9rem; row-gap: .3rem; margin-top: .7rem; color: var(--muted); font-size: .8125rem; }
-.example-link { color: var(--brand); font-weight: 600; }
 .macos-help { max-width: 37rem; margin: .55rem auto 0; color: var(--muted); font-size: .8125rem; }
 .macos-help summary { width: fit-content; margin-inline: auto; cursor: pointer; }
 .macos-help summary:hover { color: var(--brand); }
@@ -58,7 +58,7 @@ h1, h2, p, pre, figure { margin: 0; }
 
 .example { margin-top: clamp(1.75rem, 5vw, 2.75rem); scroll-margin-top: 1rem; }
 .example-header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem 1rem; margin-bottom: .75rem; }
-.example-header h2, .agent-integration h2, .walkthrough h2 { color: var(--ink); font-size: 1.0625rem; font-weight: 650; }
+.example-header h2, .agent-integration h2, .walkthrough h2, .install h2 { color: var(--ink); font-size: 1.0625rem; font-weight: 650; }
 .example-header a { color: var(--muted); font-size: .8125rem; }
 .example-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .window { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: .4rem; }

@@ -5,7 +5,7 @@ Build and preview with Nida 0.8.5 or newer from the repository root.
 ```sh
 nida check site
 nida build site
-nida serve site
+nida serve site --base-url http://127.0.0.1:1702/
 ```
 
 The static output is in `site/public/`. For a deploy under a subdirectory, pass the full URL with `nida build site --base-url URL`.
@@ -14,4 +14,4 @@ The screenshots show `static/examples/raqsh-release-board.raqsh` open in the nat
 
 ## GitHub Pages
 
-The **Publish website** workflow deploys changes to `site/` from `main` and supports manual runs from the same branch. It verifies the pinned Nida release, builds with the URL from GitHub Pages, and uploads `site/public/`. The repository’s Pages source is **GitHub Actions**.
+The **Publish website** workflow deploys changes to `site/` from `main` and supports manual runs from the same branch. It verifies the pinned Nida release and uploads `site/public/` to GitHub Pages. The production URL in `config.toml` sets the canonical links and sitemap for `https://melashri.net/raqsh/`.

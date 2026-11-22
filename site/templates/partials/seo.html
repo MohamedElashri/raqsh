@@ -1,0 +1,43 @@
+{{ define "site-seo" -}}
+{{- $title := .Config.Title -}}
+{{- with .Title }}{{ $title = printf "%s | %s" $.Config.Title . }}{{ end -}}
+{{- $description := default .Description .Config.Description -}}
+{{- $image := absURL "images/feedback-acknowledged-full.webp" -}}
+{{- $imageAlt := "Raqsh release board showing tasks and acknowledged feedback from Codex." -}}
+<title>{{ $title }}</title>
+<meta name="description" content="{{ $description }}">
+<link rel="canonical" href="{{ .CanonicalURL }}">
+{{ with .Robots }}<meta name="robots" content="{{ . }}">{{ end }}
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ .Config.Title }}">
+<meta property="og:title" content="{{ $title }}">
+<meta property="og:description" content="{{ $description }}">
+<meta property="og:url" content="{{ .CanonicalURL }}">
+<meta property="og:image" content="{{ $image }}">
+<meta property="og:image:type" content="image/webp">
+<meta property="og:image:width" content="2688">
+<meta property="og:image:height" content="1300">
+<meta property="og:image:alt" content="{{ $imageAlt }}">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $title }}">
+<meta name="twitter:description" content="{{ $description }}">
+<meta name="twitter:image" content="{{ $image }}">
+<meta name="twitter:image:alt" content="{{ $imageAlt }}">
+
+{{ if eq .CurrentURL .HomeURL -}}
+{{- $app := dict
+  "@context" "https://schema.org"
+  "@type" "SoftwareApplication"
+  "name" .Config.Title
+  "description" $description
+  "url" .CanonicalURL
+  "image" $image
+  "applicationCategory" "DeveloperApplication"
+  "operatingSystem" "macOS, Linux"
+  "installUrl" .Data.downloads.releases
+  "sameAs" .Data.downloads.source -}}
+<script type="application/ld+json">{{ jsonify $app }}</script>
+{{- end }}
+{{- end }}

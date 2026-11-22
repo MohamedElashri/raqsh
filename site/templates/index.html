@@ -6,48 +6,6 @@
     <p>Turn a plan into task cards, then pair Codex or Claude Code to share progress and send feedback. Your boards stay on your device.</p>
   </header>
 
-  {{ $installer := printf "%s/download/install.sh" .Data.downloads.releases }}
-  <section id="install" class="install" aria-label="Install Raqsh">
-    <div class="install-box">
-      <div class="install-tools" hidden>
-        <div class="install-methods" role="group" aria-label="Install method">
-          <button type="button" data-method="curl" aria-pressed="true">curl</button>
-          <button type="button" data-method="wget" aria-pressed="false">wget</button>
-        </div>
-        <button class="copy" type="button" hidden>Copy</button>
-        <span class="visually-hidden" role="status"></span>
-      </div>
-      <pre data-command="curl"><code>curl -fsSL {{ $installer }} | sh</code></pre>
-      <pre data-command="wget"><code>wget --https-only -qO- {{ $installer }} | sh</code></pre>
-    </div>
-    <p class="install-links">
-      <span>Manual downloads</span>
-      {{ range .Data.downloads.packages }}
-      <a href="{{ $.Data.downloads.releases }}/download/{{ .file }}" title="{{ .details }}">{{ .title }}</a>
-      {{ end }}
-      <a class="example-link" href="#how-it-works">See how it works</a>
-    </p>
-    <details class="macos-help">
-      <summary>macOS first launch</summary>
-      <div class="macos-help-content">
-        <p>Gatekeeper may block Raqsh because the app isn’t notarized by Apple. The shell installer verifies the download. If you downloaded the ZIP manually, verify it against the release’s <a href="{{ .Data.downloads.releases }}/download/SHA256SUMS">SHA256SUMS</a> first.</p>
-        <p>If Gatekeeper blocks the verified app, type <code>xattr -dr com.apple.quarantine</code> followed by a space in Terminal. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return. The shell installer puts Raqsh in <code>~/Applications</code>.</p>
-      </div>
-    </details>
-  </section>
-
-  <section id="agents" class="agent-integration" aria-labelledby="agent-integration-title">
-    <h2 id="agent-integration-title">What Raqsh adds to Codex and Claude Code</h2>
-    <ul>
-      <li><strong>A bundled MCP server.</strong> Every macOS and Linux package ships with the local Raqsh MCP server.</li>
-      <li><strong>Automatic client setup.</strong> Choose Codex or Claude Code in <strong>Agents</strong> and approve the pairing. Raqsh adds the server to that client’s MCP settings. Start a new session to use it.</li>
-      <li><strong>Tools for the board.</strong> Read the plan, create and edit cards, link dependencies, and update task status.</li>
-      <li><strong>Tools for feedback.</strong> Read queued feedback, acknowledge it, and reply on the board.</li>
-      <li><strong>Board-scoped access.</strong> A pairing gets access to the current board by default. You can grant access to the whole project when pairing.</li>
-    </ul>
-    <p>Choose <strong>Revoke pairing</strong> in <strong>Agents</strong> to end access and remove the pairing’s MCP entry.</p>
-  </section>
-
   <section id="how-it-works" class="walkthrough" aria-labelledby="walkthrough-title">
     <h2 id="walkthrough-title">Plan, review, and follow the work</h2>
     <ol class="walkthrough-steps">
@@ -119,6 +77,47 @@
     </div>
   </section>
 
+  <section id="agents" class="agent-integration" aria-labelledby="agent-integration-title">
+    <h2 id="agent-integration-title">What Raqsh adds to Codex and Claude Code</h2>
+    <ul>
+      <li><strong>A bundled MCP server.</strong> Every macOS and Linux package ships with the local Raqsh MCP server.</li>
+      <li><strong>Automatic client setup.</strong> Choose Codex or Claude Code in <strong>Agents</strong> and approve the pairing. Raqsh adds the server to that client’s MCP settings. Start a new session to use it.</li>
+      <li><strong>Tools for the board.</strong> Read the plan, create and edit cards, link dependencies, and update task status.</li>
+      <li><strong>Tools for feedback.</strong> Read queued feedback, acknowledge it, and reply on the board.</li>
+      <li><strong>Board-scoped access.</strong> A pairing gets access to the current board by default. You can grant access to the whole project when pairing.</li>
+    </ul>
+    <p>Choose <strong>Revoke pairing</strong> in <strong>Agents</strong> to end access and remove the pairing’s MCP entry.</p>
+  </section>
+
+  {{ $installer := printf "%s/download/install.sh" .Data.downloads.releases }}
+  <section id="install" class="install" aria-labelledby="install-title">
+    <h2 id="install-title">Install Raqsh</h2>
+    <div class="install-box">
+      <div class="install-tools" hidden>
+        <div class="install-methods" role="group" aria-label="Install method">
+          <button type="button" data-method="curl" aria-pressed="true">curl</button>
+          <button type="button" data-method="wget" aria-pressed="false">wget</button>
+        </div>
+        <button class="copy" type="button" hidden>Copy</button>
+        <span class="visually-hidden" role="status"></span>
+      </div>
+      <pre data-command="curl"><code>curl -fsSL {{ $installer }} | sh</code></pre>
+      <pre data-command="wget"><code>wget --https-only -qO- {{ $installer }} | sh</code></pre>
+    </div>
+    <p class="install-links">
+      <span>Manual downloads</span>
+      {{ range .Data.downloads.packages }}
+      <a href="{{ $.Data.downloads.releases }}/download/{{ .file }}" title="{{ .details }}">{{ .title }}</a>
+      {{ end }}
+    </p>
+    <details class="macos-help">
+      <summary>macOS first launch</summary>
+      <div class="macos-help-content">
+        <p>Gatekeeper may block Raqsh because the app isn’t notarized by Apple. The shell installer verifies the download. If you downloaded the ZIP manually, verify it against the release’s <a href="{{ .Data.downloads.releases }}/download/SHA256SUMS">SHA256SUMS</a> first.</p>
+        <p>If Gatekeeper blocks the verified app, type <code>xattr -dr com.apple.quarantine</code> followed by a space in Terminal. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return. The shell installer puts Raqsh in <code>~/Applications</code>.</p>
+      </div>
+    </details>
+  </section>
 </main>
 <script src="{{ asset "js/install.js" }}" defer></script>
 {{ end }}
