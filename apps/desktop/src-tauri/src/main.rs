@@ -20,6 +20,8 @@ fn main() -> tauri::Result<()> {
         "--macos-live=edit" => Some("edit"),
         "--macos-live=provider" => Some("provider"),
         "--macos-live=about" => Some("about"),
+        "--macos-live=sync-card" => Some("sync-card"),
+        "--macos-live=feedback-history" => Some("feedback-history"),
         "--macos-live=updater" => Some("updater"),
         "--macos-live=screenshot" => Some("screenshot"),
         "--macos-live=screenshot-agents" => Some("screenshot-agents"),

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { id, type Id, type Scope } from "../model";
 
 type Binding = { id: Id; boardId: Id | null; label: string };
@@ -10,14 +10,15 @@ type Feedback = {
   id: Id; bindingId: Id; sequence: number; text: string;
   state: "queued" | "offered" | "acknowledged" | "cancelled"; response: string | null;
 };
+type FeedbackList = { items: Feedback[]; expanded: boolean; hasOlder: boolean };
+const feedbackPageSize = 20;
 const states: Record<Feedback["state"], string> = {
   queued: "Queued", offered: "Offered to client", acknowledged: "Acknowledged", cancelled: "Cancelled",
 };
 
 export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: () => void }) {
   const [bindings, setBindings] = useState<Binding[]>([]);
-  const [recent, setRecent] = useState<Feedback[]>([]);
-  const [history, setHistory] = useState<Feedback[]>([]);
+  const [feedback, setFeedback] = useState<FeedbackList>({ items: [], expanded: false, hasOlder: false });
   const [selected, setSelected] = useState<Id>();
   const [config, setConfig] = useState<Configuration & { binding: Id; provider: string }>();
   const [clients, setClients] = useState<Client[]>([]);
@@ -27,11 +28,25 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
   const [connected, setConnected] = useState("");
   const [busy, setBusy] = useState(false);
   const nextFeedback = useRef<{ id: Id; text: string; binding: Id }>();
+  const feedbackRead = useRef(0);
   const inFlight = useRef(false);
   const binding = bindings.find((item) => item.id === selected) ?? bindings[0];
 
   const loadBindings = async () => setBindings(await invoke<Binding[]>("list_bindings", { scope }));
-  const loadFeedback = async () => setRecent(await invoke<Feedback[]>("list_feedback", { scope, before: null }));
+  const loadFeedback = useCallback(async () => {
+    const read = ++feedbackRead.current;
+    const page = await invoke<Feedback[]>("list_feedback", { scope, before: null });
+    if (read !== feedbackRead.current) return;
+    setFeedback((current) => {
+      if (!current.expanded) {
+        return { items: page, expanded: false, hasOlder: page.length === feedbackPageSize };
+      }
+      const oldest = page.at(-1);
+      if (!oldest) return current;
+      // Keep loaded items that have shifted below the latest page.
+      return { ...current, items: [...page, ...current.items.filter((item) => item.sequence < oldest.sequence)] };
+    });
+  }, [scope]);
   const selectedProvider = provider ?? clients.find((client) => client.installed)?.id ?? "generic";
   const selectedClient = clients.find((client) => client.id === selectedProvider);
   const shownConfig = config?.provider === selectedProvider && config.binding === binding?.id ? config : undefined;
@@ -52,8 +67,7 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
         timer = 0;
         running = true;
         const jobs: Promise<unknown>[] = [];
-        if (needFeedback) jobs.push(invoke<Feedback[]>("list_feedback", { scope, before: null })
-          .then((value) => { if (alive) setRecent(value); }));
+        if (needFeedback) jobs.push(loadFeedback());
         if (needBindings) jobs.push(invoke<Binding[]>("list_bindings", { scope })
           .then((value) => { if (alive) setBindings(value); }));
         needFeedback = false;
@@ -84,11 +98,12 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
     }).catch((error) => { if (alive) setMessage(String(error)); });
     return () => {
       alive = false;
+      feedbackRead.current += 1;
       clearTimeout(timer);
       void feedback.then((stop) => stop()).catch(() => {});
       void clients.then((stop) => stop()).catch(() => {});
     };
-  }, [scope]);
+  }, [scope, loadFeedback]);
 
   function run(task: () => Promise<void>) {
     if (inFlight.current) return;
@@ -147,8 +162,8 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
     });
   }
 
-  const older = history.at(-1) ?? recent.at(-1);
-  const items = [...recent, ...history.filter((entry) => !recent.some((latest) => latest.id === entry.id))];
+  const { items, hasOlder } = feedback;
+  const older = items.at(-1);
   return <aside id="board-agents" className="agent-panel" aria-label="Paired agents">
     <header><h2>Paired agents</h2><button type="button" onClick={onClose}>Close</button></header>
     <form onSubmit={pair}>
@@ -225,15 +240,18 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
         {item.response && <p dir="auto"><strong>Agent response </strong>{item.response}</p>}
         {item.state === "queued" && <button type="button" disabled={busy} onClick={() => run(async () => {
           await invoke("cancel_feedback", { scope, id: item.id });
-          setHistory([]);
+          setFeedback((current) => ({ ...current, items: current.items.map((entry) =>
+            entry.id === item.id ? { ...entry, state: "cancelled" } : entry) }));
           await loadFeedback();
         })}>Cancel feedback</button>}
       </li>)}
     </ol>}
-    {older && (history.length || recent.length) % 20 === 0 && <button type="button" disabled={busy} onClick={() => run(async () => {
+    {older && hasOlder && <button type="button" disabled={busy} onClick={() => run(async () => {
+      setFeedback((current) => ({ ...current, expanded: true }));
       const page = await invoke<Feedback[]>("list_feedback", { scope, before: older.sequence });
-      if (page.length === 0) setMessage("No older feedback.");
-      else setHistory((prior) => [...prior, ...page]);
+      setFeedback((current) => ({
+        ...current, items: [...current.items, ...page], hasOlder: page.length === feedbackPageSize,
+      }));
     })}>Older feedback</button>}
   </aside>;
 }

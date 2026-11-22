@@ -1,6 +1,22 @@
 // Injected by the macOS live-test build into the real Tauri webview.
 (() => {
   const title = "macOS live test (مراجعة)";
+  const mode = window.__RAQSH_LIVE_MODE__;
+  let refreshHeld = false;
+  let releaseRefresh;
+  if (mode === "sync-card") {
+    const fetch = window.fetch.bind(window);
+    const gate = new Promise((resolve) => { releaseRefresh = resolve; });
+    // Keep the real IPC response pending in the webview until the shortcut is exercised.
+    window.fetch = async (url, options) => {
+      const response = await fetch(url, options);
+      if (String(url).endsWith("/board_deltas") && !refreshHeld) {
+        refreshHeld = true;
+        await gate;
+      }
+      return response;
+    };
+  }
   const find = (selector) => document.querySelector(selector);
   const report = (event, details = {}) => {
     document.title = `raqsh-live:${JSON.stringify({ event, ...details })}`;
@@ -64,7 +80,7 @@
     key("n");
     const field = await waitFor(() => find('.lean-edit textarea[name="title"]'), "the N shortcut to open Add card");
     field.value = title;
-    button("Create card").click();
+    (await waitFor(() => button("Create card"), "the card form to become saveable")).click();
     return waitFor(() => find(".lean-card"), "the saved card");
   }
 
@@ -90,6 +106,7 @@
     dialog.querySelector('[name="x"]').value = "400";
     dialog.querySelector('[name="y"]').value = "130";
     let next = revision() + 1;
+    await waitFor(() => button("Create card"), "the second card form to become saveable");
     save(field);
     await atRevision(next);
     const second = cards().find((item) => item !== first);
@@ -217,9 +234,47 @@
     find(".agent-skill summary").click();
   }
 
+  async function checkAddCardDuringSync() {
+    await waitFor(() => refreshHeld, "the initial board sync to reach the webview");
+    key("n");
+    const field = await waitFor(() => find('.lean-edit textarea[name="title"]'),
+      "a single N press to open the draft during sync", 2000);
+    field.value = "Draft while syncing";
+    check(!button("Create card"), "The draft must wait for the current revision before saving");
+    releaseRefresh();
+    (await waitFor(() => button("Create card"), "the draft to become saveable after sync")).click();
+    await waitFor(() => [...document.querySelectorAll(".lean-card")].some((item) => item.textContent === field.value),
+      "the draft to appear on the board");
+  }
+
+  async function checkFeedbackHistory() {
+    await pair("generic", "Feedback history test");
+    const rows = () => [...document.querySelectorAll(".agent-panel ol li")];
+    const items = () => rows().map((item) => item.querySelector("p").textContent);
+    const queue = async (index) => {
+      const text = `Feedback ${index}`;
+      find('.agent-panel textarea[name="feedback"]').value = text;
+      (await waitFor(() => button("Queue feedback"), "the feedback form")).click();
+      await waitFor(() => items()[0] === text, "the latest feedback to appear");
+    };
+    for (let index = 1; index <= 21; index++) await queue(index);
+    (await waitFor(() => button("Older feedback"), "the history button")).click();
+    await waitFor(() => items().at(-1) === "Feedback 1", "the first item to load from history");
+    await queue(22);
+    const expected = Array.from({ length: 22 }, (_, i) => `Feedback ${22 - i}`);
+    const missing = expected.filter((item) => !items().includes(item));
+    check(items().join(",") === expected.join(","), `Refreshing loaded feedback lost or reordered rows. Missing: ${missing.join(", ")}`);
+    const previous = await waitFor(() => rows().find((row) => row.querySelector("p").textContent === "Feedback 2"
+      && row.querySelector("button:not(:disabled)")), "an older queued item to become actionable");
+    previous.querySelector("button").click();
+    await waitFor(() => previous.querySelector("small")?.textContent.includes("Cancelled"),
+      "cancelling an older item to update it in place");
+    check(items().join(",") === expected.join(","), "Cancelling an older item must keep the loaded history");
+    check(!button("Older feedback"), "The history button must disappear after loading the oldest page");
+  }
+
   async function run() {
     const started = performance.now();
-    const mode = window.__RAQSH_LIVE_MODE__;
     if (mode === "about" || mode === "updater") {
       (await waitFor(() => button("Settings"), "the Settings entry")).click();
       await waitFor(() => find(".about-brand p")?.textContent.startsWith("Version "), "the local app version");
@@ -263,6 +318,12 @@
       return;
     }
     const editor = await waitFor(() => find('[data-editor-ready="true"]'), "the first editor paint");
+    if (mode === "sync-card" || mode === "feedback-history") {
+      if (mode === "sync-card") await checkAddCardDuringSync();
+      else await checkFeedbackHistory();
+      report("pass", { mode });
+      return;
+    }
     if (mode.startsWith("screenshot")) {
       if (mode === "screenshot-agents") {
         await pair("generic", "Codex");

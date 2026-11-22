@@ -168,7 +168,7 @@ dependencies = [
 
 [[package]]
 name = "board-domain"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "serde",
  "serde_json",
@@ -177,7 +177,7 @@ dependencies = [
 
 [[package]]
 name = "board-ipc"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "board-domain",
  "dirs",
@@ -190,7 +190,7 @@ dependencies = [
 
 [[package]]
 name = "board-store"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "board-domain",
  "board-ipc",
@@ -2741,7 +2741,7 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "raqsh"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "board-domain",
  "board-ipc",
@@ -2762,7 +2762,7 @@ dependencies = [
 
 [[package]]
 name = "raqsh-harnesses"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "board-domain",
  "serde_json",
@@ -2770,7 +2770,7 @@ dependencies = [
 
 [[package]]
 name = "raqsh-mcp"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "board-domain",
  "board-ipc",
