@@ -24,11 +24,11 @@
     canvas().focus();
     canvas().dispatchEvent(new KeyboardEvent("keydown", { key: value, bubbles: true, cancelable: true, ...modifiers }));
   }
-  function pointer(type, x, y) {
+  function pointer(type, x, y, modifiers = {}) {
     const bounds = canvas().getBoundingClientRect();
     canvas().dispatchEvent(new PointerEvent(type, {
       pointerId: 1, pointerType: "mouse", button: 0, buttons: type === "pointerup" ? 0 : 1,
-      clientX: bounds.left + x, clientY: bounds.top + y, bubbles: true,
+      clientX: bounds.left + x, clientY: bounds.top + y, bubbles: true, ...modifiers,
     }));
   }
   function painted(x, y) {
@@ -42,6 +42,77 @@
     field.value = title;
     button("Create card").click();
     return waitFor(() => find(".lean-card"), "the saved card");
+  }
+
+  async function checkDirectEditing(editor, first) {
+    const cards = () => [...document.querySelectorAll(".lean-card")];
+    const selected = () => cards().filter((card) => card.dataset.selected === "true");
+    const revision = () => Number(editor.dataset.semanticRevision);
+    const atRevision = (value) => waitFor(() => revision() === value, `board revision ${value}`);
+    const click = (x, y, modifiers) => {
+      pointer("pointerdown", x, y, modifiers);
+      pointer("pointerup", x, y, modifiers);
+    };
+    const save = (field) => field.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "Enter", metaKey: true, bubbles: true, cancelable: true,
+    }));
+    key("v");
+    key("n");
+    const dialog = await waitFor(() => find('dialog[aria-label="Add card"][open]'), "Add card");
+    const field = dialog.querySelector('[name="title"]');
+    field.value = "Second card";
+    dialog.querySelector('[name="x"]').value = "400";
+    dialog.querySelector('[name="y"]').value = "130";
+    let next = revision() + 1;
+    save(field);
+    await atRevision(next);
+    const second = cards().find((item) => item !== first);
+    check(second?.textContent.includes("Second card"), "Cmd+Enter must save the new card");
+
+    pointer("pointerdown", 55, 78);
+    pointer("pointermove", 650, 218);
+    pointer("pointerup", 650, 218);
+    await waitFor(() => selected().length === 2, "marquee selection of both cards");
+    click(450, 150, { shiftKey: true });
+    await waitFor(() => selected().length === 1 && selected()[0] === first, "Shift-click to deselect one card");
+    click(450, 150, { shiftKey: true });
+    await waitFor(() => selected().length === 2, "Shift-click to add the card back");
+
+    pointer("pointerdown", 110, 120);
+    pointer("pointermove", 145, 144);
+    check(first.style.left === "105px" && second.style.left === "435px" && revision() === next,
+      "Dragging must preview both positions before committing");
+    pointer("pointerup", 145, 144);
+    await atRevision(++next);
+    key("ArrowRight", { shiftKey: true });
+    await atRevision(++next);
+    check(first.style.left === "115px" && second.style.left === "445px", "Shift+Arrow must nudge both cards");
+
+    key("d", { metaKey: true });
+    await atRevision(++next);
+    check(cards().length === 4, "Cmd+D must duplicate both selected cards");
+    key("Backspace");
+    await atRevision(++next);
+    check(cards().length === 2, "Backspace must remove the duplicated cards");
+    key("z", { metaKey: true });
+    await atRevision(++next);
+    check(cards().length === 4, "Cmd+Z must restore both deleted cards");
+    key("z", { metaKey: true, shiftKey: true });
+    await atRevision(++next);
+    check(cards().length === 2, "Cmd+Shift+Z must reapply the deletion");
+
+    key("t");
+    await waitFor(() => canvas().classList.contains("tool-text"), "the text tool");
+    click(80, 360);
+    const text = await waitFor(() => find('dialog[aria-label="Place text"][open] [name="title"]'), "the board text editor");
+    text.value = "Draft";
+    save(text);
+    await waitFor(() => find(".lean-label")?.textContent === "Draft", "the placed text");
+    key("Enter");
+    const edit = await waitFor(() => find('dialog[aria-label="Edit text"][open] [name="title"]'), "editing the selected text");
+    edit.value = "مراجعة";
+    save(edit);
+    await waitFor(() => find(".lean-label")?.textContent === "مراجعة", "the edited Arabic text");
   }
 
   async function pair(provider, name) {
@@ -110,10 +181,16 @@
       return;
     }
     check(canvas().width === Math.round(canvas().clientWidth * devicePixelRatio), "Canvas backing width must match the device scale");
-    if (mode === "reopen") {
+    if (mode === "reopen" || mode === "reopen-edits") {
       check(find(".lean-card")?.textContent.includes(title), "The card title did not survive reopening");
       check(find(".lean-card").dataset.status === "done", "The MCP status did not survive reopening");
       check(painted(120, 224), "The drawing did not survive reopening");
+      if (mode === "reopen-edits") {
+        const cards = [...document.querySelectorAll(".lean-card")];
+        check(cards.length === 2 && cards[0].style.left === "115px" && cards[1].style.left === "445px",
+          "The edited card positions did not survive reopening");
+        check(find(".lean-label")?.textContent === "مراجعة", "The edited Arabic text did not survive reopening");
+      }
       report("pass", { mode });
       return;
     }
@@ -145,6 +222,11 @@
       return;
     }
 
+    check(document.activeElement === canvas(), "The board must have keyboard focus when it opens");
+    key("F1");
+    await waitFor(() => find('dialog[aria-label="Board shortcuts"][open]'), "F1 to show keyboard shortcuts");
+    button("Close shortcuts").click();
+    await waitFor(() => !find("dialog[open]"), "the shortcuts dialog to close");
     await createCard();
     key("z", { metaKey: true });
     await waitFor(() => !find(".lean-card"), "Cmd+Z to undo the card");
@@ -164,6 +246,10 @@
     await waitFor(() => !painted(120, 224), "Cmd+Z to undo the stroke");
     key("z", { metaKey: true, shiftKey: true });
     await waitFor(() => painted(120, 224), "redo to restore the stroke");
+    if (mode === "edit") {
+      find(".agent-panel header button").click();
+      await checkDirectEditing(editor, card);
+    }
     report("pass", { mode });
   }
   document.addEventListener("DOMContentLoaded", () => {
