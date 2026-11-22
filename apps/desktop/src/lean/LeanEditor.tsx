@@ -2,14 +2,13 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MutableRefObject } from "react";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
-import { id, kinds, makeCard, priorities, statuses, type Card, type Change, type Id, type Ink, type Label, type OpenBoard,
-  type Operation, type Point, type Receipt, type Stroke } from "../model";
-import { exportImage, type Board, type View } from "./board";
+import { id, kinds, makeCard, priorities, statuses, type Card, type Change, type ExcalidrawScene, type Id,
+  type OpenBoard, type Operation, type Point, type Receipt } from "../model";
+import type { Board, View } from "./board";
 import { Checkpoint, type SaveState } from "./checkpoint";
-import type { Bounds } from "./geometry";
-import { applyMarks, boundedOffset, drawingKinds, duplicateSelection, emptySelection, geometry, invertMarks, movableBounds,
-  removeSelection, selectionSize, toggleTarget, type BoardEdit, type Mark, type MarkChange, type Selection } from "./editing";
-import EditorSurface, { type Tool } from "./EditorSurface";
+import { boundedOffset, duplicateSelection, geometry, movableBounds, removeSelection } from "./editing";
+import EditorSurface, { blankSelection, countSelection, type BoardSelection, type Tool } from "./EditorSurface";
+import { exportScene, openScene } from "./scene";
 import AgentPanel from "./AgentPanel";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
@@ -17,18 +16,19 @@ import { Modal } from "../Modal";
 import "../editor.css";
 import "./lean.css";
 
-type Edit = { kind: "card"; card: Card; fresh: boolean } | { kind: "text"; point: Point; label?: Label };
+type Edit = { card: Card; fresh: boolean };
 type Delta = Pick<Receipt, "revision" | "changes">;
 type DeltaPage = { revision: number; deltas: Delta[]; nextRevision: number };
 type HistoryAction = "record" | "undo" | "redo";
-type Submission = { operation: Operation; marks: MarkChange[]; history: HistoryAction; selection?: Selection };
+type HistoryEntry = { changes: Change[]; scene?: ExcalidrawScene };
+type Submission = { operation: Operation; scene?: ExcalidrawScene; history: HistoryAction; selection?: BoardSelection };
 type Props = {
   opened: OpenBoard;
   registerClose: MutableRefObject<((windowClose: boolean) => void) | undefined>;
   onClose: () => void;
 };
 
-const tools: { id: Tool | "image"; label: string; key?: string; number?: string }[] = [
+const tools: { id: Exclude<Tool, "connect" | "frame" | "laser">; label: string; key?: string; number?: string }[] = [
   { id: "pan", label: "Hand", key: "h" },
   { id: "select", label: "Selection", key: "v", number: "1" },
   { id: "rectangle", label: "Rectangle", key: "r", number: "2" },
@@ -38,10 +38,9 @@ const tools: { id: Tool | "image"; label: string; key?: string; number?: string 
   { id: "line", label: "Line", key: "l", number: "6" },
   { id: "pen", label: "Draw", key: "p", number: "7" },
   { id: "text", label: "Text", key: "t", number: "8" },
-  { id: "image", label: "Image attachments unavailable", number: "9" },
+  { id: "image", label: "Insert image", number: "9" },
   { id: "eraser", label: "Eraser", key: "e", number: "0" },
 ];
-const inkChoices: Partial<Record<Ink, string>> = { slate: "Graphite", blue: "Blue", red: "Red" };
 const ordered = (a: Card, b: Card) => a.order - b.order || a.id.localeCompare(b.id);
 const setNode = (node: Card): Change => ({ type: "setNode", node });
 const choices = (values: Record<string, string>) => Object.entries(values).map(([value, label]) => (
@@ -59,11 +58,12 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   const { scope, board: info, drawing } = opened;
   const [board] = useState<Board>(() => ({ ...drawing, nodes: opened.nodes.sort(ordered), edges: opened.edges }));
   const [nodeIndex] = useState(() => new Map(board.nodes.map((node) => [node.id, node])));
-  const [strokeBounds] = useState(() => new WeakMap<Stroke, Bounds>());
+  const [scene, setScene] = useState(() => openScene(drawing));
+  const sceneRef = useRef(scene);
   const [tool, setTool] = useState<Tool>("select");
   const [keepTool, setKeepTool] = useState(false);
   const [zoomPercent, setZoomPercent] = useState(100);
-  const [selection, setSelection] = useState(emptySelection);
+  const [selection, setSelection] = useState(blankSelection);
   const [edit, setEdit] = useState<Edit>();
   const [inspector, setInspector] = useState(false);
   const [agents, setAgents] = useState(false);
@@ -94,10 +94,8 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   const focusedCard = useRef<Id>();
   const view = useRef<View>({ x: 0, y: 0, zoom: 1 });
   const revision = useRef(info.semanticRevision);
-  const undoHistory = useRef<BoardEdit[]>([]);
-  const redoHistory = useRef<BoardEdit[]>([]);
-  const [initialPointCount] = useState(() => drawing.strokes.reduce((total, stroke) => total + stroke.points.length, 0));
-  const points = useRef(initialPointCount);
+  const undoHistory = useRef<HistoryEntry[]>([]);
+  const redoHistory = useRef<HistoryEntry[]>([]);
   const semantic = useRef<Promise<void>>();
   const failed = useRef<Submission>();
   const dependency = useRef<Id>();
@@ -167,7 +165,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         const changes = page.deltas.filter((delta) => delta.revision > revision.current);
         if (changes.length) {
           project(changes);
-          const retainDrawing = (stack: BoardEdit[]) => stack.filter((entry) => entry.marks.length)
+          const retainDrawing = (stack: HistoryEntry[]) => stack.filter((entry) => entry.scene)
             .map((entry) => ({ ...entry, changes: [] }));
           undoHistory.current = retainDrawing(undoHistory.current);
           redoHistory.current = retainDrawing(redoHistory.current);
@@ -188,7 +186,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function project(deltas: Delta[]) {
     const picked = selectionRef.current;
-    let pruned: Selection | undefined;
+    let pruned: BoardSelection | undefined;
     for (const delta of deltas) {
       for (const change of delta.changes) {
         switch (change.type) {
@@ -234,7 +232,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     update();
   }
 
-  function chooseSelection(next: Selection) {
+  function chooseSelection(next: BoardSelection) {
     selectionRef.current = next;
     if (next.cards.size === 1) focusedCard.current = next.cards.values().next().value;
     setSelection(next);
@@ -246,7 +244,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     semantic.current = invoke<Receipt>("apply_operation", { scope, operation: submission.operation })
       .then((receipt) => {
         project([receipt]);
-        finishEdit(submission.marks, receipt.inverse, submission.history, submission.selection);
+        finishEdit(submission.scene, receipt.inverse, submission.history, submission.selection);
         setNotice(`Saved · revision ${receipt.revision}`);
       })
       .catch((error) => {
@@ -264,33 +262,37 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     return !locked.current && !semantic.current && !failed.current && !remoteBusy.current;
   }
 
-  function commit(changes: Change[], marks: MarkChange[] = [], history: HistoryAction = "record", selected?: Selection) {
-    if (!canEdit() || (!changes.length && !marks.length)) return false;
+  function commit(changes: Change[], nextScene?: ExcalidrawScene, history: HistoryAction = "record", selected?: BoardSelection) {
+    if (!canEdit() || (!changes.length && !nextScene)) return false;
     if (changes.length > 64) {
       setNotice("This edit affects more than 64 cards or links. Select fewer objects and try again.");
       return false;
     }
     if (changes.length) {
-      send({ operation: { id: id(), expectedRevision: revision.current, changes }, marks, history, selection: selected });
+      send({ operation: { id: id(), expectedRevision: revision.current, changes }, scene: nextScene, history, selection: selected });
     } else {
-      finishEdit(marks, [], history, selected);
+      finishEdit(nextScene, [], history, selected);
     }
     return true;
   }
 
-  function finishEdit(marks: MarkChange[], inverse: Change[], history: HistoryAction, selected?: Selection) {
-    if (marks.length) {
-      points.current += applyMarks(drawing, marks);
-      const current = selectionRef.current;
-      const next = new Set(current.marks);
-      for (const { before, after } of marks) {
-        if (before && next.delete(before) && after) next.add(after);
-      }
-      if (!selected && current.marks.size) chooseSelection({ ...current, marks: next });
+  function finishEdit(nextScene: ExcalidrawScene | undefined, inverse: Change[], history: HistoryAction, selected?: BoardSelection) {
+    const entry: HistoryEntry = { changes: inverse, scene: nextScene ? sceneRef.current : undefined };
+    if (nextScene) {
+      sceneRef.current = nextScene;
+      setScene(nextScene);
+      drawing.excalidraw = nextScene;
+      drawing.strokes = [];
+      drawing.labels = [];
+      drawing.arrows = [];
       saver.changed();
-      }
+    }
     if (selected) chooseSelection(selected);
-    const entry = { changes: inverse, marks: invertMarks(marks) };
+    else if (nextScene) {
+      const live = new Set(nextScene.elements.map(({ id }) => id));
+      const picked = selectionRef.current;
+      chooseSelection({ ...picked, elements: new Set([...picked.elements].filter((id) => live.has(id))) });
+    }
     if (history === "undo") {
       undoHistory.current.pop();
       redoHistory.current.push(entry);
@@ -298,7 +300,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       if (history === "redo") redoHistory.current.pop();
       else redoHistory.current = [];
       undoHistory.current.push(entry);
-      if (undoHistory.current.length > 32) undoHistory.current.shift();
+      if (undoHistory.current.length > 24) undoHistory.current.shift();
     }
     update();
   }
@@ -306,7 +308,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   function changeHistory(redo = false) {
     if (active.current || edit) return;
     const entry = (redo ? redoHistory : undoHistory).current.at(-1);
-    if (entry) commit(entry.changes, entry.marks, redo ? "redo" : "undo");
+    if (entry) commit(entry.changes, entry.scene, redo ? "redo" : "undo");
   }
 
   function connect(card?: Card) {
@@ -326,7 +328,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     const camera = view.current;
     const shift = 32 * (board.nodes.length % 7);
     const at: Point = [geometry((70 + shift - camera.x) / camera.zoom), geometry((90 + shift - camera.y) / camera.zoom)];
-    openEdit({ kind: "card", card: makeCard("", at, (board.nodes.at(-1)?.order ?? -1) + 1), fresh: true });
+    openEdit({ card: makeCard("", at, (board.nodes.at(-1)?.order ?? -1) + 1), fresh: true });
   }
 
   function openEdit(next: Edit) {
@@ -342,25 +344,16 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     const text = String(values.get("title")).trim();
     if (!text) return;
     if (new TextEncoder().encode(text).length > 1024) return setNotice("Enter a title of 1–1024 bytes.");
-    if (edit.kind === "text") {
-      if (!edit.label && drawing.labels.length >= 1_000) return setNotice("This board reached its text limit.");
-      const label = { x: edit.point[0], y: edit.point[1], text };
-      const index = edit.label ? drawing.labels.indexOf(edit.label) : drawing.labels.length;
-      if (index < 0 || !commit([], [{ kind: "labels", index, before: edit.label, after: label }])) return;
-      chooseSelection(toggleTarget(selectionRef.current, { kind: "marks", mark: label }, false));
-      if (!keepTool) setTool("select");
-    } else {
-      if (semantic.current || failed.current) return;
-      const card: Card = {
-        ...edit.card, title: text, description: String(values.get("description")),
-        kind: values.get("kind") as Card["kind"], status: values.get("status") as Card["status"],
-        priority: values.get("priority") as Card["priority"], width: Number(values.get("width")),
-        height: Number(values.get("height")), x: Number(values.get("x")), y: Number(values.get("y")),
-        parent: (values.get("parent") || null) as Card["parent"],
-      };
-      if (card.parent !== edit.card.parent) card.order = (board.nodes.at(-1)?.order ?? -1) + 1;
-      if (!commit([setNode(card)], [], "record", toggleTarget(selectionRef.current, { kind: "cards", id: card.id }, false))) return;
-    }
+    if (semantic.current || failed.current) return;
+    const card: Card = {
+      ...edit.card, title: text, description: String(values.get("description")),
+      kind: values.get("kind") as Card["kind"], status: values.get("status") as Card["status"],
+      priority: values.get("priority") as Card["priority"], width: Number(values.get("width")),
+      height: Number(values.get("height")), x: Number(values.get("x")), y: Number(values.get("y")),
+      parent: (values.get("parent") || null) as Card["parent"],
+    };
+    if (card.parent !== edit.card.parent) card.order = (board.nodes.at(-1)?.order ?? -1) + 1;
+    if (!commit([setNode(card)], undefined, "record", { ...blankSelection(), cards: new Set([card.id]) })) return;
     closeEdit(surface());
   }
 
@@ -410,7 +403,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       await deadline(flush(), 4_000);
       const written = format === "board"
         ? await invoke<boolean>("export_board", { scope })
-        : await invoke<boolean>("export_preview", await (await exportImage(board, format)).arrayBuffer(),
+        : await invoke<boolean>("export_preview", await (await exportScene(board.nodes, board.edges, sceneRef.current, format)).arrayBuffer(),
           { headers: { "x-board-image": format } });
       if (written) setNotice("Export saved.");
     } catch (error) {
@@ -439,11 +432,6 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     }
   }
 
-  function markChanges(map: (mark: Mark) => Mark): MarkChange[] {
-    return drawingKinds.flatMap((kind) => drawing[kind].flatMap((before, index) =>
-      selectionRef.current.marks.has(before) ? [{ kind, index, before, after: map(before) }] : []));
-  }
-
   function pickedCards() {
     return board.nodes.filter((card) => selectionRef.current.cards.has(card.id));
   }
@@ -457,50 +445,30 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   function editCard(card: Card) {
     if (!edit && !locked.current && !semantic.current && !failed.current && !remoteBusy.current) {
       selectCard(card);
-      openEdit({ kind: "card", card, fresh: false });
+      openEdit({ card, fresh: false });
     }
-  }
-
-  function editLabel(label: Label) {
-    if (!edit && canEdit()) {
-      chooseSelection(toggleTarget(selectionRef.current, { kind: "marks", mark: label }, false));
-      openEdit({ kind: "text", point: [label.x, label.y], label });
-    }
-  }
-
-  function editSelected() {
-    const picked = selectionRef.current;
-    if (selectionSize(picked) !== 1) return;
-    const card = pickedCards()[0];
-    const mark = picked.marks.values().next().value;
-    if (card) editCard(card);
-    else if (mark && "text" in mark) editLabel(mark);
   }
 
   function deleteSelected() {
     if (active.current || edit) return;
-    const { changes, marks } = removeSelection(board, selectionRef.current);
-    commit(changes, marks);
+    const picked = selectionRef.current;
+    const { changes } = removeSelection(board, { ...picked, marks: new Set() });
+    // Native Delete owns freeform deletion, including frame membership and bindings.
+    if (picked.elements.size) {
+      surface()?.dispatchEvent(new KeyboardEvent("keydown", { key: "Delete", code: "Delete", bubbles: true }));
+    } else commit(changes);
   }
 
   function duplicateSelected() {
     if (active.current || edit || !canEdit()) return;
     const picked = selectionRef.current;
-    const offset = boundedOffset([24, 24], movableBounds(pickedCards(), picked.marks, strokeBounds));
-    const { changes, marks, selected } = duplicateSelection(board, picked, offset);
-    const limits = { strokes: 2_000, labels: 1_000, arrows: 1_000 };
-    const count = { strokes: 0, labels: 0, arrows: 0 };
-    let addedPoints = 0;
-    for (const { kind, after } of marks) {
-      count[kind]++;
-      if (after && "points" in after) addedPoints += after.points.length;
-    }
-    if (drawingKinds.some((kind) => drawing[kind].length + count[kind] > limits[kind])
-      || points.current + addedPoints > 180_000 || board.nodes.length + selected.cards.size > 2_000) {
-      setNotice("This board reached its object limit.");
+    const offset = boundedOffset([24, 24], movableBounds(pickedCards(), [], new WeakMap()));
+    const { changes, selected } = duplicateSelection(board, { ...picked, marks: new Set() }, offset);
+    if (board.nodes.length + selected.cards.size > 2_000) {
+      setNotice("This board reached its card limit.");
       return;
     }
-    commit(changes, marks, "record", selected);
+    commit(changes, undefined, "record", { ...blankSelection(), cards: selected.cards, edges: selected.edges });
   }
 
   function cycleCards(direction: number) {
@@ -512,7 +480,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   function selectCard(card?: Card, reveal = false) {
-    chooseSelection(card ? toggleTarget(selectionRef.current, { kind: "cards", id: card.id }, false) : emptySelection());
+    chooseSelection({ ...blankSelection(), cards: new Set(card ? [card.id] : []) });
     const api = controller.current;
     const element = card && api?.getSceneElements().find(({ customData }) => customData?.raqshCard === card.id);
     if (reveal && element) api?.scrollToContent(element, { animate: false });
@@ -563,7 +531,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     const shortcut = event.key.toLowerCase();
     const consume = () => { event.preventDefault(); event.stopPropagation(); };
     if ((event.ctrlKey || event.metaKey) && !event.altKey) {
-      if (["z", "y", "d"].includes(shortcut)) {
+      if (shortcut === "z" || shortcut === "y" || (shortcut === "d" && selectionRef.current.cards.size)) {
         consume();
         settleScene.current?.();
         if (shortcut === "d") duplicateSelected();
@@ -573,43 +541,47 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     }
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.key === "Escape") {
-      if (active.current) return;
+      if (active.current || controller.current?.getAppState().contextMenu || controller.current?.getAppState().openPopup
+        || controller.current?.getAppState().openDialog) return;
       consume();
       if (closeDisclosure(menu.current) || closeDisclosure(moreTools.current)) return;
       if (agents) closePanel("agents");
       else if (inspector) closePanel("cards");
       else {
         if (tool === "connect") selectTool("select");
-        chooseSelection(emptySelection());
+        chooseSelection(blankSelection());
         setNotice("");
       }
       return;
     }
     if (active.current) return;
     const next = tools.find((item) => item.key === shortcut || item.number === shortcut);
-    if (next && next.id !== "image" && !event.shiftKey) { consume(); selectTool(next.id); }
+    if (next && !event.shiftKey) { consume(); selectTool(next.id); }
     else if (shortcut === "insert" || shortcut === "n") { consume(); addCard(); }
     else if (shortcut === "c") { consume(); selectTool("connect"); }
     else if (shortcut === "q") { consume(); setKeepTool(!keepTool); }
-    else if (shortcut === "?" || shortcut === "f1") { consume(); setKeyboardHelp(true); }
+    else if (shortcut === "f1") { consume(); setKeyboardHelp(true); }
     else if (shortcut === "[" || shortcut === "]") { consume(); cycleCards(shortcut === "[" ? -1 : 1); }
     else if (shortcut === "enter" && (selectionRef.current.cards.size > 0 || tool === "connect")
       && canvas.current?.contains(target)) {
       consume();
       if (tool === "connect") connect(pickedCards()[0]);
-      else editSelected();
+      else {
+        const card = pickedCards()[0];
+        if (card && countSelection(selectionRef.current) === 1) editCard(card);
+      }
     } else if (["+", "=", "-"].includes(shortcut)) { consume(); zoom(shortcut === "-" ? 1 / 1.1 : 1.1); }
   }
 
-  const count = selectionSize(selection);
+  const count = countSelection(selection);
+  const typedSelected = selection.cards.size > 0 || selection.edges.size > 0;
   const card = count === 1 ? nodeIndex.get(selection.cards.values().next().value ?? "") : undefined;
-  const mark = count === 1 ? selection.marks.values().next().value : undefined;
   const edge = count === 1 && selection.edges.size ? board.edges.find((edge) => selection.edges.has(edge.id)) : undefined;
   const group = card && nodeIndex.get(card.parent ?? "");
   const unavailable = pending || !canEdit();
   return (
     <div className="board-editor lean-editor" ref={panel} data-fixture={window.__BOARD_FIXTURE__}
-      data-initial-elements={opened.nodes.length * 2 + opened.edges.length + drawing.strokes.length}
+      data-initial-elements={opened.nodes.length * 2 + opened.edges.length + (drawing.excalidraw?.elements.length ?? drawing.strokes.length)}
       data-semantic-revision={revision.current} data-renderer="excalidraw"
       onPointerDownCapture={(event) => {
         const target = event.target as Node;
@@ -641,14 +613,14 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       </details>
       <p id="board-keyboard-summary" className="visually-hidden">Press N to add a card. Arrow keys move the selection. Enter edits the selected card or text. F1 opens all shortcuts.</p>
       <div role="status" aria-atomic="true" className="visually-hidden">{card ? `Selected ${card.title}` : count ? `${count} selected` : ""}</div>
-      <EditorSurface board={board} container={canvas} cardsLayer={cardsLayer} cards={cards} active={active}
+      <EditorSurface board={board} scene={scene} container={canvas} cardsLayer={cardsLayer} cards={cards} active={active}
         controller={controller} sync={settleScene} selection={selection} view={view} tool={tool} keepTool={keepTool}
         dark={dark} canEdit={canEdit} readOnly={pending || !!edit || keyboardHelp || !!closeFailure}
         onReady={() => { if (panel.current) panel.current.dataset.editorReady = "true"; }} onView={setZoomPercent} onTool={setTool} onSelection={chooseSelection} onEditCard={editCard} onConnect={(card) => {
           selectCard(card);
           connect(card);
         }} onSettle={() => { if (remoteNeeded.current) scheduleRemote(); }} onNotice={setNotice}
-        onCommit={(changes, marks, selected) => commit(changes, marks, "record", selected)} />
+        onCommit={(changes, next, selected) => commit(changes, next, "record", selected)} />
       <div className="lean-cards" aria-hidden="true" ref={cardsLayer}>
         {board.nodes.map((item) => (
           <div key={item.id} dir="auto" className="lean-card" data-card-id={item.id}
@@ -661,7 +633,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
           </div>
         ))}
       </div>
-      {!board.nodes.length && !drawing.strokes.length && !drawing.labels.length && !drawing.arrows.length && <div className="lean-empty">
+      {!board.nodes.length && !scene.elements.length && <div className="lean-empty">
         <strong>{brand.displayName}</strong>
         <p>Draw here. Your plan starts on the board.</p>
         <small>Press N to add a card, or pick a tool to sketch and write.</small>
@@ -673,9 +645,9 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         </button>
         <span className="tool-divider" aria-hidden="true" />
         {tools.map(({ id, label, key, number }) => <button key={id} type="button" data-tool={id}
-          disabled={pending || id === "image"} aria-pressed={tool === id} aria-label={label}
+          disabled={pending} aria-pressed={tool === id} aria-label={label}
           title={key ? `${label} (${key.toUpperCase()}${number ? ` or ${number}` : ""})` : label}
-          onClick={() => { if (id !== "image") selectTool(id); }}>
+          onClick={() => selectTool(id)}>
           <Icon name={id} size={16} />{number && <span className="tool-key" aria-hidden="true">{number}</span>}
         </button>)}
         <span className="tool-divider" aria-hidden="true" />
@@ -686,6 +658,27 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
               onClick={() => { closeDisclosure(moreTools.current); selectTool("connect"); }}>
               <Icon name="connect" size={16} />Dependency
             </button>
+            <button type="button" data-tool="frame" disabled={pending} aria-pressed={tool === "frame"}
+              onClick={() => { closeDisclosure(moreTools.current); selectTool("frame"); }}>
+              <Icon name="rectangle" size={16} />Frame
+            </button>
+            <button type="button" data-tool="laser" disabled={pending} aria-pressed={tool === "laser"}
+              onClick={() => { closeDisclosure(moreTools.current); selectTool("laser"); }}>
+              <Icon name="pen" size={16} />Laser pointer
+            </button>
+            <button type="button" data-drawing-properties disabled={pending} onClick={() => {
+              closeDisclosure(moreTools.current);
+              const api = controller.current;
+              if (api) api.updateScene({ appState: { openMenu: api.getAppState().openMenu === "shape" ? null : "shape" } });
+            }}><Icon name="more" size={16} />Drawing properties</button>
+            <button type="button" data-drawing-library disabled={pending} onClick={() => {
+              closeDisclosure(moreTools.current);
+              controller.current?.toggleSidebar({ name: "default", tab: "library" });
+            }}><Icon name="library" size={16} />Drawing library</button>
+            <button type="button" data-mermaid disabled={pending} onClick={() => {
+              closeDisclosure(moreTools.current);
+              controller.current?.updateScene({ appState: { openDialog: { name: "ttd", tab: "mermaid" } } });
+            }}><Icon name="connect" size={16} />Mermaid diagram</button>
           </div>
         </details>
       </div>
@@ -732,7 +725,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
             }
           }}><span aria-hidden="true" />Agents</button>
       {agents && <AgentPanel scope={scope} onClose={() => closePanel("agents")} />}
-      {!agents && (inspector || count > 0) && <div className="lean-shelf">
+      {!agents && (inspector || typedSelected) && <div className="lean-shelf">
       {inspector && <aside id="board-card-list" className="lean-inspector" aria-label="Card list">
         <header><h2>Cards</h2><button type="button" title="Close cards" aria-label="Close cards" onClick={() => closePanel("cards")}><Icon name="close" size={16} /></button></header>
         {board.nodes.length === 0 && <p>No cards yet.</p>}
@@ -753,7 +746,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
             onClick={() => { selectCard(item, true); if (tool === "connect") connect(item); }}>{item.title}</button></li>
         ))}</ol>
       </aside>}
-      {count > 0 && <aside className="lean-selection" aria-label="Selection">
+      {typedSelected && <aside className="lean-selection" aria-label="Selection">
         {card && <>
         <strong dir="auto">{card.title}</strong>
         <small>{kinds[card.kind]} · {statuses[card.status]} · {priorities[card.priority]}{group && ` · ${group.title}`}</small>
@@ -772,26 +765,9 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         ))}
         </>}
         {edge && <strong dir="auto">{nodeIndex.get(edge.from)?.title} → {nodeIndex.get(edge.to)?.title}</strong>}
-        {mark && <>
-          <strong>{"text" in mark ? "Board text" : "points" in mark ? "Stroke" : "Arrow"}</strong>
-          {"text" in mark ? <button type="button" disabled={unavailable} onClick={() => editLabel(mark)}>Edit text</button>
-            : <label>Color<select disabled={unavailable} value={mark.color === "green" ? "slate" : mark.color}
-                onChange={(event) => {
-                  const color = event.target.value as Ink;
-                  commit([], markChanges((mark) => ({ ...mark, color })));
-                }}>{choices(inkChoices)}</select></label>}
-          {"points" in mark && <label>Stroke width<select disabled={unavailable} value={mark.width}
-            onChange={(event) => {
-              const width = Number(event.target.value);
-              commit([], markChanges((mark) => ({ ...mark, width })));
-            }}>
-            {[...new Set([1, 2, 3, 4, 6, 8, 12, mark.width])].sort((a, b) => a - b)
-              .map((width) => <option value={width} key={width}>{width}</option>)}
-          </select></label>}
-        </>}
         {count > 1 && <strong>{count} objects selected</strong>}
         <div>
-          <button type="button" disabled={unavailable || (!selection.cards.size && !selection.marks.size)}
+          <button type="button" disabled={unavailable || !selection.cards.size}
             onClick={duplicateSelected}>Duplicate</button>
           <button type="button" disabled={unavailable} onClick={deleteSelected}>Delete</button>
         </div>
@@ -812,25 +788,23 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
           <dt>Plus / minus</dt><dd>Zoom in or out.</dd>
           <dt>Ctrl / Cmd + Z</dt><dd>Undo the last board edit.</dd>
           <dt>Ctrl / Cmd + Shift + Z</dt><dd>Redo. Ctrl / Cmd + Y also works.</dd>
-          <dt>Ctrl / Cmd + Enter</dt><dd>Save the open card or text edit.</dd>
+          <dt>Ctrl / Cmd + Enter</dt><dd>Save the open card edit.</dd>
           <dt>Escape</dt><dd>Cancel a gesture or close the active panel.</dd>
         </dl>
         <button type="button" data-initial-focus onClick={() => setKeyboardHelp(false)}>Close shortcuts</button>
       </Modal>}
-      {edit && <Modal title={edit.kind === "text" ? edit.label ? "Edit text" : "Place text" : edit.fresh ? "Add card" : "Edit card"} cancel={cancelEdit}>
-        <h2>{edit.kind === "text" ? edit.label ? "Edit text" : "Place text" : edit.fresh ? "Add card" : "Edit card"}</h2>
+      {edit && <Modal title={edit.fresh ? "Add card" : "Edit card"} cancel={cancelEdit}>
+        <h2>{edit.fresh ? "Add card" : "Edit card"}</h2>
         <form className="lean-edit" onSubmit={enterEdit} onChange={() => { draftChanged.current = true; }}
           onKeyDown={(event) => {
             if (event.key !== "Enter" || event.nativeEvent.isComposing || (!event.ctrlKey && !event.metaKey)) return;
             event.preventDefault();
             event.currentTarget.requestSubmit();
           }}>
-        <label>{edit.kind === "card" ? "Title" : "Board text"}
+        <label>Title
           <textarea name="title" dir="auto" data-initial-focus required
-            className={edit.kind === "text" ? "lean-note-input" : undefined}
-            defaultValue={edit.kind === "card" ? edit.card.title : edit.label?.text ?? ""} maxLength={512} />
+            defaultValue={edit.card.title} maxLength={512} />
         </label>
-        {edit.kind === "card" && <>
           <label>Description<textarea name="description" dir="auto" defaultValue={edit.card.description} maxLength={4096} /></label>
           <div className="edit-fields">
             <label>Type<select name="kind" defaultValue={edit.card.kind}>{choices(kinds)}</select></label>
@@ -847,10 +821,9 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
               ))}
             </select></label>
           </div>
-        </>}
         <div className="dialog-actions">
           <button type="button" onClick={cancelEdit}>Cancel</button>
-          <button type="submit" disabled={unavailable}>{edit.kind === "card" ? edit.fresh ? "Create card" : "Save card" : edit.label ? "Save text" : "Place text"}</button>
+          <button type="submit" disabled={unavailable}>{edit.fresh ? "Create card" : "Save card"}</button>
         </div>
         </form>
       </Modal>}

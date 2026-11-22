@@ -1,3 +1,6 @@
+import type { ExcalidrawElement } from "@excalidraw/excalidraw/element/types";
+import type { BinaryFiles } from "@excalidraw/excalidraw/types";
+
 export type Id = string;
 export type Point = [number, number];
 export type Project = { id: Id; title: string; root: string };
@@ -23,7 +26,10 @@ export type Ink = "green" | "slate" | "blue" | "red";
 export type Stroke = { id: string; x: number; y: number; points: Point[]; color: Ink; width: number };
 export type Label = { x: number; y: number; text: string };
 export type Arrow = { from: Point; to: Point; color: Ink };
-export type Drawing = { strokes: Stroke[]; labels: Label[]; arrows: Arrow[] };
+export type ExcalidrawScene = {
+  version: 1; elements: readonly ExcalidrawElement[]; files: BinaryFiles; background: string; gridSize: number | null;
+};
+export type Drawing = { strokes: Stroke[]; labels: Label[]; arrows: Arrow[]; excalidraw?: ExcalidrawScene };
 export type OpenBoard = { board: BoardInfo; scope: Scope; nodes: Card[]; edges: Edge[]; drawing: Drawing };
 export type Change =
   | { type: "setNode"; node: Card } | { type: "removeNode"; id: Id }

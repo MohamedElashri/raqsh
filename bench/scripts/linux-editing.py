@@ -8,7 +8,7 @@ import runpy
 import sqlite3
 import time
 
-from webkit_driver import isolated_library, wait_until, webdriver
+from webkit_driver import isolated_library, open_disclosure, wait_until, webdriver
 
 helpers = runpy.run_path(str(Path(__file__).with_name("linux-p1-proof.py")))
 at, button, close_editor, pointer, ready, revision, text = (
@@ -57,7 +57,8 @@ def checkpoint(root, predicate):
         with sqlite3.connect(database) as connection:
             row = connection.execute("SELECT drawing FROM boards WHERE title = 'empty'").fetchone()
         drawing = json.loads(row[0])
-        return drawing if predicate(drawing) else None
+        scene = drawing.get("excalidraw")
+        return scene if scene and predicate(scene) else None
 
     return wait_until(snapshot, "drawing checkpoint")
 
@@ -106,20 +107,20 @@ def edit_board(web, root):
 
     key(web, "r")
     drag(web, (320, 365), (440, 435))
-    frame = checkpoint(root, lambda d: len(d["strokes"]) == 1)
-    stroke, = frame["strokes"]
-    assert [stroke["x"], stroke["y"]] == [320, 365]
-    assert max(x for x, _ in stroke["points"]) == 120
-    assert max(y for _, y in stroke["points"]) == 70
+    frame = checkpoint(root, lambda scene: any(item["type"] == "rectangle" for item in scene["elements"]))
+    rectangle, = frame["elements"]
+    assert [rectangle["x"], rectangle["y"], rectangle["width"], rectangle["height"]] == [320, 365, 120, 70]
 
     key(web, "p")
     drag(web, (210, 350), (270, 395))
-    checkpoint(root, lambda d: len(d["strokes"]) == 2)
+    checkpoint(root, lambda scene: any(item["type"] == "freedraw" for item in scene["elements"]))
 
     key(web, "a")
     drag(web, (530, 350), (610, 405))
-    arrow, = checkpoint(root, lambda d: len(d["arrows"]) == 1)["arrows"]
-    assert arrow["from"] == [530, 350] and arrow["to"] == [610, 405]
+    arrow = next(item for item in checkpoint(root, lambda scene: any(item["type"] == "arrow" for item in scene["elements"]))
+                 ["elements"] if item["type"] == "arrow")
+    assert [arrow["x"], arrow["y"]] == [530, 350]
+    assert arrow["points"][-1] == [80, 55]
 
     key(web, "t")
     click_canvas(web, 275, 320)
@@ -127,20 +128,21 @@ def edit_board(web, root):
     for letter in "Review":
         key(web, letter)
     key(web, ESCAPE)
-    checkpoint(root, lambda d: d["labels"] and d["labels"][0]["text"] == "Review")
+    checkpoint(root, lambda scene: any(item.get("text") == "Review" for item in scene["elements"]))
 
     # One history entry covers a mixed card-and-text move.
     key(web, "v")
+    click_canvas(web, 285, 280)
     drag(web, (75, 110), (348, 344))
     wait_until(lambda: web.evaluate('return document.querySelector(".lean-selection strong")?.textContent;') == "2 objects selected",
                "mixed selection")
     drag(web, (150, 175), (170, 195))
     revision(web, 7)
-    checkpoint(root, lambda d: d["labels"][0]["x"] == 295)
+    checkpoint(root, lambda scene: any(item.get("text") == "Review" and item["x"] == 295 for item in scene["elements"]))
     key(web, "z", CONTROL)
     revision(web, 8)
     assert [card["x"] for card in cards(web)] == [120, 430]
-    expected = checkpoint(root, lambda d: d["labels"][0]["x"] == 275)
+    checkpoint(root, lambda scene: any(item.get("text") == "Review" and item["x"] == 275 for item in scene["elements"]))
 
     key(web, "v")
     click_canvas(web, 160, 180)
@@ -157,8 +159,112 @@ def edit_board(web, root):
     key(web, "z", CONTROL)
     revision(web, 10)
     assert [card["title"] for card in cards(web)] == ["First task", "Second task"]
+    rich = rich_editing(web, root)
     close_editor(web)
-    return expected
+    return rich
+
+
+def rich_editing(web, root):
+    def control(name):
+        selector = f'.selected-shape-actions [data-testid="{name}"]'
+        wait_until(lambda: web.evaluate("return !!document.querySelector(arguments[0])?.getClientRects().length;", selector),
+                   f"native {name} control")
+        web.evaluate("document.querySelector(arguments[0]).click();", selector)
+
+    def element(scene, kind):
+        return next((item for item in scene["elements"] if item["type"] == kind), {})
+
+    key(web, "v")
+    click_canvas(web, 380, 365)
+    control("strokeWidth-extraBold")
+    checkpoint(root, lambda scene: element(scene, "rectangle").get("strokeWidth") == 4)
+
+    click_canvas(web, 569, 377)
+    control("elbow-arrow")
+    checkpoint(root, lambda scene: element(scene, "arrow").get("elbowed"))
+
+    click_canvas(web, 760, 320)
+    drag(web, (195, 345), (460, 443))
+    key(web, "g", CONTROL)
+    checkpoint(root, lambda scene: element(scene, "rectangle").get("groupIds")
+               and element(scene, "rectangle")["groupIds"] == element(scene, "freedraw").get("groupIds"))
+
+    web.click('.more-tools > summary')
+    web.click('[data-tool="frame"]')
+    drag(web, (680, 450), (875, 620))
+    checkpoint(root, lambda scene: element(scene, "frame"))
+    web.evaluate("""
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(new File([
+          '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="36"><rect width="48" height="36" fill="red"/></svg>'
+        ], "local-shape.svg", {type: "image/svg+xml"}));
+        document.querySelector("canvas.interactive").dispatchEvent(new DragEvent("drop", {
+          dataTransfer, bubbles: true, clientX: 730, clientY: 510, cancelable: true
+        }));
+    """)
+    rich = checkpoint(root, lambda scene: element(scene, "image").get("fileId") in scene["files"])
+    assert element(rich, "image")["frameId"] == element(rich, "frame")["id"]
+    assert rich["files"][element(rich, "image")["fileId"]]["dataURL"].startswith("data:image/svg+xml;base64,")
+    key(web, "v")
+    click_canvas(web, 295, 328)
+    key(web, "c", CONTROL)
+    pointer(web, at(web, 550, 490))
+    key(web, "v", CONTROL)
+    return checkpoint(root, lambda scene: sum(item.get("text") == "Review" for item in scene["elements"]) == 2)
+
+
+def preview_exports(web):
+    web.evaluate("""
+        window.encodedPreviews = {};
+        const original = window.fetch;
+        window.fetch = function (url, options) {
+            if (!String(url).endsWith("/export_preview")) return original.apply(this, arguments);
+            const format = new Headers(options.headers).get("x-board-image");
+            const response = new Response(options.body);
+            const data = format === "svg" ? response.text() : response.arrayBuffer();
+            return data.then(value => {
+                window.encodedPreviews[format] = format === "svg" ? value : Array.from(new Uint8Array(value).slice(0, 8));
+                return new Response("false", { headers: { "Tauri-Response": "ok" } });
+            });
+        };
+    """)
+    for index, kind in [(2, "png"), (3, "svg")]:
+        open_disclosure(web, ".board-header")
+        open_disclosure(web, ".export-menu")
+        web.click(f".export-menu button:nth-child({index})")
+        wait_until(lambda: web.evaluate("return window.encodedPreviews[arguments[0]];", kind), f"{kind} export IPC")
+        wait_until(lambda: web.evaluate('return !document.querySelector(".board-header button").disabled;'), f"{kind} export completion")
+    assert web.evaluate("return window.encodedPreviews.png;") == [137, 80, 78, 71, 13, 10, 26, 10]
+    assert web.evaluate("return window.encodedPreviews.svg.includes('<image') && window.encodedPreviews.svg.includes('First task');")
+
+
+def native_panels(web, root):
+    web.click(".more-tools > summary")
+    web.click("[data-drawing-library]")
+    wait_until(lambda: web.evaluate('return !!document.querySelector(".default-sidebar")?.getClientRects().length;'),
+               "native drawing library")
+    web.click(".more-tools > summary")
+    web.click("[data-drawing-library]")
+    web.click(".more-tools > summary")
+    web.click("[data-mermaid]")
+    wait_until(lambda: web.evaluate('return !!document.querySelector(".excalidraw [role=dialog] textarea");'),
+               "local Mermaid editor")
+    web.evaluate("""
+        const input = document.querySelector(".ttd-dialog textarea");
+        Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value").set.call(input, arguments[0]);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+    """, "flowchart TD\n  A[Implementation] --> B[Review result]")
+    wait_until(lambda: web.evaluate("""
+        const error = document.querySelector("[data-testid=ttd-dialog-output-error]");
+        if (error) throw new Error(error.textContent);
+        const canvas = document.querySelector(".ttd-dialog canvas");
+        if (!canvas?.width || !canvas.height) return false;
+        return canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data
+          .some((value, index) => index % 4 === 3 && value > 0);
+    """), "rendered Mermaid preview")
+    web.evaluate('document.querySelector(".ttd-dialog textarea").focus();')
+    key(web, ENTER, CONTROL)
+    checkpoint(root, lambda scene: any(item.get("text") == "Review result" for item in scene["elements"]))
 
 
 def main():
@@ -176,6 +282,8 @@ def main():
             click_canvas(web, 175, 175)
             wait_until(lambda: web.evaluate('return document.querySelector(".lean-selection")?.innerText.includes("Required by Second task");'),
                        "saved dependency")
+            preview_exports(web)
+            native_panels(web, root)
         with launch(args.binary, ("--fixture=normal",)) as web:
             ready(web)
             key(web, "+")

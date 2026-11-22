@@ -13,8 +13,8 @@
       { "label": "main", "create": false, "width": 1024, "height": 720, "minWidth": 480, "minHeight": 360 }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'none'; form-action 'none'",
-      "devCsp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ws://127.0.0.1:1420; object-src 'none'; base-uri 'none'; form-action 'none'",
+      "csp": "default-src 'self'; img-src 'self' data: blob:; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'none'; form-action 'none'",
+      "devCsp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ipc: http://ipc.localhost ws://127.0.0.1:1420; object-src 'none'; base-uri 'none'; form-action 'none'",
       "capabilities": ["board-editor"]
     }
   },
@@ -31,6 +31,12 @@
     "resources": {
       "../../../LICENSE": "licenses/Raqsh-LICENSE.txt",
       "licenses/Excalidraw-MIT.txt": "licenses/Excalidraw-MIT.txt",
+      "licenses/Cascadia-OFL.txt": "licenses/Cascadia-OFL.txt",
+      "licenses/ComicShanns-MIT.txt": "licenses/ComicShanns-MIT.txt",
+      "licenses/Liberation-OFL.txt": "licenses/Liberation-OFL.txt",
+      "licenses/Lilita-OFL.txt": "licenses/Lilita-OFL.txt",
+      "licenses/Virgil-OFL.txt": "licenses/Virgil-OFL.txt",
+      "licenses/Xiaolai-OFL.txt": "licenses/Xiaolai-OFL.txt",
       "../src/lean/fonts/OFL-Assistant.txt": "licenses/OFL-Assistant.txt",
       "../src/lean/fonts/OFL-Excalifont.txt": "licenses/OFL-Excalifont.txt",
       "../src/lean/fonts/OFL-Nunito.txt": "licenses/OFL-Nunito.txt"

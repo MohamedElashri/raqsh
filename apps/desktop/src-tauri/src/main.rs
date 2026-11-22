@@ -122,6 +122,8 @@ fn main() -> tauri::Result<()> {
             };
 
             let mut window = WebviewWindowBuilder::from_config(app, &config.app.windows[0])?
+                .disable_drag_drop_handler()
+                .enable_clipboard_access()
                 .on_navigation(move |url| {
                     (url.scheme() == "tauri" && url.host_str() == Some("localhost"))
                         || dev_origin.as_ref() == Some(&url.origin())

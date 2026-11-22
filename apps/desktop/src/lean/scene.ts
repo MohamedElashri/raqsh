@@ -1,7 +1,8 @@
-import { convertToExcalidrawElements, FONT_FAMILY } from "@excalidraw/excalidraw";
+import { convertToExcalidrawElements, exportToBlob, exportToSvg, FONT_FAMILY } from "@excalidraw/excalidraw";
 import type { ExcalidrawElement, ExcalidrawFreeDrawElement } from "@excalidraw/excalidraw/element/types";
-import { id, type Card, type Edge, type Ink, type Point } from "../model";
-import { geometry, type DrawingKind, type Mark } from "./editing";
+import type { AppState, BinaryFiles } from "@excalidraw/excalidraw/types";
+import type { Card, Drawing, Edge, ExcalidrawScene, Ink, Point } from "../model";
+import { drawingKinds, type Mark } from "./editing";
 import { outline, type Shape } from "./geometry";
 
 const palette: Record<Ink, string> = { green: "#1b1b19", slate: "#1b1b19", blue: "#2862a3", red: "#a74a41" };
@@ -13,7 +14,7 @@ const localPoints = (points: Point[]) => points as unknown as ExcalidrawFreeDraw
 export const cardId = (key: string) => `raqsh-card-${key}`;
 export const edgeId = (key: string) => `raqsh-edge-${key}`;
 
-export function cardElements(cards: Card[], edges: Edge[]) {
+export function cardElements(cards: Card[], edges: Edge[], visible = false) {
   const byId = new Map(cards.map((card) => [card.id, card]));
   return convertToExcalidrawElements([
     ...edges.flatMap((edge) => {
@@ -25,11 +26,14 @@ export function cardElements(cards: Card[], edges: Edge[]) {
       return [{ ...stroke, type: "arrow" as const, id: edgeId(edge.id), x, y,
         points: localPoints([[0, 0], [to.x - x, to.y + to.height / 2 - y]]),
         start: { id: cardId(from.id) }, end: { id: cardId(to.id) },
-        strokeColor: "#77746c", strokeWidth: edge.kind === "dependency" ? 1.5 : 1 }];
+        customData: { raqshEdge: edge.id }, strokeColor: "#77746c", strokeWidth: edge.kind === "dependency" ? 1.5 : 1 }];
     }),
     ...cards.map((card) => ({
       ...stroke, type: "rectangle" as const, id: cardId(card.id), x: card.x, y: card.y,
-      width: card.width, height: card.height, customData: { raqshCard: card.id }, opacity: 0, backgroundColor: "#e5e5e0", fillStyle: "solid" as const,
+      width: card.width, height: card.height, customData: { raqshCard: card.id },
+      opacity: visible ? 100 : 0, backgroundColor: card.dropped ? "#efeeea" : "#e5e5e0",
+      strokeColor: "#8c8981", strokeWidth: 1, fillStyle: "solid" as const,
+      label: visible ? { text: card.title, fontSize: 17, fontFamily: FONT_FAMILY.Nunito } : undefined,
     })),
   ], exact);
 }
@@ -75,46 +79,80 @@ export function markElement(mark: Mark, key: string): ExcalidrawElement {
     pressures: [], simulatePressure: true, lastCommittedPoint: null };
 }
 
-export function readMark(element: ExcalidrawElement, before?: Mark): { kind: DrawingKind; mark: Mark } | undefined {
-  const { x, y, width, height, angle } = element;
-  const color = element.strokeColor === palette.red ? "red" : element.strokeColor === palette.blue ? "blue"
-    : before && "color" in before && before.color === "green" ? "green" : "slate";
-  if (element.type === "text") {
-    const text = element.originalText.trim();
-    if (element.containerId || !text || text.includes("\0") || new TextEncoder().encode(text).length > 1024) return;
-    return { kind: "labels", mark: { x: geometry(x), y: geometry(y + 17), text } };
+export const isTypedId = (id: string) => id.startsWith("raqsh-card-") || id.startsWith("raqsh-edge-");
+
+export function openScene(drawing: Drawing): ExcalidrawScene {
+  return drawing.excalidraw ?? {
+    version: 1, files: {}, background: "transparent", gridSize: null,
+    elements: drawingKinds.flatMap((kind) => drawing[kind].map((item, index) =>
+      markElement(item, `drawing-${kind}-${index}`))),
+  };
+}
+
+export function sceneAppState(scene: ExcalidrawScene) {
+  return { viewBackgroundColor: scene.background, gridModeEnabled: scene.gridSize !== null,
+    gridSize: scene.gridSize ?? 20 };
+}
+
+export function composeScene(typed: readonly ExcalidrawElement[], scene: ExcalidrawScene) {
+  const byCard = new Map<string, Set<string>>();
+  for (const element of scene.elements) {
+    if (element.type !== "arrow") continue;
+    for (const binding of [element.startBinding, element.endBinding]) {
+      const id = binding?.elementId;
+      if (!id?.startsWith("raqsh-card-")) continue;
+      if (!byCard.has(id)) byCard.set(id, new Set());
+      byCard.get(id)!.add(element.id);
+    }
   }
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-  const centerX = "points" in element ? (Math.max(...element.points.map(([px]) => px)) + Math.min(...element.points.map(([px]) => px))) / 2 : width / 2;
-  const centerY = "points" in element ? (Math.max(...element.points.map(([, py]) => py)) + Math.min(...element.points.map(([, py]) => py))) / 2 : height / 2;
-  const toBoard = ([px, py]: readonly [number, number]): Point => [
-    geometry(x + centerX + (px - centerX) * cos - (py - centerY) * sin),
-    geometry(y + centerY + (px - centerX) * sin + (py - centerY) * cos),
-  ];
-  if (element.type === "arrow") {
-    if (element.points.length !== 2) return;
-    const from = toBoard(element.points[0]);
-    const to = toBoard(element.points[1]);
-    if (from[0] === to[0] && from[1] === to[1]) return;
-    return { kind: "arrows", mark: { from, to, color } };
+  return [...typed.map((element) => {
+    const arrows = byCard.get(element.id);
+    return arrows ? { ...element, boundElements: [...(element.boundElements ?? []),
+      ...Array.from(arrows, (id) => ({ id, type: "arrow" as const }))] } : element;
+  }), ...scene.elements];
+}
+
+// Excalidraw mutates its own elements during gestures. Reuse immutable snapshots
+// across undo entries, cloning only elements whose native version changed.
+export function snapshotScene(
+  previous: ExcalidrawScene, elements: readonly ExcalidrawElement[], files: BinaryFiles, state: AppState,
+): ExcalidrawScene {
+  const background = state.viewBackgroundColor;
+  const gridSize = state.gridModeEnabled ? state.gridSize : null;
+  const native = elements.filter((element) => !isTypedId(element.id) &&
+    !element.customData?.raqshCard && !element.customData?.raqshEdge && !element.isDeleted);
+  const images: BinaryFiles = {};
+  for (const element of native) {
+    if (element.type === "image" && element.fileId && files[element.fileId]) {
+      images[element.fileId] = files[element.fileId];
+    }
   }
-  let points: readonly (readonly [number, number])[];
-  switch (element.type) {
-    case "freedraw":
-    case "line": points = element.points; break;
-    case "rectangle":
-    case "diamond":
-    case "ellipse": points = outline(element.type, [width, height]); break;
-    default: return;
-  }
-  if (!points.length) return;
-  const [originX, originY] = toBoard([0, 0]);
-  const steps = Math.max(2, Math.min(1024, points.length));
-  const path = Array.from({ length: steps }, (_, index): Point => {
-    const [px, py] = toBoard(points[Math.round(index * (points.length - 1) / (steps - 1))]);
-    return [px - originX, py - originY];
+  const unchanged = native.length === previous.elements.length && native.every((element, index) => {
+    const saved = previous.elements[index];
+    return saved.id === element.id && saved.versionNonce === element.versionNonce;
   });
-  return { kind: "strokes", mark: { id: before && "id" in before ? before.id : id(), x: originX, y: originY,
-    points: path, color, width: Math.max(1, Math.min(12, element.strokeWidth * (element.type === "freedraw" ? penWidthScale : 1))) } };
+  if (unchanged && background === previous.background && gridSize === previous.gridSize &&
+    Object.keys(images).length === Object.keys(previous.files).length &&
+    Object.keys(images).every((id) => images[id].dataURL === previous.files[id]?.dataURL)) return previous;
+  const saved = new Map(previous.elements.map((element) => [element.id, element]));
+  return {
+    version: 1, background, gridSize, files: images,
+    elements: native.map((element) => saved.get(element.id)?.versionNonce === element.versionNonce
+      ? saved.get(element.id)! : structuredClone(element)),
+  };
+}
+
+export async function exportScene(cards: Card[], edges: Edge[], scene: ExcalidrawScene, format: "png" | "svg") {
+  const opts = {
+    elements: composeScene(cardElements(cards, edges, true), scene),
+    appState: { ...sceneAppState(scene), exportBackground: scene.background !== "transparent" },
+    files: scene.files,
+  };
+  if (format === "png") return exportToBlob({ ...opts, mimeType: "image/png",
+    getDimensions: (width: number, height: number) => {
+      const scale = Math.min(1, 4096 / Math.max(width, height, 1));
+      return { width: Math.ceil(width * scale), height: Math.ceil(height * scale), scale };
+    } });
+  const svg = await exportToSvg(opts);
+  return new Blob([new XMLSerializer().serializeToString(svg)], { type: "image/svg+xml" });
 }
