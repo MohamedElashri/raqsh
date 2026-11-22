@@ -200,9 +200,9 @@ def read_export(session, label, path):
 
 
 def native_exports(session, root):
-    board_path = root / "board.visualboard"
+    board_path = root / "board.raqsh"
     board = json.loads(read_export(session, "Board file…", board_path))
-    assert board["format"] == "dev.local.visualboard.board" and board["schemaVersion"] == 1
+    assert board["format"] == "dev.local.raqsh.board" and board["schemaVersion"] == 1
     assert str(root) not in json.dumps(board)
     svg_bytes = read_export(session, "SVG…", root / "board.svg")
     svg = ElementTree.fromstring(svg_bytes)
@@ -328,7 +328,7 @@ def exercise(launch, parent, binary, root, native):
         time.sleep(0.6)
         assert len(tracked(session, "save_drawing")) == before
 
-        db = root / "data/dev.local.visualboard/library/boards.sqlite3"
+        db = root / "data/dev.local.raqsh/library/boards.sqlite3"
         with sqlite3.connect(db, timeout=1) as blocker:
             blocker.execute("BEGIN EXCLUSIVE")
             annotation(session, "Flush retry")
@@ -425,7 +425,7 @@ def checkpoint_queue(launch, parent, binary, root, native):
         request_window_close(session)
         wait_until(lambda: process_birth(parent, binary) is None, "requested native close")
         session.terminated = True
-        db = root / "data/dev.local.visualboard/library/boards.sqlite3"
+        db = root / "data/dev.local.raqsh/library/boards.sqlite3"
         with sqlite3.connect(db) as connection:
             revision, drawing = connection.execute("SELECT drawing_revision, drawing FROM boards WHERE title='tiny'").fetchone()
         assert revision == 5

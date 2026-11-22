@@ -2,12 +2,12 @@
   "build": {
     "profile": "size-thin-lto",
     "gui": {
-      "filename": "visual-board",
+      "filename": "<desktop executable>",
       "bytes": 7009400,
       "sha256": "b775176baca2942bc5600b7228cca90f2addfab20b1f5dd075443901e803754b"
     },
     "helper": {
-      "filename": "visual-board-mcp",
+      "filename": "<MCP executable>",
       "bytes": 836584,
       "sha256": "2a57e97088b99860cf92c1e616c52f88733e8745345877cd3d45ecc766ba0029"
     },
@@ -18,7 +18,7 @@
     "release": "24.04",
     "container_network": "none",
     "package": {
-      "filename": "visual-board_0.1.0_amd64.deb",
+      "filename": "<Debian package>",
       "bytes": 3376212,
       "sha256": "7ca7c7fbaa3d844b4a9d6bc8519c541608d1c92310957068829b28031de57162"
     },
@@ -259,12 +259,12 @@
   "fedora": {
     "release": 43,
     "package": {
-      "filename": "visual-board-0.1.0-1.x86_64.rpm",
+      "filename": "<RPM package>",
       "bytes": 3382033,
       "sha256": "3d133c4819825f92a2ae42909ae1fbf9dddecfff666319da38ce57fd15007699"
     },
     "packages": [
-      "visual-board-0.1.0-1.x86_64",
+      "<RPM package stem>",
       "kwin-6.7.6-1.fc43.x86_64",
       "webkit2gtk4.1-2.54.2-1.fc43.x86_64",
       "webkitgtk6.0-2.54.2-1.fc43.x86_64"

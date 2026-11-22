@@ -30,11 +30,11 @@ def bundle(path, desktop, helper, version, replacement=False):
     contents = path / "Contents"
     (contents / "MacOS").mkdir(parents=True)
     (contents / "Resources").mkdir()
-    shutil.copy2(desktop, contents / "MacOS/visual-board")
-    shutil.copy2(helper, contents / "MacOS/visual-board-mcp")
+    shutil.copy2(desktop, contents / "MacOS/raqsh")
+    shutil.copy2(helper, contents / "MacOS/raqsh-mcp")
     (contents / "Info.plist").write_bytes(plistlib.dumps({
-        "CFBundleName": "Raqsh Update Fixture", "CFBundleIdentifier": "dev.local.visualboard.updatefixture",
-        "CFBundleExecutable": "visual-board", "CFBundlePackageType": "APPL",
+        "CFBundleName": "Raqsh Update Fixture", "CFBundleIdentifier": "dev.local.raqsh.updatefixture",
+        "CFBundleExecutable": "raqsh", "CFBundlePackageType": "APPL",
         "CFBundleVersion": version, "CFBundleShortVersionString": version,
     }))
     if replacement:
@@ -93,13 +93,13 @@ def main(desktop, helper):
             Thread(target=server.serve_forever, daemon=True).start()
             result = root / "restarted"
             log_path = root / "app.log"
-            env = dict(os.environ, VISUAL_BOARD_RUNTIME_DIR=str(root / "runtime"),
-                       VISUAL_BOARD_TEST_LIBRARY=str(root / "library"),
-                       VISUAL_BOARD_TEST_UPDATE_PORT=str(server.server_port),
-                       VISUAL_BOARD_TEST_UPDATE_KEY=(root / "fixture.key.pub").read_text().strip())
+            env = dict(os.environ, RAQSH_RUNTIME_DIR=str(root / "runtime"),
+                       RAQSH_TEST_LIBRARY=str(root / "library"),
+                       RAQSH_TEST_UPDATE_PORT=str(server.server_port),
+                       RAQSH_TEST_UPDATE_KEY=(root / "fixture.key.pub").read_text().strip())
             try:
                 with log_path.open("wb") as log, subprocess.Popen(
-                    [initial / "Contents/MacOS/visual-board", "--macos-live=updater", f"--update-fixture-result={result}"],
+                    [initial / "Contents/MacOS/raqsh", "--macos-live=updater", f"--update-fixture-result={result}"],
                     env=env, stdout=log, stderr=subprocess.STDOUT,
                 ) as app:
                     try:

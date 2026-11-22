@@ -2,7 +2,7 @@
   "process_recovery": {
     "elapsed_seconds": 3.000811687998066,
     "processes_paused": [
-      "visual-board",
+      "Raqsh",
       "WebKitNetworkPr",
       "WebKitWebProces"
     ],

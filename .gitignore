@@ -1,5 +1,6 @@
 /node_modules/
 /target/
+/site/public/
 /plan.md
 /AGENTS.md
 /apps/desktop/node_modules/

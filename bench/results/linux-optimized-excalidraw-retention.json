@@ -14,7 +14,7 @@
       "processes": [
         {
           "pid": 343978,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 343976,
           "cpu_ticks": 43,
@@ -68,7 +68,7 @@
       "processes": [
         {
           "pid": 343978,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 343976,
           "cpu_ticks": 52,
@@ -122,7 +122,7 @@
       "processes": [
         {
           "pid": 343978,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 343976,
           "cpu_ticks": 61,
@@ -176,7 +176,7 @@
       "processes": [
         {
           "pid": 343978,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 343976,
           "cpu_ticks": 69,
@@ -230,7 +230,7 @@
       "processes": [
         {
           "pid": 343978,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 343976,
           "cpu_ticks": 78,

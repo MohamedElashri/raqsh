@@ -104,7 +104,7 @@ def webdriver():
 @contextmanager
 def isolated_library():
     """Keep fixture databases, preferences and caches outside a regular library."""
-    with tempfile.TemporaryDirectory(prefix="visual-board-bench-", ignore_cleanup_errors=True) as tmp:
+    with tempfile.TemporaryDirectory(prefix="raqsh-bench-", ignore_cleanup_errors=True) as tmp:
         root = Path(tmp)
         project = root / "worktree"
         project.mkdir()
@@ -114,8 +114,8 @@ def isolated_library():
             "XDG_DATA_HOME": str(root / "data"),
             "XDG_CACHE_HOME": str(root / "cache"),
             "XDG_CONFIG_HOME": str(root / "config"),
-            "VISUAL_BOARD_BENCH_PROJECT": str(project),
-            "VISUAL_BOARD_RUNTIME_DIR": str(runtime),
+            "RAQSH_BENCH_PROJECT": str(project),
+            "RAQSH_RUNTIME_DIR": str(runtime),
         }
         previous = {key: os.environ.get(key) for key in sandbox}
         os.environ.update(sandbox)

@@ -10,7 +10,7 @@ mod updates;
 fn main() -> tauri::Result<()> {
     #[cfg(feature = "combined-mcp")]
     if std::env::args_os().nth(1).is_some_and(|arg| arg == "mcp") {
-        visual_board_mcp::main_entry(std::env::args_os().skip(2), true)?;
+        raqsh_mcp::main_entry(std::env::args_os().skip(2), true)?;
         return Ok(());
     }
 
@@ -42,8 +42,8 @@ fn main() -> tauri::Result<()> {
     }
     #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
     let live_library = if live_test.is_some() {
-        if std::env::var_os("VISUAL_BOARD_TEST_LIBRARY").is_none()
-            || std::env::var_os("VISUAL_BOARD_RUNTIME_DIR").is_none()
+        if std::env::var_os("RAQSH_TEST_LIBRARY").is_none()
+            || std::env::var_os("RAQSH_RUNTIME_DIR").is_none()
         {
             return Err(std::io::Error::other(
                 "The macOS live test requires an isolated library and runtime directory",
@@ -142,7 +142,7 @@ fn main() -> tauri::Result<()> {
             #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
             if let Some(mode) = live_test {
                 let script = include_str!("../../../../bench/scripts/macos-live.js");
-                let provider = match std::env::var("VISUAL_BOARD_TEST_PROVIDER").as_deref() {
+                let provider = match std::env::var("RAQSH_TEST_PROVIDER").as_deref() {
                     Ok("codex") => "codex",
                     Ok("claude") => "claude",
                     _ => "generic",

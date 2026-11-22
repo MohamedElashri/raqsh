@@ -37,7 +37,7 @@ export async function generateBrand(sources = join(root, "branding"), output = d
   const plistName = brand.displayName.replace(/[&<>]/g, (character) => markupEscapes[character]);
   const desktopName = brand.displayName.replaceAll("{{", "\\{{");
 
-  const scratch = mkdtempSync(join(tmpdir(), "visual-board-icons-"));
+  const scratch = mkdtempSync(join(tmpdir(), "raqsh-icons-"));
   try {
     const iconPath = join(scratch, "source.svg");
     const iconOutput = join(scratch, "icons");

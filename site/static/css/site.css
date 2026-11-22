@@ -1,0 +1,82 @@
+:root {
+  color-scheme: light;
+  --paper: #fdfdfc;
+  --ink: #242321;
+  --muted: #64615b;
+  --line: #e4e2de;
+  --brand: #895319;
+  background: var(--paper);
+  color: var(--ink);
+  font: 100%/1.5 system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+a { color: inherit; text-underline-offset: .2em; }
+a:hover { color: var(--brand); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+button { font: inherit; }
+h1, h2, p, pre, figure { margin: 0; }
+
+.wrap { width: min(100% - 2rem, 48rem); margin-inline: auto; }
+.skip-link { position: absolute; top: 1rem; left: 1rem; transform: translateY(calc(-100% - 2rem)); padding: .5rem .75rem; background: var(--paper); }
+.skip-link:focus { transform: none; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.masthead, .masthead nav, .wordmark { display: flex; align-items: center; }
+.masthead { min-height: 3.25rem; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--line); }
+.masthead nav { gap: clamp(.75rem, 3vw, 1.25rem); color: var(--muted); font-size: .8125rem; }
+.masthead a { text-decoration: none; }
+.masthead a:hover { text-decoration: underline; }
+.wordmark { gap: .4rem; font-size: .9375rem; font-weight: 650; }
+
+.intro { padding-top: clamp(1.75rem, 4.5vw, 2.75rem); text-align: center; }
+.intro h1 { font-size: clamp(1.25rem, 3.5vw, 1.5rem); font-weight: 650; line-height: 1.25; }
+.intro p { max-width: 52ch; margin: .65rem auto 0; color: var(--muted); font-size: .9375rem; }
+
+.install { margin-top: 1.5rem; scroll-margin-top: 1rem; }
+.install-box { border: 1px solid var(--line); border-radius: .4rem; background: #f7f7f5; }
+.install-tools { display: flex; align-items: center; justify-content: space-between; padding: 0 .875rem; border-bottom: 1px solid var(--line); font-size: .8125rem; }
+.install-methods { display: flex; gap: .1rem; }
+.install-tools button { min-height: 2.5rem; padding: .3rem .5rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.install-tools button:hover { color: var(--ink); }
+.install-methods button { border-bottom: 2px solid transparent; }
+.install-methods button[aria-pressed="true"] { border-color: var(--brand); color: var(--ink); }
+.install pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.install-box pre { padding: .95rem 1rem; }
+.install-box pre + pre { border-top: 1px solid var(--line); }
+.install code { font: .8125rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.install-links { display: flex; flex-wrap: wrap; justify-content: center; column-gap: .9rem; row-gap: .3rem; margin-top: .7rem; color: var(--muted); font-size: .8125rem; }
+.example-link { color: var(--brand); font-weight: 600; }
+.macos-help { max-width: 37rem; margin: .55rem auto 0; color: var(--muted); font-size: .8125rem; }
+.macos-help summary { width: fit-content; margin-inline: auto; cursor: pointer; }
+.macos-help summary:hover { color: var(--brand); }
+.macos-help summary:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+.macos-help-content { margin-top: .65rem; padding-top: .75rem; border-top: 1px solid var(--line); }
+.macos-help-content p + p { margin-top: .45rem; }
+
+.example { margin-top: clamp(1.75rem, 5vw, 2.75rem); scroll-margin-top: 1rem; }
+.example-header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: .4rem 1rem; margin-bottom: .75rem; }
+.example-header h2, .agent-integration h2 { color: var(--ink); font-size: 1.0625rem; font-weight: 650; }
+.example-header a { color: var(--muted); font-size: .8125rem; }
+.example-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.window { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: .4rem; }
+.window img { display: block; width: 100%; height: auto; }
+.example figcaption { margin-top: .5rem; color: var(--muted); font-size: .8125rem; }
+.example figcaption strong { color: var(--ink); font-weight: 650; }
+
+.agent-integration { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .875rem; }
+.agent-integration p { max-width: 70ch; margin-block: .5rem 0; }
+.agent-integration ul { max-width: 76ch; margin: .65rem 0; padding-inline-start: 1.2rem; }
+.agent-integration li + li { margin-top: .35rem; }
+.agent-integration li::marker { color: var(--brand); }
+.agent-integration strong { color: var(--ink); font-weight: 650; }
+
+.footer { margin-top: clamp(2rem, 5vw, 3rem); padding: 1rem 0 1.5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .8125rem; }
+.footer nav { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.15rem; }
+.prose { padding-block: 3rem; }
+
+@media (max-width: 39rem) {
+  .example-steps { grid-template-columns: 1fr; }
+}

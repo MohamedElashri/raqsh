@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { generateBrand } from "./generate-brand.mjs";
 
 const sources = fileURLToPath(new URL("../branding", import.meta.url));
-const scratch = mkdtempSync(join(tmpdir(), "visual-board-brand-check-"));
+const scratch = mkdtempSync(join(tmpdir(), "raqsh-brand-check-"));
 
 try {
   const renamedSources = join(scratch, "sources");
@@ -22,6 +22,7 @@ try {
 
   const config = (path) => JSON.parse(readFileSync(join(path, "src-tauri/tauri.conf.json"), "utf8"));
   assert.equal(config(original).app.windows[0].title, brand.displayName);
+  assert.equal(config(original).productName, "Raqsh");
   assert.equal(config(renamed).productName, config(original).productName);
   assert.equal(config(renamed).app.windows[0].title, "Planning Board");
   assert.equal(config(renamed).identifier, config(original).identifier);
@@ -34,7 +35,7 @@ try {
   for (const icon of config(original).bundle.icon) {
     assert.notDeepEqual(readFileSync(join(original, "src-tauri", icon)), readFileSync(join(renamed, "src-tauri", icon)));
   }
-  console.log("Rename changes the generated title and platform icons while preserving the application ID.");
+  console.log("Verified the product name, application ID, window title, and platform icons.");
 } finally {
   rmSync(scratch, { force: true, recursive: true });
 }

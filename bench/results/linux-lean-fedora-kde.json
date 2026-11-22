@@ -3,7 +3,7 @@
   "compositor": "KWin 6.7.6 virtual Wayland",
   "software_rendering": true,
   "installed_packages": [
-    "visual-board-0.1.0-1.x86_64",
+    "<RPM package stem>",
     "kwin-6.7.6-1.fc43.x86_64",
     "webkit2gtk4.1-2.54.2-1.fc43.x86_64",
     "webkitgtk6.0-2.54.2-1.fc43.x86_64"

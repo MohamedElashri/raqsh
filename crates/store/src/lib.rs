@@ -794,7 +794,7 @@ mod tests {
     struct Folder(PathBuf);
     impl Folder {
         fn new() -> Self {
-            let root = std::env::temp_dir().join(format!("visual-board-test-{}", Id::new_v4()));
+            let root = std::env::temp_dir().join(format!("raqsh-test-{}", Id::new_v4()));
             ensure_directory(&root).unwrap();
             Self(root)
         }

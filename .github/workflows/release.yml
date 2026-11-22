@@ -69,14 +69,16 @@ jobs:
       - name: Smoke-test Debian and RPM installation
         if: runner.os == 'Linux'
         run: |
+          test "$(dpkg-deb -f release-assets/raqsh-linux-x86_64.deb Package)" = raqsh
           sudo apt-get install -y "$PWD/release-assets/raqsh-linux-x86_64.deb"
-          test -x /usr/bin/visual-board
-          /usr/bin/visual-board-mcp --help
+          test -x /usr/bin/raqsh
+          /usr/bin/raqsh-mcp --help
           docker run --rm \
             --mount "type=bind,src=$PWD/release-assets/raqsh-linux-x86_64.rpm,dst=/tmp/raqsh.rpm,readonly" \
             fedora:43 sh -ec 'dnf -y --setopt=install_weak_deps=False install /tmp/raqsh.rpm
-              test -x /usr/bin/visual-board
-              /usr/bin/visual-board-mcp --help'
+              rpm -q raqsh
+              test -x /usr/bin/raqsh
+              /usr/bin/raqsh-mcp --help'
       - name: Build and verify the universal macOS app
         if: runner.os == 'macOS'
         env:
@@ -84,11 +86,11 @@ jobs:
         run: |
           rustup target add aarch64-apple-darwin x86_64-apple-darwin
           pnpm brand:generate
-          pnpm --filter visual-board-desktop exec tauri build --target universal-apple-darwin --no-bundle -- --locked
+          pnpm --filter raqsh-desktop exec tauri build --target universal-apple-darwin --no-bundle -- --locked
           pnpm desktop:bundle --target universal-apple-darwin --bundles app
-          app=target/universal-apple-darwin/release/bundle/macos/visual-board.app
-          lipo "$app/Contents/MacOS/visual-board" -verify_arch arm64 x86_64
-          lipo "$app/Contents/MacOS/visual-board-mcp" -verify_arch arm64 x86_64
+          app=target/universal-apple-darwin/release/bundle/macos/Raqsh.app
+          lipo "$app/Contents/MacOS/raqsh" -verify_arch arm64 x86_64
+          lipo "$app/Contents/MacOS/raqsh-mcp" -verify_arch arm64 x86_64
           codesign --verify --deep --strict "$app"
           mkdir release-assets
           ditto -c -k --keepParent "$app" release-assets/raqsh-macos-universal.zip
@@ -96,7 +98,7 @@ jobs:
           staged=$(mktemp -d)
           trap 'rm -rf "$staged"' EXIT
           tar -xzf release-assets/raqsh-macos-universal.app.tar.gz -C "$staged"
-          codesign --verify --deep --strict "$staged/visual-board.app"
+          codesign --verify --deep --strict "$staged/Raqsh.app"
       - name: Sign update packages with the release version
         env:
           RELEASE_TAG: ${{ inputs.tag }}

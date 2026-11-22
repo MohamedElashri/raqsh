@@ -1,54 +1,54 @@
 {
   "D1": {
     "deb": {
-      "file": "visual-board_0.1.0_amd64.deb",
+      "file": "<Debian package>",
       "bytes": 4418248,
       "sha256": "27d43309fc24b0aa5471f760e9b09acec8b2c3cbe295a0d687abf34b1d6f3d94",
       "installed_kib": 10944,
       "depends": "libwebkit2gtk-4.1-0, libgtk-3-0",
       "executables": [
         {
-          "path": "/usr/bin/visual-board",
+          "path": "<desktop executable path>",
           "bytes": 11138208
         }
       ]
     },
     "rpm": {
-      "file": "visual-board-0.1.0-1.x86_64.rpm",
+      "file": "<RPM package>",
       "bytes": 4423799,
       "sha256": "bb65a692c1d63d14f2cfcb023bd2d0a041983c809228053969cebc4700383d23",
       "installed_bytes": 11145719,
       "executables": [
-        "/usr/bin/visual-board"
+        "<desktop executable path>"
       ]
     }
   },
   "D2": {
     "deb": {
-      "file": "visual-board_0.1.0_amd64.deb",
+      "file": "<Debian package>",
       "bytes": 4676122,
       "sha256": "ea1cb64c184e3c220dbff7413c9d500dc9a6a31cac3ac6b6ec69e8ebac45886f",
       "installed_kib": 11447,
       "depends": "libwebkit2gtk-4.1-0, libgtk-3-0",
       "executables": [
         {
-          "path": "/usr/bin/visual-board",
+          "path": "<desktop executable path>",
           "bytes": 10654304
         },
         {
-          "path": "/usr/bin/visual-board-mcp",
+          "path": "<MCP executable path>",
           "bytes": 999464
         }
       ]
     },
     "rpm": {
-      "file": "visual-board-0.1.0-1.x86_64.rpm",
+      "file": "<RPM package>",
       "bytes": 4682410,
       "sha256": "cb763da35f7c683dc7465138cfa836414b6bb8f03b1e22fac7c1f5fef0d25c4a",
       "installed_bytes": 11661279,
       "executables": [
-        "/usr/bin/visual-board",
-        "/usr/bin/visual-board-mcp"
+        "<desktop executable path>",
+        "<MCP executable path>"
       ]
     },
     "helper_libraries": [

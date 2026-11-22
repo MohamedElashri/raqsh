@@ -1,0 +1,6 @@
+{{ define "article" }}
+<main id="main" class="wrap prose">
+  <h1>{{ .Title }}</h1>
+  {{ with .Page }}{{ safeHTML .BodyHTML }}{{ end }}
+</main>
+{{ end }}

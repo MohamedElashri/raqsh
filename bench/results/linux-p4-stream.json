@@ -152,7 +152,7 @@
       "desktop_processes": [
         {
           "pid": 531161,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 531149,
           "cpu_ticks": 93,
@@ -229,7 +229,7 @@
       "desktop_processes": [
         {
           "pid": 531161,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 531149,
           "cpu_ticks": 437,
@@ -288,7 +288,7 @@
       "desktop_processes": [
         {
           "pid": 531161,
-          "name": "visual-board",
+          "name": "Raqsh",
           "state": "S",
           "parent": 531149,
           "cpu_ticks": 450,

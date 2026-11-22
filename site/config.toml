@@ -1,0 +1,18 @@
+base_url = "http://127.0.0.1:1702/"
+title = "Raqsh"
+description = "A local-first whiteboard for planning with Codex and Claude Code."
+language = "en"
+minify_html = true
+
+[feed]
+enabled = false
+
+[sitemap]
+enabled = false
+
+[robots]
+enabled = false
+
+[pipeline]
+fingerprint = true
+minify_css = true

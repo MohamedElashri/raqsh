@@ -15,7 +15,7 @@ use std::{
 
 const PROTOCOL: &str = "2025-11-25";
 const REQUEST_QUEUE: usize = 8;
-const SERVER_ID: &str = "visual-board";
+const SERVER_ID: &str = "raqsh";
 type Pending = Arc<Mutex<HashMap<String, Arc<AtomicBool>>>>;
 
 struct Job {
@@ -317,7 +317,7 @@ fn print_value(value: Value) -> io::Result<()> {
 pub fn main_entry(mut arguments: impl Iterator<Item = OsString>, combined: bool) -> io::Result<()> {
     let command = arguments.next().and_then(|arg| arg.into_string().ok());
     if matches!(command.as_deref(), None | Some("--help" | "help")) {
-        println!("Usage: visual-board-mcp <serve|doctor|probe|setup|remove> --pairing <UUID>");
+        println!("Usage: raqsh-mcp <serve|doctor|probe|setup|remove> --pairing <UUID>");
         println!("Setup and probe also accept --format <json|codex|claude>.");
         return Ok(());
     }
@@ -446,7 +446,7 @@ fn registration(
             let args = serde_json::to_string(&args).map_err(io::Error::other)?;
             Ok(format!(
                 "[mcp_servers.{SERVER_ID}]\ncommand = {command}\nargs = {args}\n\
-                 env_vars = [\"XDG_DATA_HOME\", \"XDG_RUNTIME_DIR\", \"VISUAL_BOARD_RUNTIME_DIR\"]\n"
+                 env_vars = [\"XDG_DATA_HOME\", \"XDG_RUNTIME_DIR\", \"RAQSH_RUNTIME_DIR\"]\n"
             ))
         }
     }
@@ -477,7 +477,7 @@ mod tests {
 
     #[test]
     fn formats_use_the_stable_server_id_and_preserve_quoted_paths() {
-        let path = Path::new("/opt/Board \"Test\"/visual-board-mcp");
+        let path = Path::new("/opt/Board \"Test\"/raqsh-mcp");
         let binding = Id::new_v4();
         let json: Value = serde_json::from_str(
             &registration(path, binding, false, RegistrationFormat::Json).unwrap(),
@@ -497,8 +497,8 @@ mod tests {
         );
 
         let codex = registration(path, binding, true, RegistrationFormat::Codex).unwrap();
-        assert!(codex.starts_with("[mcp_servers.visual-board]\n"));
-        assert!(codex.contains(r#"command = "/opt/Board \"Test\"/visual-board-mcp""#));
+        assert!(codex.starts_with("[mcp_servers.raqsh]\n"));
+        assert!(codex.contains(r#"command = "/opt/Board \"Test\"/raqsh-mcp""#));
         assert!(codex.contains(&format!(
             r#"args = ["mcp","serve","--pairing","{binding}"]"#
         )));

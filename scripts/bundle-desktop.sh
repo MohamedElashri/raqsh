@@ -23,23 +23,23 @@ triple=${target:-$(rustc --print host-tuple)}
 generated=apps/desktop/src-tauri/generated
 mkdir -p "$generated"
 
-helper=(build --locked -p visual-board-mcp)
+helper=(build --locked -p raqsh-mcp)
 if [[ "$profile" == release ]]; then helper+=(--release); fi
 if [[ "$target" == universal-apple-darwin ]]; then
   arm=aarch64-apple-darwin
   intel=x86_64-apple-darwin
   cargo "${helper[@]}" --target "$arm"
   cargo "${helper[@]}" --target "$intel"
-  lipo -create "$directory/$arm/$profile/visual-board-mcp" \
-    "$directory/$intel/$profile/visual-board-mcp" -output "$generated/visual-board-mcp-$triple"
+  lipo -create "$directory/$arm/$profile/raqsh-mcp" \
+    "$directory/$intel/$profile/raqsh-mcp" -output "$generated/raqsh-mcp-$triple"
 else
   if [[ -n "$target" ]]; then
     helper+=(--target "$target")
     directory="$directory/$target"
   fi
   cargo "${helper[@]}"
-  cp "$directory/$profile/visual-board-mcp" "$generated/visual-board-mcp-$triple"
+  cp "$directory/$profile/raqsh-mcp" "$generated/raqsh-mcp-$triple"
 fi
 
-pnpm --filter visual-board-desktop exec tauri bundle --config \
-  '{"bundle":{"externalBin":["generated/visual-board-mcp"]}}' "${bundle[@]}"
+pnpm --filter raqsh-desktop exec tauri bundle --config \
+  '{"bundle":{"externalBin":["generated/raqsh-mcp"]}}' "${bundle[@]}"

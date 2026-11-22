@@ -70,7 +70,7 @@ pub fn installed_clients() -> Vec<Provider> {
 fn helper_path() -> Result<PathBuf, String> {
     let path = env::current_exe()
         .map_err(|error| error.to_string())?
-        .with_file_name("visual-board-mcp");
+        .with_file_name("raqsh-mcp");
     executable_file(&path).then_some(path).ok_or_else(|| {
         "The Raqsh MCP helper is missing. Reinstall Raqsh before pairing a client.".into()
     })
@@ -84,9 +84,9 @@ fn forwarded_environment() -> serde_json::Map<String, serde_json::Value> {
     let names = [
         "XDG_DATA_HOME",
         "XDG_RUNTIME_DIR",
-        "VISUAL_BOARD_RUNTIME_DIR",
+        "RAQSH_RUNTIME_DIR",
         #[cfg(feature = "macos-live-test")]
-        "VISUAL_BOARD_TEST_LIBRARY",
+        "RAQSH_TEST_LIBRARY",
     ];
     names
         .into_iter()

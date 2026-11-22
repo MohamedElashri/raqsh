@@ -83,11 +83,11 @@ case "$asset" in
     *.zip)
         app_dir="$HOME/Applications"
         mkdir -p "$app_dir"
-        app_path="$app_dir/visual-board.app"
+        app_path="$app_dir/Raqsh.app"
         [ ! -L "$app_path" ] || fail "The installation path is a symbolic link: $app_path"
         app_stage=$(mktemp -d "$app_dir/.raqsh-install.XXXXXXXX")
         ditto -x -k "$package" "$app_stage"
-        app="$app_stage/visual-board.app"
+        app="$app_stage/Raqsh.app"
         codesign --verify --deep --strict "$app"
         if [ -e "$app_path" ]; then
             [ -d "$app_path" ] || fail "The installation path is not an app: $app_path"

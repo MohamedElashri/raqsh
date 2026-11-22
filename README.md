@@ -23,13 +23,7 @@ curl -fsSL https://github.com/MohamedElashri/raqsh/releases/latest/download/inst
 
 > **First launch on macOS.** Raqsh is ad hoc signed and has no Apple notarization ticket. Gatekeeper may block the downloaded app. If that happens, verify the ZIP against `SHA256SUMS` from the same GitHub release, then remove the quarantine attribute from your installed copy of Raqsh only. [Apple’s explanation of Gatekeeper](https://support.apple.com/en-us/102445)
 >
-> ```sh
-> # If you moved the app to Applications
-> xattr -dr com.apple.quarantine /Applications/visual-board.app
->
-> # If you used the shell installer
-> xattr -dr com.apple.quarantine "$HOME/Applications/visual-board.app"
-> ```
+> In Terminal, type `xattr -dr com.apple.quarantine` followed by a space. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return. The shell installer puts Raqsh in `~/Applications`.
 
 ## Get started
 

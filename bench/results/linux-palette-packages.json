@@ -3,12 +3,12 @@
   "deb_icon_matches_generated": true,
   "packages": [
     {
-      "file": "visual-board_0.1.0_amd64.deb",
+      "file": "<Debian package>",
       "bytes": 4690318,
       "sha256": "66159fa62389b2f75570c3458908d5ea0cf052033ad5d93de7541b5e97aa0e13"
     },
     {
-      "file": "visual-board-0.1.0-1.x86_64.rpm",
+      "file": "<RPM package>",
       "bytes": 4695875,
       "sha256": "6976b37a0f7d973e19f0b05d2e706302d15fa43779928156f09878e374fc6f8a"
     }

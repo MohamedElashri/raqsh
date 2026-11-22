@@ -36,15 +36,15 @@ x11() {
 x11 python3 /checks/linux-package-state.py seed /tmp/lifecycle
 config_hash=$(sha256sum /tmp/lifecycle/agent.json)
 dpkg -i /packages/current.deb
-test "$(dpkg-query -W -f='${Version}' visual-board)" = "$(dpkg-deb -f /packages/current.deb Version)"
-dpkg-query -W visual-board libgtk-3-0t64 libwebkit2gtk-4.1-0
-desktop-file-validate /usr/share/applications/visual-board.desktop
+test "$(dpkg-query -W -f='${Version}' raqsh)" = "$(dpkg-deb -f /packages/current.deb Version)"
+dpkg-query -W raqsh libgtk-3-0t64 libwebkit2gtk-4.1-0
+desktop-file-validate /usr/share/applications/Raqsh.desktop
 if test -n "$EXPECTED_DISPLAY_NAME"; then
-  grep -Fx "Name=$EXPECTED_DISPLAY_NAME" /usr/share/applications/visual-board.desktop
+  grep -Fx "Name=$EXPECTED_DISPLAY_NAME" /usr/share/applications/Raqsh.desktop
 fi
-sha256sum /usr/bin/visual-board /usr/bin/visual-board-mcp
+sha256sum /usr/bin/raqsh /usr/bin/raqsh-mcp
 x11 python3 /checks/linux-package-state.py import /tmp/lifecycle --display-name "$EXPECTED_DISPLAY_NAME"
-x11 python3 /checks/linux-p4-ui.py /usr/bin/visual-board --workspace --native-text --output /tmp/x11.json
+x11 python3 /checks/linux-p4-ui.py /usr/bin/raqsh --workspace --native-text --output /tmp/x11.json
 
 runuser -u desktop-test -- env LIBGL_ALWAYS_SOFTWARE=1 dbus-run-session -- bash -ec '
   export XDG_RUNTIME_DIR=$(mktemp -d)
@@ -58,14 +58,14 @@ runuser -u desktop-test -- env LIBGL_ALWAYS_SOFTWARE=1 dbus-run-session -- bash 
   done
   test -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" || { cat /tmp/mutter.log; exit 1; }
   mutter --version
-  python3 /checks/linux-p4-ui.py /usr/bin/visual-board --workspace --output /tmp/wayland.json
+  python3 /checks/linux-p4-ui.py /usr/bin/raqsh --workspace --output /tmp/wayland.json
 '
 
 dpkg -i /packages/previous.deb
 x11 python3 /checks/linux-package-state.py verify /tmp/lifecycle
-dpkg -P visual-board
-test ! -e /usr/bin/visual-board && test ! -e /usr/bin/visual-board-mcp
-test -f /tmp/lifecycle/data/dev.local.visualboard/library/boards.sqlite3
+dpkg -P raqsh
+test ! -e /usr/bin/raqsh && test ! -e /usr/bin/raqsh-mcp
+test -f /tmp/lifecycle/data/dev.local.raqsh/library/boards.sqlite3
 test "$config_hash" = "$(sha256sum /tmp/lifecycle/agent.json)"
 dpkg -i /packages/current.deb
 x11 python3 /checks/linux-package-state.py verify /tmp/lifecycle --display-name "$EXPECTED_DISPLAY_NAME"

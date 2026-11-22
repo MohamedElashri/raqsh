@@ -1,5 +1,5 @@
 [package]
-name = "visual-board"
+name = "raqsh"
 version = "0.1.0"
 edition = "2024"
 publish = false
@@ -12,7 +12,7 @@ serde.workspace = true
 board-domain = { path = "../../../crates/domain" }
 board-store = { path = "../../../crates/store" }
 board-ipc = { path = "../../../crates/ipc" }
-visual-board-mcp = { path = "../../../crates/mcp", optional = true }
+raqsh-mcp = { path = "../../../crates/mcp", optional = true }
 serde_json.workspace = true
 tokio = { version = "=1.54.1", default-features = false, features = ["rt-multi-thread", "sync", "net", "io-util", "time", "macros", "process"] }
 tauri = { version = "=2.12.7", default-features = false, features = ["wry", "x11", "compression"] }
@@ -27,5 +27,5 @@ rfd = { version = "=0.17.2", default-features = false }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
-combined-mcp = ["dep:visual-board-mcp"]
+combined-mcp = ["dep:raqsh-mcp"]
 macos-live-test = ["board-ipc/live-test"]

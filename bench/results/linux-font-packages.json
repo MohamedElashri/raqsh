@@ -11,12 +11,12 @@
   "deb_desktop_entry_validation": true,
   "packages": [
     {
-      "file": "visual-board_0.1.0_amd64.deb",
+      "file": "<Debian package>",
       "bytes": 4743304,
       "sha256": "9c2cf0e353087a410262551a407a04d44bd180fa5f8507ed7bfa479b93fc3de2"
     },
     {
-      "file": "visual-board-0.1.0-1.x86_64.rpm",
+      "file": "<RPM package>",
       "bytes": 4749031,
       "sha256": "a6367f1a5fce0aecf5ee865203b7c3fbae9dc1f9cfdda576d3a3c1ded7bdc41e"
     }

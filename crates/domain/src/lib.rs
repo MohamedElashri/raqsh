@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet};
 pub use uuid::Uuid as Id;
 
-pub const FORMAT: &str = "dev.local.visualboard.board";
+pub const FORMAT: &str = "dev.local.raqsh.board";
 pub const SCHEMA_VERSION: u32 = 1;
 pub const MAX_DOCUMENT_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_NODES: usize = 2_000;

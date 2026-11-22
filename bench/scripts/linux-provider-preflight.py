@@ -24,7 +24,7 @@ add_pairing = phase2["add_pairing"]
 feedback_ui = phase2["feedback_ui"]
 uuid = phase2["uuid"]
 
-SERVER = "visual-board"
+SERVER = "raqsh"
 FEEDBACK = "Synthetic portable compatibility feedback."
 RESPONSE = "Portable MCP round trip verified."
 FEEDBACK_TOOLS = ("board_get_feedback", "board_ack_feedback", "board_post_response")
@@ -33,7 +33,7 @@ FEEDBACK_TOOLS = ("board_get_feedback", "board_ack_feedback", "board_post_respon
 def provider_environment(root):
     env = {key: value for key, value in os.environ.items() if key in (
         "PATH", "LANG", "LC_ALL", "XDG_DATA_HOME", "XDG_CACHE_HOME", "XDG_CONFIG_HOME",
-        "VISUAL_BOARD_RUNTIME_DIR",
+        "RAQSH_RUNTIME_DIR",
     )}
     for variable, directory in (
         ("HOME", "provider-home"), ("CODEX_HOME", "codex-config"), ("CLAUDE_CONFIG_DIR", "claude-config"),
@@ -157,7 +157,7 @@ def codex_workflow(codex, helper, cwd, env, binding, web, *, live=False):
     version = run(codex, "--version", cwd=cwd, env=env)
 
     with app_server(codex, cwd, env, live=live) as server:
-        server.call("initialize", {"clientInfo": {"name": "visual_board_preflight", "version": "0.1.0"}})
+        server.call("initialize", {"clientInfo": {"name": "raqsh_preflight", "version": "0.1.0"}})
         server.send({"method": "initialized"})
         thread = server.call("thread/start", {
             "cwd": str(cwd), "ephemeral": True, "sandbox": "read-only", "approvalPolicy": "on-request",
@@ -203,7 +203,7 @@ def codex_workflow(codex, helper, cwd, env, binding, web, *, live=False):
 def codex_model_turn(server, thread, board, cwd, web):
     ack_id = uuid()
     prompt = (
-        "This is a synthetic integration test. Use only the visual-board MCP server. "
+        "This is a synthetic integration test. Use only the raqsh MCP server. "
         "Do not run commands or read or edit files. "
         f"Call board_get_feedback with boardId {board}. Read the sole queued item. "
         f"Call board_ack_feedback with its feedbackId, the same boardId and operationId {ack_id}. "

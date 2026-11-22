@@ -34,7 +34,7 @@ function showcase() {
 
 export async function openBenchmark(fixture: string) {
   if (fixture === "showcase") {
-    const input = JSON.stringify({ format: "dev.local.visualboard.board", schemaVersion: 1, title: fixture, ...showcase() });
+    const input = JSON.stringify({ format: "dev.local.raqsh.board", schemaVersion: 1, title: fixture, ...showcase() });
     return invoke<OpenBoard>("open_benchmark", { fixture, input });
   }
   if (!Object.hasOwn(boardSizes, fixture)) throw new Error("Unknown board fixture.");
@@ -49,7 +49,7 @@ export async function openBenchmark(fixture: string) {
   }));
   const strokes = sample.strokes.map((stroke): Stroke => ({ ...stroke, color: "slate", width: 3 }));
   const input = JSON.stringify({
-    format: "dev.local.visualboard.board", schemaVersion: 1, title: fixture, nodes, edges,
+    format: "dev.local.raqsh.board", schemaVersion: 1, title: fixture, nodes, edges,
     drawing: { strokes, labels: [], arrows: [] },
   });
   return invoke<OpenBoard>("open_benchmark", { fixture, input });

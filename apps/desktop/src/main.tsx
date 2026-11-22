@@ -172,7 +172,7 @@ function Workspace() {
               <button className="ui-button primary" disabled={busy} type="submit"><Icon name="add" size={16} />Create board</button>
             </form>
             <button className="ui-button" disabled={busy} onClick={() => importInput.current?.click()}>Import board…</button>
-            <input ref={importInput} type="file" accept=".visualboard,application/json" hidden onChange={(event) => {
+            <input ref={importInput} type="file" accept=".raqsh,application/json" hidden onChange={(event) => {
               const file = event.currentTarget.files?.[0];
               event.currentTarget.value = "";
               if (!file) return;

@@ -19,7 +19,7 @@ pub const MAX_FRAME: usize = 4 * 1024 * 1024;
 pub const MAX_REPLY: usize = 2 * 1024 * 1024;
 pub const MAX_OPERATION_BYTES: usize = 128 * 1024;
 pub const IO_TIMEOUT: Duration = Duration::from_secs(5);
-pub const APP_ID: &str = "dev.local.visualboard";
+pub const APP_ID: &str = "dev.local.raqsh";
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -196,7 +196,7 @@ fn private_directory(path: &Path, create: bool) -> io::Result<()> {
 }
 
 fn socket_directory() -> io::Result<PathBuf> {
-    if let Some(custom) = env::var_os("VISUAL_BOARD_RUNTIME_DIR") {
+    if let Some(custom) = env::var_os("RAQSH_RUNTIME_DIR") {
         let path = PathBuf::from(custom);
         if !path.is_absolute() || path.join("bridge.sock").as_os_str().as_bytes().len() >= 100 {
             return Err(io::Error::new(
@@ -208,13 +208,13 @@ fn socket_directory() -> io::Result<PathBuf> {
         return Ok(path);
     }
     if let Some(root) = env::var_os("XDG_RUNTIME_DIR").map(PathBuf::from) {
-        let path = root.join("visual-board");
+        let path = root.join("raqsh");
         if root.is_absolute() && path.join("bridge.sock").as_os_str().as_bytes().len() < 100 {
             private_directory(&root, false)?;
             return Ok(path);
         }
     }
-    Ok(PathBuf::from(format!("/tmp/visual-board-{}", uid())))
+    Ok(PathBuf::from(format!("/tmp/raqsh-{}", uid())))
 }
 
 pub struct SocketOwner {
@@ -270,7 +270,7 @@ fn pairing_path(library: &Path, binding: Id) -> PathBuf {
 
 pub fn default_library() -> io::Result<PathBuf> {
     #[cfg(feature = "live-test")]
-    if let Some(path) = env::var_os("VISUAL_BOARD_TEST_LIBRARY") {
+    if let Some(path) = env::var_os("RAQSH_TEST_LIBRARY") {
         let path = PathBuf::from(path);
         if path.is_absolute() {
             return Ok(path);

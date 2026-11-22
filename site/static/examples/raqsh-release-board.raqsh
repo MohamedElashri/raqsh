@@ -1,0 +1,234 @@
+{
+  "format": "dev.local.raqsh.board",
+  "schemaVersion": 1,
+  "title": "Ship Raqsh 0.1.0",
+  "nodes": [
+    {
+      "id": "b212b73b-48a9-4945-bbe6-bc41c4731190",
+      "title": "Build the universal Mac app",
+      "kind": "task",
+      "status": "done",
+      "description": "",
+      "priority": "normal",
+      "dropped": false,
+      "x": 68,
+      "y": 154,
+      "width": 218,
+      "height": 92,
+      "parent": null,
+      "order": 0,
+      "revision": 0
+    },
+    {
+      "id": "e00b03b1-f396-41bd-9385-9162ffae3c21",
+      "title": "Verify Apple silicon and Intel",
+      "kind": "task",
+      "status": "done",
+      "description": "",
+      "priority": "normal",
+      "dropped": false,
+      "x": 370,
+      "y": 154,
+      "width": 218,
+      "height": 92,
+      "parent": null,
+      "order": 1,
+      "revision": 0
+    },
+    {
+      "id": "4311b25e-1351-446f-9f18-2fbdf85a56ed",
+      "title": "Check first launch from ZIP",
+      "kind": "task",
+      "status": "inProgress",
+      "description": "",
+      "priority": "normal",
+      "dropped": false,
+      "x": 672,
+      "y": 154,
+      "width": 218,
+      "height": 92,
+      "parent": null,
+      "order": 2,
+      "revision": 0
+    },
+    {
+      "id": "34cbdb44-9d49-4838-8fcb-015a87dda13a",
+      "title": "Package Ubuntu and Fedora",
+      "kind": "task",
+      "status": "done",
+      "description": "",
+      "priority": "normal",
+      "dropped": false,
+      "x": 68,
+      "y": 372,
+      "width": 218,
+      "height": 92,
+      "parent": null,
+      "order": 3,
+      "revision": 0
+    },
+    {
+      "id": "3b6fede2-924f-42f1-b291-db50ea05da46",
+      "title": "Smoke-test clean installs",
+      "kind": "task",
+      "status": "inProgress",
+      "description": "",
+      "priority": "normal",
+      "dropped": false,
+      "x": 370,
+      "y": 372,
+      "width": 218,
+      "height": 92,
+      "parent": null,
+      "order": 4,
+      "revision": 0
+    },
+    {
+      "id": "23b0e1b5-076b-4ea9-80ab-e4423d81c3f7",
+      "title": "Verify update signatures",
+      "kind": "task",
+      "status": "todo",
+      "description": "",
+      "priority": "normal",
+      "dropped": false,
+      "x": 672,
+      "y": 372,
+      "width": 218,
+      "height": 92,
+      "parent": null,
+      "order": 5,
+      "revision": 0
+    }
+  ],
+  "edges": [
+    {
+      "id": "5b3a934c-0e60-412f-ba8f-35c34ba8d61e",
+      "from": "b212b73b-48a9-4945-bbe6-bc41c4731190",
+      "to": "e00b03b1-f396-41bd-9385-9162ffae3c21",
+      "kind": "dependency",
+      "revision": 0
+    },
+    {
+      "id": "37bccc38-c418-461f-92bf-bb508a2be746",
+      "from": "e00b03b1-f396-41bd-9385-9162ffae3c21",
+      "to": "4311b25e-1351-446f-9f18-2fbdf85a56ed",
+      "kind": "dependency",
+      "revision": 0
+    },
+    {
+      "id": "fcdcb602-6f6c-43d1-b4c7-e8099cf40133",
+      "from": "34cbdb44-9d49-4838-8fcb-015a87dda13a",
+      "to": "3b6fede2-924f-42f1-b291-db50ea05da46",
+      "kind": "dependency",
+      "revision": 0
+    },
+    {
+      "id": "75e910bf-b38c-4cc0-b828-6a74e1570a92",
+      "from": "3b6fede2-924f-42f1-b291-db50ea05da46",
+      "to": "23b0e1b5-076b-4ea9-80ab-e4423d81c3f7",
+      "kind": "dependency",
+      "revision": 0
+    }
+  ],
+  "drawing": {
+    "labels": [
+      {
+        "x": 68,
+        "y": 99,
+        "text": "Ship Raqsh 0.1.0"
+      },
+      {
+        "x": 68,
+        "y": 138,
+        "text": "macOS release"
+      },
+      {
+        "x": 68,
+        "y": 351,
+        "text": "Linux release"
+      },
+      {
+        "x": 675,
+        "y": 288,
+        "text": "Test a fresh download."
+      },
+      {
+        "x": 677,
+        "y": 523,
+        "text": "Compare against SHA256SUMS."
+      }
+    ],
+    "strokes": [
+      {
+        "id": "46045ace-1fe0-4312-8f6f-19beba485efa",
+        "x": 68,
+        "y": 110,
+        "color": "blue",
+        "width": 2,
+        "points": [
+          [
+            0,
+            2
+          ],
+          [
+            43,
+            0
+          ],
+          [
+            97,
+            2
+          ],
+          [
+            154,
+            1
+          ]
+        ]
+      },
+      {
+        "id": "e1a2aeaf-4f81-45b6-933e-0a5b56eb4b81",
+        "x": 679,
+        "y": 534,
+        "color": "blue",
+        "width": 2,
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            102,
+            3
+          ],
+          [
+            223,
+            0
+          ]
+        ]
+      }
+    ],
+    "arrows": [
+      {
+        "from": [
+          740,
+          268
+        ],
+        "to": [
+          740,
+          250
+        ],
+        "color": "blue"
+      },
+      {
+        "from": [
+          764,
+          502
+        ],
+        "to": [
+          764,
+          470
+        ],
+        "color": "blue"
+      }
+    ]
+  }
+}

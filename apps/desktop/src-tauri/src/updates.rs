@@ -13,7 +13,7 @@ const PUBLIC_KEY: Option<&str> = option_env!("RAQSH_UPDATER_PUBLIC_KEY");
 fn public_key() -> Option<String> {
     #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
     if fixture_origin().is_some() {
-        return std::env::var("VISUAL_BOARD_TEST_UPDATE_KEY").ok();
+        return std::env::var("RAQSH_TEST_UPDATE_KEY").ok();
     }
     PUBLIC_KEY
         .filter(|key| !key.trim().is_empty())
@@ -25,10 +25,7 @@ fn fixture_origin() -> Option<String> {
     if !std::env::args_os().any(|arg| arg == "--macos-live=updater") {
         return None;
     }
-    let port: u16 = std::env::var("VISUAL_BOARD_TEST_UPDATE_PORT")
-        .ok()?
-        .parse()
-        .ok()?;
+    let port: u16 = std::env::var("RAQSH_TEST_UPDATE_PORT").ok()?.parse().ok()?;
     Some(format!("https://127.0.0.1:{port}"))
 }
 

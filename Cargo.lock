@@ -2739,6 +2739,35 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
+name = "raqsh"
+version = "0.1.0"
+dependencies = [
+ "board-domain",
+ "board-ipc",
+ "board-store",
+ "gtk",
+ "raqsh-mcp",
+ "rfd",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-updater",
+ "tokio",
+ "webkit2gtk",
+]
+
+[[package]]
+name = "raqsh-mcp"
+version = "0.1.0"
+dependencies = [
+ "board-domain",
+ "board-ipc",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "raw-window-handle"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4262,35 +4291,6 @@ name = "version_check"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
-
-[[package]]
-name = "visual-board"
-version = "0.1.0"
-dependencies = [
- "board-domain",
- "board-ipc",
- "board-store",
- "gtk",
- "rfd",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-updater",
- "tokio",
- "visual-board-mcp",
- "webkit2gtk",
-]
-
-[[package]]
-name = "visual-board-mcp"
-version = "0.1.0"
-dependencies = [
- "board-domain",
- "board-ipc",
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "vswhom"

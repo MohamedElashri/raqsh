@@ -11,12 +11,12 @@ checks=$(cd -- "$(dirname -- "$0")" && pwd)
 driver=$(command -v tauri-driver)
 
 docker run --rm -i --network "${RAQSH_TEST_DOCKER_NETWORK:-bridge}" --env "BOARD_TEST_MODE=$mode" \
-  --mount "type=bind,src=$artifact,dst=/tmp/visual-board.rpm,readonly" \
+  --mount "type=bind,src=$artifact,dst=/tmp/raqsh.rpm,readonly" \
   --mount "type=bind,src=$checks,dst=/checks,readonly" \
   --mount "type=bind,src=$driver,dst=/usr/local/bin/tauri-driver,readonly" \
   fedora:43 bash -se <<'FEDORA'
-dnf -y --setopt=install_weak_deps=False install /tmp/visual-board.rpm kwin webkitgtk6.0 python3 dbus-daemon mesa-dri-drivers shadow-utils libcap >/tmp/deps.log 2>&1 || { tail -n 40 /tmp/deps.log; exit 1; }
-rpm -q visual-board kwin webkit2gtk4.1 webkitgtk6.0
+dnf -y --setopt=install_weak_deps=False install /tmp/raqsh.rpm kwin webkitgtk6.0 python3 dbus-daemon mesa-dri-drivers shadow-utils libcap >/tmp/deps.log 2>&1 || { tail -n 40 /tmp/deps.log; exit 1; }
+rpm -q raqsh kwin webkit2gtk4.1 webkitgtk6.0
 # A private virtual compositor does not need the installed realtime-priority capability.
 kwin=$(readlink -f "$(command -v kwin_wayland)")
 if test -n "$(getcap "$kwin")"; then setcap -r "$kwin"; fi
@@ -42,9 +42,9 @@ os.execvp("dbus-run-session", ["dbus-run-session", "--", "bash", "-ec", r'''
     test -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" || { cat /tmp/raqsh-kwin.log; exit 1; }
     QT_QPA_PLATFORM=offscreen kwin_wayland --version
     if test "$BOARD_TEST_MODE" = workspace; then
-        python3 /checks/linux-p4-ui.py /usr/bin/visual-board --workspace --output /tmp/raqsh-kde-result.json
+        python3 /checks/linux-p4-ui.py /usr/bin/raqsh --workspace --output /tmp/raqsh-kde-result.json
     else
-        python3 /checks/linux-fixture-proof.py /usr/bin/visual-board --output /tmp/raqsh-kde-result.json
+        python3 /checks/linux-fixture-proof.py /usr/bin/raqsh --output /tmp/raqsh-kde-result.json
     fi
 '''])
 RUN_AS_USER

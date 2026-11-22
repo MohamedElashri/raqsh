@@ -24,12 +24,12 @@
   "deb_font_notices_match": true,
   "packages": [
     {
-      "file": "visual-board_0.1.0_amd64.deb",
+      "file": "<Debian package>",
       "bytes": 4785774,
       "sha256": "e728eaaa2c78c3e7c192fdc7958cdaa8e023cbee96faa6188b7012dda3e304eb"
     },
     {
-      "file": "visual-board-0.1.0-1.x86_64.rpm",
+      "file": "<RPM package>",
       "bytes": 4791853,
       "sha256": "e7248cf0b11386d52e92708764e0aae430df18220c4f7e84f15495d096040d3e"
     }

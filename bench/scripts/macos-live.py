@@ -16,7 +16,7 @@ import time
 import tomllib
 from uuid import uuid4
 
-SERVER = "visual-board"
+SERVER = "raqsh"
 STATUS_TOOL = "board_set_task_status"
 PROVIDER_TIMEOUT = 100
 
@@ -119,7 +119,7 @@ def update_status_with_provider(helper, pairing, root, env, provider, registrati
               f"exactly once with these arguments: {json.dumps(arguments)}. Do not use any other tools. "
               "Finish after the tool returns.")
     setup = run_cli([helper, "setup", "--pairing", pairing["binding"], "--format", cli], root, env)
-    forward = {key: env[key] for key in ("VISUAL_BOARD_RUNTIME_DIR", "VISUAL_BOARD_TEST_LIBRARY")}
+    forward = {key: env[key] for key in ("RAQSH_RUNTIME_DIR", "RAQSH_TEST_LIBRARY")}
     if provider == "codex":
         config = tomllib.loads(setup)["mcp_servers"][SERVER]
         prefix = f"mcp_servers.{SERVER}"
@@ -163,14 +163,14 @@ def run_app(desktop, helper, root, env, mode, provider):
     command = [desktop, f"--macos-live={mode}"]
     if mode != "about":
         command.append(f"--fixture={fixture}")
-    app_env = dict(env, VISUAL_BOARD_TEST_PROVIDER="generic")
+    app_env = dict(env, RAQSH_TEST_PROVIDER="generic")
     if mode == "provider":
         codex_profile = root / "codex-profile"
         claude_profile = root / "claude-profile"
         codex_profile.mkdir(mode=0o700)
         claude_profile.mkdir(mode=0o700)
         app_env.update(CODEX_HOME=str(codex_profile), CLAUDE_CONFIG_DIR=str(claude_profile),
-                       VISUAL_BOARD_TEST_PROVIDER="codex" if provider == "codex" else "claude")
+                       RAQSH_TEST_PROVIDER="codex" if provider == "codex" else "claude")
     log_path = root / f"{mode}.log"
     with log_path.open("wb") as output, log_path.open(encoding="utf8") as log:
         with child(command, env=app_env, stdout=output, stderr=subprocess.STDOUT) as process:
@@ -221,8 +221,8 @@ def main():
         root = Path(directory)
         (root / "project").mkdir()
         (root / "runtime").mkdir(mode=0o700)
-        env = dict(os.environ, VISUAL_BOARD_BENCH_PROJECT=str(root / "project"),
-                   VISUAL_BOARD_RUNTIME_DIR=str(root / "runtime"), VISUAL_BOARD_TEST_LIBRARY=str(root / "library"))
+        env = dict(os.environ, RAQSH_BENCH_PROJECT=str(root / "project"),
+                   RAQSH_RUNTIME_DIR=str(root / "runtime"), RAQSH_TEST_LIBRARY=str(root / "library"))
         modes = ("provider", "reopen") if args.provider else ("about", "edit", "reopen", "stress")
         if args.stress_only:
             modes = ("stress",)

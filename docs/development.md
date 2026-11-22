@@ -17,8 +17,8 @@ pnpm test:macos
 pnpm test:macos --stress-only
 pnpm desktop:build
 APPLE_SIGNING_IDENTITY=- pnpm desktop:bundle --bundles app
-codesign --verify --deep --strict target/release/bundle/macos/visual-board.app
-open target/release/bundle/macos/visual-board.app
+codesign --verify --deep --strict target/release/bundle/macos/Raqsh.app
+open target/release/bundle/macos/Raqsh.app
 ```
 
 The stress test reports the median time for 160 eraser moves on a 500-card, 2,000-stroke board.

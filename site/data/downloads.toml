@@ -1,0 +1,17 @@
+releases = "https://github.com/MohamedElashri/raqsh/releases/latest"
+source = "https://github.com/MohamedElashri/raqsh"
+
+[[packages]]
+title = "macOS"
+details = "Apple silicon and Intel · ZIP"
+file = "raqsh-macos-universal.zip"
+
+[[packages]]
+title = "Ubuntu"
+details = "x86-64 · DEB"
+file = "raqsh-linux-x86_64.deb"
+
+[[packages]]
+title = "Fedora"
+details = "x86-64 · RPM"
+file = "raqsh-linux-x86_64.rpm"

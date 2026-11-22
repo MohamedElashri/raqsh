@@ -125,7 +125,7 @@ def request(auth, version=1):
 
 def exercise_wire(root, binding):
     path = root / "runtime/bridge.sock"
-    credentials = root / f"data/dev.local.visualboard/library/pairings/{binding}.json"
+    credentials = root / f"data/dev.local.raqsh/library/pairings/{binding}.json"
     assert (path.stat().st_mode & 0o777) == 0o600
     assert (path.parent.stat().st_mode & 0o777) == 0o700
     assert (credentials.stat().st_mode & 0o777) == 0o600
@@ -162,7 +162,7 @@ def verify_stdio_cancellation(helper, binding, root):
     directory = root / "cancel-runtime"
     directory.mkdir(mode=0o700)
     path = directory / "bridge.sock"
-    env = {**os.environ, "VISUAL_BOARD_RUNTIME_DIR": str(directory)}
+    env = {**os.environ, "RAQSH_RUNTIME_DIR": str(directory)}
     with socket.socket(socket.AF_UNIX) as listener:
         listener.bind(str(path))
         path.chmod(0o600)
@@ -239,7 +239,7 @@ async def proof(launch, parent, desktop, helper, root):
         assert len({a, b, project}) == 3
         pid, _ = wait_until(lambda: process_birth(parent, desktop), "owned GUI")
         setup = subprocess.check_output(command(helper, False, "setup", a), text=True)
-        registration = json.loads(setup)["mcpServers"]["visual-board"]
+        registration = json.loads(setup)["mcpServers"]["raqsh"]
         assert registration["command"] == str(helper.resolve()) and registration["args"][-1] == a
         # Deliberately leave the old socket entry to verify restart after a hard kill.
         os.kill(pid, signal.SIGKILL)
@@ -350,7 +350,7 @@ async def proof(launch, parent, desktop, helper, root):
     path = symlink_runtime / "bridge.sock"
     path.symlink_to(marker)
     rejected = subprocess.run([str(desktop.resolve())],
-                              env={**os.environ, "VISUAL_BOARD_RUNTIME_DIR": str(symlink_runtime)},
+                              env={**os.environ, "RAQSH_RUNTIME_DIR": str(symlink_runtime)},
                               capture_output=True, timeout=5)
     assert rejected.returncode != 0 and path.is_symlink() and marker.read_text() == "marker"
     return {**wire, "official_tools": 9, "desktop_offline_start_and_restart": True,

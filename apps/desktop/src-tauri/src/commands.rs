@@ -188,7 +188,7 @@ pub async fn export_board(
     scope: Scope,
 ) -> Reply<bool> {
     let document = state.call(move |store| store.export(scope)).await?;
-    save_file(window, "visualboard", document.into_bytes()).await
+    save_file(window, "raqsh", document.into_bytes()).await
 }
 
 #[tauri::command]
@@ -223,7 +223,7 @@ async fn save_file(window: WebviewWindow, suffix: &'static str, data: Vec<u8>) -
 }
 
 fn write_export(destination: &Path, data: &[u8]) -> std::io::Result<()> {
-    let temporary = destination.with_file_name(format!(".visualboard-export-{}.tmp", Id::new_v4()));
+    let temporary = destination.with_file_name(format!(".raqsh-export-{}.tmp", Id::new_v4()));
     let mut options = std::fs::OpenOptions::new();
     options.create_new(true).write(true);
     #[cfg(unix)]
@@ -255,7 +255,7 @@ pub async fn open_benchmark(
     fixture: String,
     input: String,
 ) -> Reply<OpenBoard> {
-    let root = std::env::var_os("VISUAL_BOARD_BENCH_PROJECT")
+    let root = std::env::var_os("RAQSH_BENCH_PROJECT")
         .ok_or("Benchmark project was not enabled at launch.")?;
     if !matches!(
         fixture.as_str(),

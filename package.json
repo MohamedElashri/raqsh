@@ -1,5 +1,5 @@
 {
-  "name": "visual-board-workspace",
+  "name": "raqsh-workspace",
   "private": true,
   "packageManager": "pnpm@11.17.0",
   "engines": {
@@ -8,11 +8,11 @@
   "scripts": {
     "brand:generate": "node scripts/generate-brand.mjs",
     "brand:check": "node scripts/check-brand.mjs",
-    "desktop:dev": "pnpm brand:generate && cargo build --locked -p visual-board-mcp && pnpm --filter visual-board-desktop exec tauri dev",
-    "desktop:build": "pnpm brand:generate && pnpm --filter visual-board-desktop exec tauri build --no-bundle -- --locked && cargo build --release --locked -p visual-board-mcp",
+    "desktop:dev": "pnpm brand:generate && cargo build --locked -p raqsh-mcp && pnpm --filter raqsh-desktop exec tauri dev",
+    "desktop:build": "pnpm brand:generate && pnpm --filter raqsh-desktop exec tauri build --no-bundle -- --locked && cargo build --release --locked -p raqsh-mcp",
     "desktop:bundle": "pnpm brand:generate && bash scripts/bundle-desktop.sh",
-    "desktop:check": "pnpm brand:generate && pnpm --filter visual-board-desktop typecheck && cargo check --workspace --locked",
-    "test:unit": "pnpm brand:check && pnpm brand:generate && pnpm --filter visual-board-desktop typecheck && node --test apps/desktop/tests/*.test.mjs && cargo test --workspace --locked",
+    "desktop:check": "pnpm brand:generate && pnpm --filter raqsh-desktop typecheck && cargo check --workspace --locked",
+    "test:unit": "pnpm brand:check && pnpm brand:generate && pnpm --filter raqsh-desktop typecheck && node --test apps/desktop/tests/*.test.mjs && cargo test --workspace --locked",
     "test:macos": "bash scripts/test-macos.sh"
   },
   "devDependencies": {
