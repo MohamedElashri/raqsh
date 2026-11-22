@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import select
 import shutil
+import sqlite3
 import statistics
 import subprocess
 import sys
@@ -203,6 +204,23 @@ def run_app(desktop, helper, root, env, mode, provider):
                 raise RuntimeError(f"{mode}: {failure}\n{log_path.read_text()}") from failure
 
 
+def verify_reopened_drawing(root, rich):
+    with sqlite3.connect(root / "library/boards.sqlite3") as connection:
+        row = connection.execute("SELECT drawing FROM boards WHERE title = 'empty'").fetchone()
+    require(row, "The test drawing is missing")
+    scene = json.loads(row[0])["excalidraw"]
+    elements = scene["elements"]
+    require(any(item["type"] == "freedraw" and item["width"] >= 100 and len(item["points"]) > 1
+                for item in elements), "The saved pen stroke collapsed into a dot")
+    if rich:
+        require(any(item["type"] == "text" and item["text"] == "مراجعة" for item in elements),
+                "The saved scene is missing the Arabic text")
+        frames = {item["id"] for item in elements if item["type"] == "frame"}
+        require(any(item["type"] == "image" and item["frameId"] in frames
+                    and scene["files"].get(item["fileId"], {}).get("mimeType") == "image/svg+xml"
+                    for item in elements), "The saved scene is missing the framed image attachment")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("desktop", type=Path)
@@ -228,6 +246,8 @@ def main():
             modes = ("stress",)
         for mode in modes:
             report = run_app(args.desktop.resolve(), args.helper.resolve(), root, env, mode, args.provider)
+            if mode in ("reopen", "reopen-edits"):
+                verify_reopened_drawing(root, rich=mode == "reopen-edits")
             if mode == "stress":
                 report["eraserMedianMs"] = statistics.median(report["eraserBatchesMs"])
             print(json.dumps(report), flush=True)

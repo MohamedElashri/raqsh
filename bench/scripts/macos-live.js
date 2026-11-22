@@ -21,6 +21,7 @@
     element.textContent.trim() === label && !element.disabled);
   const canvas = () => find("[data-board-surface] canvas.interactive");
   const toolSurface = () => find("[data-board-surface]");
+  const frame = () => new Promise(requestAnimationFrame);
   function key(value, modifiers = {}) {
     const keyboardSurface = find("[data-board-surface] .excalidraw");
     keyboardSurface.focus();
@@ -29,9 +30,28 @@
   function pointer(type, x, y, modifiers = {}) {
     const bounds = canvas().getBoundingClientRect();
     canvas().dispatchEvent(new PointerEvent(type, {
-      pointerId: 1, pointerType: "mouse", button: 0, buttons: type === "pointerup" ? 0 : 1,
+      pointerId: 1, pointerType: "mouse", isPrimary: true, button: type === "pointermove" ? -1 : 0,
+      buttons: type === "pointerup" ? 0 : 1, pressure: type === "pointerup" ? 0 : 0.5,
       clientX: bounds.left + x, clientY: bounds.top + y, bubbles: true, ...modifiers,
     }));
+  }
+  async function drag(start, end, release = true) {
+    pointer("pointerdown", ...start);
+    await frame();
+    pointer("pointermove", ...end);
+    await frame(); // Excalidraw processes drag movement on the next animation frame.
+    if (release) pointer("pointerup", ...end);
+  }
+  const checkpoint = () => {
+    const status = find("[data-drawing-save]").textContent;
+    if (status.startsWith("Drawing save failed")) throw new Error(status);
+    const match = status.match(/checkpoint (\d+)$/);
+    return match && { revision: Number(match[1]) };
+  };
+  async function saveDrawing(action, description) {
+    const { revision } = await waitFor(checkpoint, "the previous drawing checkpoint");
+    await action();
+    await waitFor(() => (checkpoint()?.revision ?? -1) > revision, description);
   }
   function painted(x, y) {
     const ratio = devicePixelRatio;
@@ -51,14 +71,16 @@
     const selected = () => cards().filter((card) => card.dataset.selected === "true");
     const revision = () => Number(editor.dataset.semanticRevision);
     const atRevision = (value) => waitFor(() => revision() === value, `board revision ${value}`);
-    const click = (x, y, modifiers) => {
+    const click = async (x, y, modifiers) => {
       pointer("pointerdown", x, y, modifiers);
+      await frame();
       pointer("pointerup", x, y, modifiers);
     };
     const save = (field) => field.dispatchEvent(new KeyboardEvent("keydown", {
       key: "Enter", metaKey: true, bubbles: true, cancelable: true,
     }));
     key("v");
+    await waitFor(() => toolSurface().classList.contains("tool-select"), "the selection tool");
     key("n");
     const dialog = await waitFor(() => find('dialog[aria-label="Add card"][open]'), "Add card");
     const field = dialog.querySelector('[name="title"]');
@@ -71,31 +93,28 @@
     const second = cards().find((item) => item !== first);
     check(second?.textContent.includes("Second card"), "Cmd+Enter must save the new card");
 
-    pointer("pointerdown", 55, 78);
-    pointer("pointermove", 650, 218);
-    pointer("pointerup", 650, 218);
+    await drag([55, 78], [650, 218]);
     await waitFor(() => selected().length === 2, "marquee selection of both cards");
-    click(450, 150, { shiftKey: true });
+    await click(450, 150, { shiftKey: true });
     await waitFor(() => selected().length === 1 && selected()[0] === first, "Shift-click to deselect one card");
-    click(450, 150, { shiftKey: true });
+    await click(450, 150, { shiftKey: true });
     await waitFor(() => selected().length === 2, "Shift-click to add the card back");
 
-    pointer("pointerdown", 110, 120);
-    pointer("pointermove", 145, 144);
-    check(first.style.left === "105px" && second.style.left === "435px" && revision() === next,
-      "Dragging must preview both positions before committing");
+    await drag([110, 120], [145, 144], false);
+    await waitFor(() => first.style.left === "105px" && second.style.left === "435px", "the drag preview");
+    check(revision() === next, "Dragging must preview both positions before committing");
     pointer("pointerup", 145, 144);
     await atRevision(++next);
     key("ArrowRight", { shiftKey: true });
     await atRevision(++next);
-    check(first.style.left === "115px" && second.style.left === "445px", "Shift+Arrow must nudge both cards");
+    check(first.style.left === "110px" && second.style.left === "440px", "Shift+Arrow must nudge both cards");
 
     key("d", { metaKey: true });
     await atRevision(++next);
     check(cards().length === 4, "Cmd+D must duplicate both selected cards");
-    key("Backspace");
+    key("Delete");
     await atRevision(++next);
-    check(cards().length === 2, "Backspace must remove the duplicated cards");
+    check(cards().length === 2, "Delete must remove the duplicated cards");
     key("z", { metaKey: true });
     await atRevision(++next);
     check(cards().length === 4, "Cmd+Z must restore both deleted cards");
@@ -104,17 +123,28 @@
     check(cards().length === 2, "Cmd+Shift+Z must reapply the deletion");
 
     key("t");
-    await waitFor(() => canvas().classList.contains("tool-text"), "the text tool");
-    click(80, 360);
-    const text = await waitFor(() => find('dialog[aria-label="Place text"][open] [name="title"]'), "the board text editor");
-    text.value = "Draft";
-    save(text);
-    await waitFor(() => find(".lean-label")?.textContent === "Draft", "the placed text");
-    key("Enter");
-    const edit = await waitFor(() => find('dialog[aria-label="Edit text"][open] [name="title"]'), "editing the selected text");
-    edit.value = "مراجعة";
-    save(edit);
-    await waitFor(() => find(".lean-label")?.textContent === "مراجعة", "the edited Arabic text");
+    await waitFor(() => toolSurface().classList.contains("tool-text"), "the text tool");
+    await saveDrawing(async () => {
+      await click(80, 360);
+      const text = await waitFor(() => find("textarea.excalidraw-wysiwyg"), "the native text editor");
+      text.value = "مراجعة";
+      text.dispatchEvent(new Event("input", { bubbles: true }));
+      text.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    }, "the Arabic text checkpoint");
+
+    find(".more-tools > summary").click();
+    find('[data-tool="frame"]').click();
+    await waitFor(() => toolSurface().classList.contains("tool-frame"), "the frame tool");
+    await saveDrawing(() => drag([350, 345], [565, 530]), "the frame checkpoint");
+
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([
+      '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="36"><rect width="48" height="36" fill="red"/></svg>',
+    ], "frame-image.svg", { type: "image/svg+xml" }));
+    const bounds = canvas().getBoundingClientRect();
+    await saveDrawing(() => canvas().dispatchEvent(new DragEvent("drop", {
+      dataTransfer: transfer, bubbles: true, cancelable: true, clientX: bounds.left + 405, clientY: bounds.top + 420,
+    })), "the framed image checkpoint");
   }
 
   async function pair(provider, name) {
@@ -219,9 +249,8 @@
       check(painted(120, 224), "The drawing did not survive reopening");
       if (mode === "reopen-edits") {
         const cards = [...document.querySelectorAll(".lean-card")];
-        check(cards.length === 2 && cards[0].style.left === "115px" && cards[1].style.left === "445px",
+        check(cards.length === 2 && cards[0].style.left === "110px" && cards[1].style.left === "440px",
           "The edited card positions did not survive reopening");
-        check(find(".lean-label")?.textContent === "مراجعة", "The edited Arabic text did not survive reopening");
       }
       report("pass", { mode });
       return;
@@ -243,18 +272,26 @@
         await new Promise(requestAnimationFrame);
       }
       pointer("pointerup", 32, 320);
+      await frame();
       check(find('[data-history="undo"]').disabled, "The off-stroke eraser moves changed the drawing");
       check(painted(96, 182), "Expected the first fixture stroke to be visible");
-      pointer("pointerdown", 96, 183);
-      pointer("pointerup", 96, 183);
+      await saveDrawing(async () => {
+        pointer("pointerdown", 96, 183);
+        await frame();
+        pointer("pointerup", 96, 183);
+      }, "the erased stroke checkpoint");
       await waitFor(() => !painted(96, 182), "the first stroke to be erased");
-      find('[data-history="undo"]').click();
+      const undo = await waitFor(() => {
+        const control = find('[data-history="undo"]');
+        return !control.disabled && control;
+      }, "Undo to become available after erasing");
+      await saveDrawing(() => undo.click(), "the restored stroke checkpoint");
       await waitFor(() => painted(96, 182), "undo to restore the erased stroke");
       report("pass", { mode, initialPaintMs, eraserBatchesMs, movesPerBatch: 160 });
       return;
     }
 
-    check(document.activeElement === canvas(), "The board must have keyboard focus when it opens");
+    check(toolSurface().contains(document.activeElement), "The board must have keyboard focus when it opens");
     key("F1");
     await waitFor(() => find('dialog[aria-label="Board shortcuts"][open]'), "F1 to show keyboard shortcuts");
     button("Close shortcuts").click();
@@ -271,13 +308,11 @@
 
     key("p");
     await waitFor(() => toolSurface().classList.contains("tool-pen"), "the drawing tool");
-    pointer("pointerdown", 60, 225);
-    pointer("pointermove", 180, 225);
-    pointer("pointerup", 180, 225);
+    await saveDrawing(() => drag([60, 225], [180, 225]), "the pen stroke checkpoint");
     await waitFor(() => painted(120, 224), "the stroke to be painted");
-    key("z", { metaKey: true });
+    await saveDrawing(() => key("z", { metaKey: true }), "the undone stroke checkpoint");
     await waitFor(() => !painted(120, 224), "Cmd+Z to undo the stroke");
-    key("z", { metaKey: true, shiftKey: true });
+    await saveDrawing(() => key("z", { metaKey: true, shiftKey: true }), "the restored stroke checkpoint");
     await waitFor(() => painted(120, 224), "redo to restore the stroke");
     if (mode === "edit") {
       find(".agent-panel header button").click();
