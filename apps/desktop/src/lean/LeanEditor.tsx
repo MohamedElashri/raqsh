@@ -528,6 +528,8 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp) return;
     const target = event.target as HTMLElement;
     if (locked.current || target.closest("input, textarea, select, [contenteditable], .agent-panel")) return;
+    const nativeState = controller.current?.getAppState();
+    if (nativeState?.openPopup && canvas.current?.contains(target)) return;
     const shortcut = event.key.toLowerCase();
     const consume = () => { event.preventDefault(); event.stopPropagation(); };
     if ((event.ctrlKey || event.metaKey) && !event.altKey) {
@@ -541,8 +543,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     }
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     if (event.key === "Escape") {
-      if (active.current || controller.current?.getAppState().contextMenu || controller.current?.getAppState().openPopup
-        || controller.current?.getAppState().openDialog) return;
+      if (active.current || nativeState?.contextMenu || nativeState?.openPopup || nativeState?.openDialog) return;
       consume();
       if (closeDisclosure(menu.current) || closeDisclosure(moreTools.current)) return;
       if (agents) closePanel("agents");

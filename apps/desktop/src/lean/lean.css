@@ -310,6 +310,17 @@
   isolation: isolate;
   overflow: hidden;
 }
+/* Let the floating picker share the board's stacking context while the canvas
+   and its editing controls stay below the Raqsh toolbar and panels. */
+.excalidraw-surface:has(.color-picker-content) {
+  isolation: auto;
+  --zIndex-canvas: 0;
+  --zIndex-interactiveCanvas: 0;
+  --zIndex-svgLayer: 1;
+  --zIndex-wysiwyg: 1;
+  --zIndex-canvasButtons: 1;
+  --zIndex-layerUI: 1;
+}
 .excalidraw-surface .excalidraw {
   --ui-font: Assistant, system-ui, sans-serif;
   --color-primary: var(--focus);

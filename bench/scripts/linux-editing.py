@@ -267,6 +267,47 @@ def native_panels(web, root):
     checkpoint(root, lambda scene: any(item.get("text") == "Review result" for item in scene["elements"]))
 
 
+def color_picker(web, root):
+    ready(web)
+    web.call("POST", "/window/rect", {"width": 520, "height": 410})
+    wait_until(lambda: web.evaluate('return !!document.querySelector(".excalidraw--mobile");'), "narrow editor")
+    key(web, "r")
+    drag(web, (300, 142), (440, 202))
+    key(web, "v")
+    click_canvas(web, 430, 142)
+    open_disclosure(web, ".more-tools")
+    web.click("[data-drawing-properties]")
+    picker = '.properties-trigger[aria-label="Stroke"]'
+    field = '.color-picker-content input[aria-label="Stroke"]'
+    web.click(picker)
+    point = web.evaluate("""
+        const {x, y, width, height} = document.querySelector(arguments[0]).getBoundingClientRect();
+        return [Math.round(x + width/2), Math.round(y + height/2)];
+    """, field)
+    click_canvas(web, *point)
+    assert web.evaluate("return document.activeElement.matches(arguments[0]);", field), "hex input lost the click"
+    assert web.evaluate('return document.querySelector(".lean-presence").ariaExpanded === "false";')
+    key(web, "a", CONTROL)
+    for character in "284a62":
+        key(web, character)
+    key(web, ENTER)
+    checkpoint(root, lambda scene: scene["elements"][0]["strokeColor"] == "#284a62")
+
+    if not web.evaluate("return document.querySelector(arguments[0]).getAttribute('aria-expanded') === 'true';", picker):
+        web.click(picker)
+    red = '.color-picker-content button[data-testid="color-red"]'
+    web.click(red)
+    checkpoint(root, lambda scene: scene["elements"][0]["strokeColor"] == "#e03131")
+    assert web.evaluate("return !!document.querySelector(arguments[0]);", red), "choosing a swatch should keep the palette open"
+    key(web, "r")
+    checkpoint(root, lambda scene: scene["elements"][0]["strokeColor"] == "#1e1e1e")
+    assert web.evaluate("return !!document.querySelector(arguments[0]);", red), "palette shortcuts should keep it open"
+    key(web, ESCAPE)
+    wait_until(lambda: web.evaluate("return !document.querySelector(arguments[0]);", red), "Escape closes the palette")
+    key(web, "r")
+    assert web.evaluate("""return document.querySelector('[data-tool="rectangle"]').ariaPressed === "true";""")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary", type=Path)
@@ -296,6 +337,9 @@ def main():
                 ).fetchone()
             assert drawing_revision == 0, "Opening or zooming changed the fixture's drawing revision"
             assert len(json.loads(payload)["strokes"]) == 300
+    with isolated_library() as root, webdriver() as (launch, _):
+        with launch(args.binary, ("--fixture=empty",)) as web:
+            color_picker(web, root)
     print("Native editing and persistence passed.")
 
 
