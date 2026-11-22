@@ -74,7 +74,7 @@
   white-space: nowrap;
 }
 .lean-card[data-selected="true"] { outline: 1.5px dashed var(--focus); outline-offset: 5px; border-radius: 12px; }
-.lean-card[data-selected="true"]::after {
+.lean-card[data-selected="true"][data-resizable="true"]::after {
   position: absolute;
   right: -4px;
   bottom: -4px;
@@ -98,6 +98,7 @@
   font: 400 17px/22px Excalifont, Nunito, system-ui, sans-serif;
 }
 .lean-label { width: max-content; transform: translateY(-17px); unicode-bidi: plaintext; }
+.lean-label[data-selected="true"] { outline: 1.5px dashed var(--focus); outline-offset: 4px; }
 .lean-empty {
   position: absolute;
   top: 58.5%;

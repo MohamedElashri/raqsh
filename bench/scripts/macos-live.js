@@ -134,12 +134,12 @@
         await new Promise(requestAnimationFrame);
       }
       pointer("pointerup", 32, 320);
-      check(!button("Undo drawing"), "The off-stroke eraser moves changed the drawing");
+      check(find('[data-history="undo"]').disabled, "The off-stroke eraser moves changed the drawing");
       check(painted(96, 182), "Expected the first fixture stroke to be visible");
       pointer("pointerdown", 96, 183);
       pointer("pointerup", 96, 183);
       await waitFor(() => !painted(96, 182), "the first stroke to be erased");
-      button("Undo drawing").click();
+      find('[data-history="undo"]').click();
       await waitFor(() => painted(96, 182), "undo to restore the erased stroke");
       report("pass", { mode, initialPaintMs, eraserBatchesMs, movesPerBatch: 160 });
       return;
@@ -160,9 +160,9 @@
     pointer("pointermove", 180, 225);
     pointer("pointerup", 180, 225);
     await waitFor(() => painted(120, 224), "the stroke to be painted");
+    key("z", { metaKey: true });
+    await waitFor(() => !painted(120, 224), "Cmd+Z to undo the stroke");
     key("z", { metaKey: true, shiftKey: true });
-    await waitFor(() => !painted(120, 224), "Cmd+Shift+Z to undo the stroke");
-    button("Redo drawing").click();
     await waitFor(() => painted(120, 224), "redo to restore the stroke");
     report("pass", { mode });
   }

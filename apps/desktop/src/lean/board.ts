@@ -18,13 +18,13 @@ const darkInk: Record<Ink, string> = { green: chalk, slate: chalk, blue: "#94c5f
 
 const colors = { fill: "#e5e5e0", border: "#8c8981", edge: "#77746c", text: "#1b1b19", dropped: "#efeeea", paper: "#f0f0ed" };
 
-function edgePoints(from: Card, to: Card): Point[] {
+export function edgePoints(from: Card, to: Card): Point[] {
   const start: Point = [from.x + from.width, from.y + from.height / 2];
   const end: Point = [to.x, to.y + to.height / 2];
   return arrowPoints(start, end);
 }
 
-function arrowPoints(start: Point, end: Point): Point[] {
+export function arrowPoints(start: Point, end: Point): Point[] {
   const angle = Math.atan2(end[1] - start[1], end[0] - start[0]);
   const tip = (offset: number): Point => [end[0] - 12 * Math.cos(angle + offset), end[1] - 12 * Math.sin(angle + offset)];
   return [start, end, tip(0.45), end, tip(-0.45)];
@@ -32,7 +32,10 @@ function arrowPoints(start: Point, end: Point): Point[] {
 
 type PathPainter = (points: readonly Point[], color: string, width: number, x: number, y: number) => void;
 
-export type VisibleBoard = { region: Bounds; cards: ReadonlyMap<Id, Card>; strokes: WeakMap<Stroke, Bounds>; dark: boolean };
+export type VisibleBoard = {
+  region: Bounds; cards: ReadonlyMap<Id, Card>; strokes: WeakMap<Stroke, Bounds>; dark: boolean;
+  movedStrokes?: ReadonlyMap<Stroke, Stroke>; movedArrows?: ReadonlyMap<Arrow, Arrow>;
+};
 
 const overlaps = (box: Bounds, view: Bounds, padding: number) =>
   box.right + padding >= view.left && box.left - padding <= view.right
@@ -55,12 +58,14 @@ function paths(board: Board, draw: PathPainter, visible?: VisibleBoard) {
       to.x, to.y + to.height / 2, visible.region)) continue;
     draw(edgePoints(from, to), edgeColor, edge.kind === "dependency" ? 1.5 : 1, 0, 0);
   }
-  for (const stroke of board.strokes) {
+  for (const original of board.strokes) {
+    const stroke = visible?.movedStrokes?.get(original) ?? original;
     if (!visible || overlaps(getStrokeBounds(stroke, visible.strokes), visible.region, stroke.width / 2 + 2)) {
       draw(stroke.points, palette[stroke.color], stroke.width, stroke.x, stroke.y);
     }
   }
-  for (const arrow of board.arrows) {
+  for (const original of board.arrows) {
+    const arrow = visible?.movedArrows?.get(original) ?? original;
     if (!visible || segmentVisible(arrow.from[0], arrow.from[1], arrow.to[0], arrow.to[1], visible.region)) {
       draw(arrowPoints(arrow.from, arrow.to), palette[arrow.color], 2, 0, 0);
     }

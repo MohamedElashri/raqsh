@@ -32,6 +32,17 @@ pnpm test:macos --provider claude-code
 
 The **CI** workflow builds on Linux and macOS. To run model-backed tests on GitHub, set `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` as repository secrets and dispatch **CI** with `providers` enabled.
 
+## Linux editor verification
+
+With `tauri-driver` and `WebKitWebDriver` installed, run the editing check from a logged-in Linux desktop session.
+
+```sh
+pnpm desktop:build
+python3 bench/scripts/linux-editing.py target/release/raqsh
+```
+
+The check uses a disposable board and exercises keyboard shortcuts, grouped pointer gestures, drawing edits, unified history, and reopening the saved board.
+
 ## Releases and updates
 
 1. Generate a Tauri updater key outside the repository with `pnpm exec tauri signer generate --write-keys /path/to/raqsh-updater.key`. Store the private key securely. Set `TAURI_SIGNING_PRIVATE_KEY` and, if used, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` as GitHub repository secrets. Set the contents of the public key file as the `RAQSH_UPDATER_PUBLIC_KEY` repository variable. Keep the same updater key for future releases so installed versions can verify them.
