@@ -788,7 +788,8 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use board_domain::{Label, NodeKind, Priority, Status};
+    use board_domain::{ExcalidrawScene, Label, NodeKind, Priority, Status};
+    use serde_json::{Value, json};
     use std::path::PathBuf;
 
     struct Folder(PathBuf);
@@ -941,6 +942,65 @@ mod tests {
         assert_ne!(copied.nodes[0].id, opened.nodes[0].id);
         assert_eq!(copied.nodes[0].title, opened.nodes[0].title);
         assert!(store.apply(copied.scope, op).is_err());
+    }
+
+    #[test]
+    fn round_trips_native_scene_and_remaps_task_bindings() {
+        let folder = Folder::new();
+        let mut store = Store::open(&folder.database()).unwrap();
+        let project = store.add_project(&folder.0).unwrap();
+        let board = store.create_board(project.id, "Native scene").unwrap();
+        let scope = store.open_board(project.id, board.id).unwrap().scope;
+        let op = operation();
+        let Change::SetNode { node } = &op.changes[0] else {
+            panic!("test needs a task");
+        };
+        let card_id = node.id;
+        store.apply(scope, op).unwrap();
+        let scene = ExcalidrawScene {
+            version: 1,
+            background: "#f0f0ed".into(),
+            grid_size: Some(20),
+            elements: vec![
+                json!({
+                    "id": "arrow", "type": "arrow", "isDeleted": false,
+                    "x": 4, "y": 3, "width": 9, "height": 5, "angle": 0,
+                    "startBinding": { "elementId": format!("raqsh-card-{card_id}"), "gap": 2 },
+                    "elbowed": true, "points": [[0, 0], [5, 0], [5, 5], [9, 5]],
+                    "strokeStyle": "dashed", "groupIds": ["examples"]
+                }),
+                json!({
+                    "id": "image", "type": "image", "isDeleted": false,
+                    "x": 4, "y": 3, "width": 9, "height": 5, "angle": 0, "fileId": "image-data"
+                })
+            ],
+            files: [("image-data".into(), json!({
+                "id": "image-data", "mimeType": "image/svg+xml", "dataURL": "data:image/svg+xml;base64,PHN2Zy8+"
+            }))].into(),
+        };
+        let drawing = Drawing {
+            excalidraw: Some(scene.clone()),
+            ..Drawing::default()
+        };
+        assert_eq!(store.save_drawing(scope, 0, 1, drawing.clone()).unwrap(), 1);
+        assert_eq!(store.save_drawing(scope, 0, 1, drawing.clone()).unwrap(), 1);
+        let mut invalid = drawing.clone();
+        invalid.excalidraw.as_mut().unwrap().files.clear();
+        assert!(store.save_drawing(scope, 1, 2, invalid).is_err());
+        let exported = store.export(scope).unwrap();
+        store.close_board(scope).unwrap();
+        let reopened = store.open_board(project.id, board.id).unwrap();
+        assert_eq!(reopened.drawing, drawing);
+        store.close_board(reopened.scope).unwrap();
+
+        let imported = store.import(project.id, &exported).unwrap();
+        let copied = store.open_board(project.id, imported.id).unwrap();
+        let mut expected = scene;
+        let new_card = copied.nodes[0].id;
+        assert_ne!(new_card, card_id);
+        expected.elements[0]["startBinding"]["elementId"] =
+            Value::String(format!("raqsh-card-{new_card}"));
+        assert_eq!(copied.drawing.excalidraw.unwrap(), expected);
     }
 
     #[test]

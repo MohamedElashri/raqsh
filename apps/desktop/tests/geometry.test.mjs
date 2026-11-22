@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getStrokeBounds, nearPath, nearStroke, outline } from "../src/lean/geometry.ts";
+import { getStrokeBounds, insideClosedStroke, nearPath, nearStroke, outline } from "../src/lean/geometry.ts";
 
 test("stroke bounds cover translated and negative points", () => {
   const stroke = { x: -35, y: 63, points: [[14, 3], [-12, -25], [6, 8]] };
@@ -30,4 +30,12 @@ test("bounding-box rejection preserves segment-level erasing for shapes and repe
       }
     }
   }
+});
+
+test("selection hits a closed shape's interior without filling its bounding box", () => {
+  const diamond = { x: 100, y: -10, points: outline("diamond", [20, 20]) };
+  const cache = new WeakMap();
+  assert.equal(insideClosedStroke(diamond, 110, 0, cache), true);
+  assert.equal(insideClosedStroke(diamond, 101, 8, cache), false);
+  assert.equal(insideClosedStroke({ ...diamond, points: [[0, 0], [20, 0], [20, 20], [0, 20]] }, 110, 0, cache), false);
 });

@@ -285,7 +285,7 @@ def exercise(launch, parent, binary, root, native):
         button(session, "Move earlier")
         revision(session, 8)
         open_disclosure(session, ".board-header")
-        button(session, "Undo card")
+        session.click('.board-menu button[data-menu-history="undo"]')
         revision(session, 9)
         button(session, "Library")
         open_disclosure(session, ".more-tools")
@@ -311,7 +311,7 @@ def exercise(launch, parent, binary, root, native):
         revision(session, 11)
         assert len(tracked(session, "apply_operation")) == before + 1
         open_disclosure(session, ".board-header")
-        button(session, "Undo card")
+        session.click('.board-menu button[data-menu-history="undo"]')
         revision(session, 12)
 
         session.click('[data-tool="pen"]')
@@ -331,7 +331,7 @@ def exercise(launch, parent, binary, root, native):
         db = root / "data/dev.local.raqsh/library/boards.sqlite3"
         with sqlite3.connect(db, timeout=1) as blocker:
             blocker.execute("BEGIN EXCLUSIVE")
-            annotation(session, "Flush retry")
+            annotation(session, "Flush retry", y=320)
             close_board(session)
             wait_until(lambda: exists(session, '.lean-close[role="alertdialog"]'), "close-time save error")
             blocker.rollback()
@@ -360,7 +360,7 @@ def exercise(launch, parent, binary, root, native):
                       reducer=percentiles([call["result"]["reducerMicros"] / 1000 for call in calls]))
         with sqlite3.connect(db, timeout=1) as blocker:
             blocker.execute("BEGIN IMMEDIATE")
-            annotation(session, "Uncommitted annotation")
+            annotation(session, "Uncommitted annotation", y=375)
             pid, _ = wait_until(lambda: process_birth(parent, binary), "desktop process")
             os.kill(pid, signal.SIGKILL)
             blocker.rollback()
@@ -368,8 +368,9 @@ def exercise(launch, parent, binary, root, native):
             session.terminated = True
 
     with launch(binary) as session:
-        wait_until(lambda: exists(session, ".project-link"), "durable project library")
-        session.click(".project-link")
+        project = '[aria-label="Projects"] .project-link:not(:disabled)'
+        wait_until(lambda: exists(session, project), "durable project library")
+        session.click(project)
         wait_until(lambda: exists(session, row), "durable board row")
         session.click(row)
         ready(session)
@@ -399,7 +400,7 @@ def checkpoint_queue(launch, parent, binary, root, native):
         session.evaluate(TRACE + "window.holdCheckpoint = true;")
         annotation(session, "First in flight")
         wait_until(lambda: session.evaluate("return !!window.releaseCheckpoint;"), "held drawing reply")
-        annotation(session, "Newer generation")
+        annotation(session, "Newer generation", y=320)
         time.sleep(0.65)
         assert len(tracked(session, "save_drawing")) == 1
         session.evaluate("window.releaseCheckpoint();")
@@ -415,13 +416,13 @@ def checkpoint_queue(launch, parent, binary, root, native):
         pointer(session, at(session, 620, 200), {"type": "pointerDown", "button": 0}, at(session, 665, 212),
                 {"type": "pointerUp", "button": 0})
         assert len(wait_until(lambda: saved(3), "freeform arrow checkpoint")["arrows"]) == 1
-        button(session, "Undo drawing")
+        session.click('[data-history="undo"]')
         assert wait_until(lambda: saved(4), "freeform undo checkpoint")["arrows"] == []
         result = {"one_snapshot_in_flight": True, "freeform_arrow_and_undo": True}
         if not native:
             close_editor(session)
             return result
-        annotation(session, "Native window flush")
+        annotation(session, "Native window flush", y=375)
         request_window_close(session)
         wait_until(lambda: process_birth(parent, binary) is None, "requested native close")
         session.terminated = True

@@ -46,7 +46,7 @@
 .lean-canvas:focus { outline: none; }
 .lean-canvas:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
 .lean-cards { transform-origin: 0 0; pointer-events: none; }
-.lean-card, .lean-label { position: absolute; white-space: pre-wrap; }
+.lean-card { position: absolute; white-space: pre-wrap; }
 .lean-card {
   display: grid;
   place-items: center;
@@ -73,18 +73,6 @@
   letter-spacing: .04em;
   white-space: nowrap;
 }
-.lean-card[data-selected="true"] { outline: 1.5px dashed var(--focus); outline-offset: 5px; border-radius: 12px; }
-.lean-card[data-selected="true"]::after {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  width: 8px;
-  height: 8px;
-  border: 1.5px solid var(--focus);
-  background: var(--toolbar-surface);
-  border-radius: 2px;
-  content: "";
-}
 .lean-card[data-kind="group"] { border: 1px dashed var(--status-marker); background-image: none; }
 .lean-card[data-kind="blocker"] { border-color: var(--danger); }
 .lean-card[data-priority="high"]::before { border-color: var(--status-marker); font-weight: 800; }
@@ -94,10 +82,9 @@
 .lean-card[data-status="blocked"] { --card-badge: var(--card-blocked); }
 .lean-card[data-status="done"] { --card-badge: var(--card-done); }
 .lean-card[data-dropped="true"] { --card-badge: var(--card-done); color: var(--muted); text-decoration: line-through; }
-.lean-label, .lean-edit .lean-note-input {
+.lean-edit .lean-note-input {
   font: 400 17px/22px Excalifont, Nunito, system-ui, sans-serif;
 }
-.lean-label { width: max-content; transform: translateY(-17px); unicode-bidi: plaintext; }
 .lean-empty {
   position: absolute;
   top: 58.5%;
@@ -317,4 +304,52 @@
     --pill: #242421;
     --pill-text: #8c8981;
   }
+}
+
+.excalidraw-surface {
+  isolation: isolate;
+  overflow: hidden;
+}
+/* Let the floating picker share the board's stacking context while the canvas
+   and its editing controls stay below the Raqsh toolbar and panels. */
+.excalidraw-surface:has(.color-picker-content) {
+  isolation: auto;
+  --zIndex-canvas: 0;
+  --zIndex-interactiveCanvas: 0;
+  --zIndex-svgLayer: 1;
+  --zIndex-wysiwyg: 1;
+  --zIndex-canvasButtons: 1;
+  --zIndex-layerUI: 1;
+}
+.excalidraw-surface .excalidraw {
+  --ui-font: Assistant, system-ui, sans-serif;
+  --color-primary: var(--focus);
+  --color-primary-darker: var(--focus);
+  --color-selection: var(--focus);
+}
+.excalidraw-surface .excalidraw :is(.App-menu_top__left > div:first-child, .App-toolbar, .HintViewer, .App-bottom-bar, .layer-ui__wrapper__footer-left,
+  .layer-ui__wrapper__footer-right, .layer-ui__wrapper__top-right, .mobile-misc-tools-container,
+  .mobile-menu, .hint, .help-icon, .welcome-screen-center) {
+  display: none;
+}
+
+.excalidraw-surface .excalidraw .selected-shape-actions {
+  margin-block-start: 60px;
+  margin-inline-start: 8px;
+}
+
+.excalidraw-surface[data-typed-selection="true"] .selected-shape-actions {
+  display: none;
+}
+
+.excalidraw-surface .excalidraw .default-sidebar {
+  margin-block-start: 65px;
+}
+
+.lean-editor:not(:has(.excalidraw--mobile)) [data-drawing-properties] {
+  display: none;
+}
+.excalidraw-surface:not([data-typed-selection="true"]) .excalidraw--mobile .App-bottom-bar:has(.App-mobile-menu) {
+  display: block;
+  margin-bottom: 64px !important;
 }

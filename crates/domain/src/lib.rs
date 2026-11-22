@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::{BTreeMap, HashMap, HashSet};
 pub use uuid::Uuid as Id;
 
@@ -383,10 +384,144 @@ pub struct Drawing {
     pub strokes: Vec<Stroke>,
     pub labels: Vec<Label>,
     pub arrows: Vec<Arrow>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub excalidraw: Option<ExcalidrawScene>,
+}
+
+/// Keep native element attributes intact across checkpoints and portable board exports.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ExcalidrawScene {
+    pub version: u32,
+    pub elements: Vec<Value>,
+    pub files: BTreeMap<String, Value>,
+    pub background: String,
+    pub grid_size: Option<u32>,
+}
+
+fn scene_id(id: &str) -> bool {
+    !matches!(id, "__proto__" | "constructor" | "prototype")
+        && (1..=128).contains(&id.len())
+        && id
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
+}
+
+impl ExcalidrawScene {
+    fn validate(&self) -> Result<(), Error> {
+        let invalid = Error::Invalid("Invalid Excalidraw scene or scene size limit exceeded.");
+        if self.version != 1
+            || self.elements.len() > 12_000
+            || self.files.len() > 512
+            || !(self.background == "transparent"
+                || (self.background.starts_with('#')
+                    && matches!(self.background.len(), 4 | 7 | 9)
+                    && self.background[1..]
+                        .bytes()
+                        .all(|byte| byte.is_ascii_hexdigit())))
+            || self
+                .grid_size
+                .is_some_and(|size| !(1..=1000).contains(&size))
+        {
+            return Err(invalid);
+        }
+        let mut ids = HashSet::new();
+        for element in &self.elements {
+            let Some(id) = element["id"].as_str() else {
+                return Err(invalid);
+            };
+            if !scene_id(id)
+                || id.starts_with("raqsh-card-")
+                || id.starts_with("raqsh-edge-")
+                || !ids.insert(id)
+                || !matches!(
+                    element["type"].as_str(),
+                    Some(
+                        "rectangle"
+                            | "diamond"
+                            | "ellipse"
+                            | "arrow"
+                            | "line"
+                            | "freedraw"
+                            | "text"
+                            | "image"
+                            | "frame"
+                            | "magicframe"
+                            | "embeddable"
+                    )
+                )
+                || element["isDeleted"].as_bool() != Some(false)
+                || ["x", "y", "width", "height", "angle"].iter().any(|key| {
+                    !element[*key]
+                        .as_f64()
+                        .is_some_and(|number| number.abs() <= 10_000_000.0)
+                })
+            {
+                return Err(invalid);
+            }
+            if let Some(file) = element["fileId"].as_str()
+                && !self.files.contains_key(file)
+            {
+                return Err(invalid);
+            }
+        }
+        for (id, file) in &self.files {
+            if !scene_id(id) || file["id"].as_str() != Some(id.as_str()) {
+                return Err(invalid);
+            }
+            let Some(
+                mime @ ("image/png" | "image/jpeg" | "image/gif" | "image/webp" | "image/svg+xml"
+                | "image/avif"),
+            ) = file["mimeType"].as_str()
+            else {
+                return Err(invalid);
+            };
+            let prefix = format!("data:{mime};base64,");
+            if !file["dataURL"]
+                .as_str()
+                .and_then(|data| data.strip_prefix(&prefix))
+                .is_some_and(|encoded| {
+                    !encoded.is_empty()
+                        && encoded.bytes().all(|byte| {
+                            byte.is_ascii_alphanumeric() || matches!(byte, b'+' | b'/' | b'=')
+                        })
+                })
+            {
+                return Err(invalid);
+            }
+        }
+        Ok(())
+    }
+
+    fn remap_cards(&mut self, ids: &HashMap<Id, Id>) {
+        for element in &mut self.elements {
+            for property in ["startBinding", "endBinding"] {
+                let binding = &element[property];
+                let Some(id) = binding["elementId"]
+                    .as_str()
+                    .and_then(|id| id.strip_prefix("raqsh-card-"))
+                else {
+                    continue;
+                };
+                let target = Id::parse_str(id).ok().and_then(|id| ids.get(&id));
+                element[property] = match target {
+                    Some(id) => {
+                        let mut binding = binding.clone();
+                        binding["elementId"] = Value::String(format!("raqsh-card-{id}"));
+                        binding
+                    }
+                    None => Value::Null,
+                };
+            }
+        }
+    }
 }
 
 impl Drawing {
     pub fn validate(&self) -> Result<(), Error> {
+        if let Some(scene) = &self.excalidraw {
+            scene.validate()?;
+        }
         let mut ids = HashSet::new();
         if self.strokes.len() > 2_000
             || self.labels.len() > 1_000
@@ -470,6 +605,9 @@ impl Document {
             })
             .collect();
         let mut drawing = self.drawing;
+        if let Some(scene) = &mut drawing.excalidraw {
+            scene.remap_cards(&ids);
+        }
         for stroke in &mut drawing.strokes {
             stroke.id = Id::new_v4().to_string();
         }

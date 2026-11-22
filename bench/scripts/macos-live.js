@@ -19,10 +19,12 @@
   }
   const button = (label) => [...document.querySelectorAll("button")].find((element) =>
     element.textContent.trim() === label && !element.disabled);
-  const canvas = () => find("[data-board-surface]");
+  const canvas = () => find("[data-board-surface] canvas.interactive");
+  const toolSurface = () => find("[data-board-surface]");
   function key(value, modifiers = {}) {
-    canvas().focus();
-    canvas().dispatchEvent(new KeyboardEvent("keydown", { key: value, bubbles: true, cancelable: true, ...modifiers }));
+    const keyboardSurface = find("[data-board-surface] .excalidraw");
+    keyboardSurface.focus();
+    keyboardSurface.dispatchEvent(new KeyboardEvent("keydown", { key: value, bubbles: true, cancelable: true, ...modifiers }));
   }
   function pointer(type, x, y) {
     const bounds = canvas().getBoundingClientRect();
@@ -33,7 +35,7 @@
   }
   function painted(x, y) {
     const ratio = devicePixelRatio;
-    const pixels = canvas().getContext("2d").getImageData(Math.round(x * ratio), Math.round(y * ratio), 6, 6).data;
+    const pixels = find("[data-board-surface] canvas.static").getContext("2d").getImageData(Math.round(x * ratio), Math.round(y * ratio), 6, 6).data;
     return pixels.some((value, index) => index % 4 === 3 && value > 0);
   }
   async function createCard() {
@@ -154,7 +156,7 @@
       const initialPaintMs = performance.now() - started;
       check(editor.dataset.initialElements === "3500", "The stress fixture did not load in full");
       key("e");
-      await waitFor(() => canvas().classList.contains("tool-eraser"), "the eraser tool");
+      await waitFor(() => toolSurface().classList.contains("tool-eraser"), "the eraser tool");
       const eraserBatchesMs = [];
       pointer("pointerdown", 32, 160);
       for (let batch = 0; batch < 9; batch++) {
@@ -164,12 +166,12 @@
         await new Promise(requestAnimationFrame);
       }
       pointer("pointerup", 32, 320);
-      check(!button("Undo drawing"), "The off-stroke eraser moves changed the drawing");
+      check(find('[data-history="undo"]').disabled, "The off-stroke eraser moves changed the drawing");
       check(painted(96, 182), "Expected the first fixture stroke to be visible");
       pointer("pointerdown", 96, 183);
       pointer("pointerup", 96, 183);
       await waitFor(() => !painted(96, 182), "the first stroke to be erased");
-      button("Undo drawing").click();
+      find('[data-history="undo"]').click();
       await waitFor(() => painted(96, 182), "undo to restore the erased stroke");
       report("pass", { mode, initialPaintMs, eraserBatchesMs, movesPerBatch: 160 });
       return;
@@ -186,14 +188,14 @@
       mode === "provider" ? 120_000 : 10_000);
 
     key("p");
-    await waitFor(() => canvas().classList.contains("tool-pen"), "the drawing tool");
+    await waitFor(() => toolSurface().classList.contains("tool-pen"), "the drawing tool");
     pointer("pointerdown", 60, 225);
     pointer("pointermove", 180, 225);
     pointer("pointerup", 180, 225);
     await waitFor(() => painted(120, 224), "the stroke to be painted");
+    key("z", { metaKey: true });
+    await waitFor(() => !painted(120, 224), "Cmd+Z to undo the stroke");
     key("z", { metaKey: true, shiftKey: true });
-    await waitFor(() => !painted(120, 224), "Cmd+Shift+Z to undo the stroke");
-    button("Redo drawing").click();
     await waitFor(() => painted(120, 224), "redo to restore the stroke");
     report("pass", { mode });
   }

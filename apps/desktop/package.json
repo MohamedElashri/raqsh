@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "frontend:dev": "vite",
-    "frontend:build": "tsc --noEmit && vite build",
+    "frontend:dev": "node scripts/stage-editor-fonts.mjs && vite",
+    "frontend:build": "node scripts/stage-editor-fonts.mjs && tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "0.18.1",
     "@tauri-apps/api": "2.12.5",
     "react": "18.3.1",
     "react-dom": "18.3.1"
