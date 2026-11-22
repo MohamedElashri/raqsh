@@ -15,4 +15,22 @@ wget -qO- https://github.com/MohamedElashri/raqsh/releases/latest/download/insta
 
 ## Get started
 
-Open Raqsh, choose a project folder, and create a board. Press **Insert** to add a card. Open **Agents** to pair a coding client, then use **Setup command** to get its MCP configuration.
+Open Raqsh, choose a project folder, and create a board. Focus the canvas and press **N** to add a card. Open **Agents** to pair a coding client, then use **Setup command** to get its MCP configuration.
+
+## Build and test on macOS
+
+Install the Xcode Command Line Tools, Python 3, the Node version in `.node-version`, and the Rust toolchain in `rust-toolchain.toml`. Use the pnpm version in `package.json`.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm test:unit
+pnpm test:macos
+pnpm desktop:build
+APPLE_SIGNING_IDENTITY=- pnpm desktop:bundle --bundles app
+codesign --verify --deep --strict target/release/bundle/macos/visual-board.app
+open target/release/bundle/macos/visual-board.app
+```
+
+The live suite needs a logged-in macOS desktop session. It drives the editor in WebKit, exercises the MCP sidecar, and reopens a board to check persistence using a temporary library. Use `pnpm test:macos --stress-only` to repeat the eraser benchmark on a 500-card, 2,000-stroke board. It reports the median time for a batch of 160 synthetic pointer moves.
+
+The bundle command above produces an ad hoc signed app for local use. The release workflow handles Developer ID signing and notarization.

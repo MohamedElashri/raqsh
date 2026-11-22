@@ -27,3 +27,4 @@ rfd = { version = "=0.17.2", default-features = false }
 [features]
 custom-protocol = ["tauri/custom-protocol"]
 combined-mcp = ["dep:visual-board-mcp"]
+macos-live-test = ["board-ipc/live-test"]

@@ -5,7 +5,7 @@ import { id, kinds, makeCard, priorities, statuses, type Arrow, type Card, type 
   type Operation, type Point, type Receipt, type Stroke } from "../model";
 import { exportImage, paintPaths, type Board, type View, type VisibleBoard } from "./board";
 import { Checkpoint, type SaveState } from "./checkpoint";
-import { nearPath, outline, type Shape } from "./geometry";
+import { nearPath, nearStroke, outline, type Shape } from "./geometry";
 import AgentPanel from "./AgentPanel";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
@@ -368,7 +368,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     const [x, y] = point(event);
     const radius = 6 / view.current.zoom;
     for (const stroke of drawing.strokes) {
-      if (!removed.has(stroke) && nearPath(stroke.points, x - stroke.x, y - stroke.y, radius + stroke.width / 2)) {
+      if (!removed.has(stroke) && nearStroke(stroke, x, y, radius, strokeBounds)) {
         removed.add(stroke);
       }
     }
@@ -728,7 +728,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       const selectedCard = board.nodes.find((item) => item.id === selectedRef.current);
       if (tool === "connect") connect(selectedCard);
       else if (selectedCard) editCard(selectedCard);
-    } else if (event.key === "Insert") {
+    } else if (event.key === "Insert" || shortcut === "n") {
       event.preventDefault();
       addCard();
     } else if (event.key === " ") {
@@ -801,7 +801,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       {!board.nodes.length && !drawing.strokes.length && !drawing.labels.length && !drawing.arrows.length && <div className="lean-empty">
         <strong>{brand.displayName}</strong>
         <p>Draw here. Your plan starts on the board.</p>
-        <small>Press Insert to add a card, or pick a tool to sketch and write.</small>
+        <small>Press N to add a card, or pick a tool to sketch and write.</small>
       </div>}
       <div className="lean-toolbar" role="toolbar" aria-label="Board tools">
         <button type="button" aria-pressed={keepTool} onClick={() => setKeepTool(!keepTool)}
@@ -913,7 +913,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         <dl className="board-shortcuts">
           <dt>Arrow keys</dt><dd>Select a card, or pan in Pan mode.</dd>
           <dt>Enter</dt><dd>Edit the selected card, or link two cards in Dependency mode.</dd>
-          <dt>Insert</dt><dd>Add a card.</dd>
+          <dt>N / Insert</dt><dd>Add a card.</dd>
           <dt>Plus / minus</dt><dd>Zoom in or out.</dd>
           <dt>Ctrl / Cmd + Z</dt><dd>Undo the last card change.</dd>
           <dt>Ctrl / Cmd + Shift + Z</dt><dd>Undo the last drawing change.</dd>

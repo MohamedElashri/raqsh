@@ -269,6 +269,17 @@ fn pairing_path(library: &Path, binding: Id) -> PathBuf {
 }
 
 pub fn default_library() -> io::Result<PathBuf> {
+    #[cfg(feature = "live-test")]
+    if let Some(path) = env::var_os("VISUAL_BOARD_TEST_LIBRARY") {
+        let path = PathBuf::from(path);
+        if path.is_absolute() {
+            return Ok(path);
+        }
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "The test library must have an absolute path",
+        ));
+    }
     dirs::data_dir()
         .map(|directory| directory.join(APP_ID).join("library"))
         .ok_or_else(|| {
@@ -361,11 +372,25 @@ fn read_deadline(stream: &mut UnixStream, mut output: &mut [u8], end: Instant) -
             .checked_duration_since(Instant::now())
             .filter(|time| !time.is_zero())
             .ok_or_else(|| io::Error::new(io::ErrorKind::TimedOut, "IPC reply deadline"))?;
-        stream.set_read_timeout(Some(time))?;
         match stream.read(output) {
             Ok(0) => return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "IPC closed")),
             Ok(n) => output = &mut output[n..],
             Err(error) if error.kind() == io::ErrorKind::Interrupted => (),
+            Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                let mut descriptor = libc::pollfd {
+                    fd: stream.as_raw_fd(),
+                    events: libc::POLLIN,
+                    revents: 0,
+                };
+                let timeout = time.as_nanos().div_ceil(1_000_000).min(i32::MAX as u128) as i32;
+                // The descriptor stays open, and poll only accesses this one initialized entry.
+                if unsafe { libc::poll(&mut descriptor, 1, timeout) } < 0 {
+                    let error = io::Error::last_os_error();
+                    if error.kind() != io::ErrorKind::Interrupted {
+                        return Err(error);
+                    }
+                }
+            }
             Err(error) => return Err(error),
         }
     }
@@ -436,6 +461,8 @@ pub fn invoke(request: &Request) -> Result<Value, RemoteFailure> {
         let bytes = serde_json::to_vec(request).map_err(io::Error::other)?;
         stream.set_write_timeout(Some(IO_TIMEOUT))?;
         stream.write_all(&frame(&bytes, MAX_FRAME)?)?;
+        // Darwin can reject SO_RCVTIMEO changes after the peer closes, even with buffered data.
+        stream.set_nonblocking(true)?;
         let deadline = Instant::now() + IO_TIMEOUT;
         let mut header = [0; 4];
         read_deadline(&mut stream, &mut header, deadline)?;
@@ -466,5 +493,48 @@ pub fn invoke(request: &Request) -> Result<Value, RemoteFailure> {
             "transport",
             "The desktop did not return a valid reply. Retry writes with the same operation ID.",
         )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reads_a_complete_reply_after_the_peer_closes() -> io::Result<()> {
+        let (mut reader, mut writer) = UnixStream::pair()?;
+        assert_eq!(peer_uid(&reader)?, uid());
+        writer.write_all(&frame(b"reply", MAX_REPLY)?)?;
+        drop(writer);
+        reader.set_nonblocking(true)?;
+        let deadline = Instant::now() + IO_TIMEOUT;
+        let mut header = [0; 4];
+        read_deadline(&mut reader, &mut header, deadline)?;
+        let mut body = vec![0; frame_len(header, MAX_REPLY)?];
+        read_deadline(&mut reader, &mut body, deadline)?;
+        assert_eq!(body, b"reply");
+        Ok(())
+    }
+
+    #[test]
+    fn partial_reply_expires_at_the_original_deadline() -> io::Result<()> {
+        let (mut reader, mut writer) = UnixStream::pair()?;
+        reader.set_nonblocking(true)?;
+        writer.write_all(b"a")?;
+        let deadline = Instant::now() + Duration::from_millis(30);
+        let mut bytes = [0; 2];
+        let error = read_deadline(&mut reader, &mut bytes, deadline).unwrap_err();
+        assert_eq!(bytes[0], b'a');
+        assert_eq!(error.kind(), io::ErrorKind::TimedOut);
+        assert!(Instant::now() >= deadline);
+        Ok(())
+    }
+
+    #[test]
+    fn frame_header_enforces_the_size_limit() {
+        assert_eq!(frame_len([0, 0, 0, 8], 8).unwrap(), 8);
+        assert!(frame_len([0; 4], 8).is_err());
+        assert!(frame_len([0, 0, 0, 9], 8).is_err());
+        assert!(frame(&[0; 9], 8).is_err());
     }
 }

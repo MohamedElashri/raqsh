@@ -12,6 +12,27 @@ fn main() -> tauri::Result<()> {
         return Ok(());
     }
 
+    #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
+    let live_test = std::env::args().find_map(|arg| match arg.as_str() {
+        "--macos-live=edit" => Some("edit"),
+        "--macos-live=reopen" => Some("reopen"),
+        "--macos-live=stress" => Some("stress"),
+        _ => None,
+    });
+    #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
+    let live_library = if live_test.is_some() {
+        if std::env::var_os("VISUAL_BOARD_TEST_LIBRARY").is_none()
+            || std::env::var_os("VISUAL_BOARD_RUNTIME_DIR").is_none()
+        {
+            return Err(std::io::Error::other(
+                "The macOS live test requires an isolated library and runtime directory",
+            )
+            .into());
+        }
+        Some(board_ipc::default_library()?)
+    } else {
+        None
+    };
     let (socket_owner, socket) = board_ipc::SocketOwner::bind()?;
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(2)
@@ -53,9 +74,10 @@ fn main() -> tauri::Result<()> {
             }
         })
         .setup(move |app| {
-            app.manage(commands::Desktop::start(
-                app.path().app_data_dir()?.join("library"),
-            )?);
+            let library = app.path().app_data_dir()?.join("library");
+            #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
+            let library = live_library.unwrap_or(library);
+            app.manage(commands::Desktop::start(library)?);
             app.manage(bridge::RuntimeBridge::start(
                 app.handle().clone(),
                 socket_owner,
@@ -85,9 +107,25 @@ fn main() -> tauri::Result<()> {
                 window = window
                     .initialization_script(format!("window.__BOARD_FIXTURE__ = '{fixture}';"));
             }
-            let window = window.build()?;
+            #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
+            if let Some(mode) = live_test {
+                let script = include_str!("../../../../bench/scripts/macos-live.js");
+                window = window
+                    .initialization_script(format!(
+                        "window.__RAQSH_LIVE_MODE__ = '{mode}';\n{script}"
+                    ))
+                    .on_document_title_changed(|window, title| {
+                        if let Some(report) = title.strip_prefix("raqsh-live:") {
+                            println!("raqsh-live:{report}");
+                            if report.starts_with("{\"event\":\"pass\"") {
+                                let _ = window.close();
+                            }
+                        }
+                    });
+            }
+            let _window = window.build()?;
             #[cfg(target_os = "linux")]
-            window.with_webview(|webview| {
+            _window.with_webview(|webview| {
                 use webkit2gtk::{HardwareAccelerationPolicy, SettingsExt, WebViewExt};
                 if let Some(settings) = webview.inner().settings() {
                     settings.set_hardware_acceleration_policy(HardwareAccelerationPolicy::Never);

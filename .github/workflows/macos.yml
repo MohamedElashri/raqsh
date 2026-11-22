@@ -1,0 +1,38 @@
+name: macOS desktop
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version-file: .node-version
+      - name: Install pinned toolchains and dependencies
+        run: |
+          npm install --global "$(node -p 'require("./package.json").packageManager')"
+          pnpm install --frozen-lockfile
+          rustup show
+      - run: pnpm test:unit
+      - run: pnpm test:macos
+      - name: Build and verify the native app bundle
+        env:
+          APPLE_SIGNING_IDENTITY: '-'
+        run: |
+          pnpm desktop:build
+          pnpm desktop:bundle --bundles app
+          app=target/release/bundle/macos/visual-board.app
+          codesign --verify --deep --strict "$app"
+          lipo -verify_arch "$(uname -m)" "$app/Contents/MacOS/visual-board"
+          lipo -verify_arch "$(uname -m)" "$app/Contents/MacOS/visual-board-mcp"

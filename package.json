@@ -11,7 +11,9 @@
     "desktop:dev": "pnpm brand:generate && pnpm --filter visual-board-desktop exec tauri dev",
     "desktop:build": "pnpm brand:generate && pnpm --filter visual-board-desktop exec tauri build --no-bundle -- --locked && cargo build --release --locked -p visual-board-mcp",
     "desktop:bundle": "pnpm brand:generate && bash scripts/bundle-desktop.sh",
-    "desktop:check": "pnpm brand:generate && pnpm --filter visual-board-desktop typecheck && cargo check --workspace --locked"
+    "desktop:check": "pnpm brand:generate && pnpm --filter visual-board-desktop typecheck && cargo check --workspace --locked",
+    "test:unit": "pnpm brand:check && pnpm brand:generate && pnpm --filter visual-board-desktop typecheck && node --test apps/desktop/tests/*.test.mjs && cargo test --workspace --locked",
+    "test:macos": "bash scripts/test-macos.sh"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.12.6"

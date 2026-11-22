@@ -1,5 +1,6 @@
 import type { Arrow, Card, Drawing, Edge, Id, Ink, Point, Stroke } from "../model";
 import noteFontUrl from "./fonts/Excalifont-Regular.woff2?url";
+import { getStrokeBounds, type Bounds } from "./geometry";
 
 export type View = { x: number; y: number; zoom: number };
 export type Board = Drawing & { nodes: Card[]; edges: Edge[] };
@@ -31,33 +32,15 @@ function arrowPoints(start: Point, end: Point): Point[] {
 
 type PathPainter = (points: readonly Point[], color: string, width: number, x: number, y: number) => void;
 
-type Box = { left: number; top: number; right: number; bottom: number };
-export type VisibleBoard = { region: Box; cards: ReadonlyMap<Id, Card>; strokes: WeakMap<Stroke, Box>; dark: boolean };
+export type VisibleBoard = { region: Bounds; cards: ReadonlyMap<Id, Card>; strokes: WeakMap<Stroke, Bounds>; dark: boolean };
 
-const overlaps = (box: Box, view: Box, padding: number) =>
+const overlaps = (box: Bounds, view: Bounds, padding: number) =>
   box.right + padding >= view.left && box.left - padding <= view.right
   && box.bottom + padding >= view.top && box.top - padding <= view.bottom;
 
-function segmentVisible(x1: number, y1: number, x2: number, y2: number, region: Box) {
+function segmentVisible(x1: number, y1: number, x2: number, y2: number, region: Bounds) {
   return Math.max(x1, x2) + 14 >= region.left && Math.min(x1, x2) - 14 <= region.right
     && Math.max(y1, y2) + 14 >= region.top && Math.min(y1, y2) - 14 <= region.bottom;
-}
-
-function strokeVisible(stroke: Stroke, view: VisibleBoard) {
-  let box = view.strokes.get(stroke);
-  if (!box) {
-    box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
-    for (const point of stroke.points) {
-      const x = stroke.x + point[0];
-      const y = stroke.y + point[1];
-      box.left = Math.min(box.left, x);
-      box.top = Math.min(box.top, y);
-      box.right = Math.max(box.right, x);
-      box.bottom = Math.max(box.bottom, y);
-    }
-    view.strokes.set(stroke, box);
-  }
-  return overlaps(box, view.region, stroke.width / 2 + 2);
 }
 
 function paths(board: Board, draw: PathPainter, visible?: VisibleBoard) {
@@ -73,7 +56,9 @@ function paths(board: Board, draw: PathPainter, visible?: VisibleBoard) {
     draw(edgePoints(from, to), edgeColor, edge.kind === "dependency" ? 1.5 : 1, 0, 0);
   }
   for (const stroke of board.strokes) {
-    if (!visible || strokeVisible(stroke, visible)) draw(stroke.points, palette[stroke.color], stroke.width, stroke.x, stroke.y);
+    if (!visible || overlaps(getStrokeBounds(stroke, visible.strokes), visible.region, stroke.width / 2 + 2)) {
+      draw(stroke.points, palette[stroke.color], stroke.width, stroke.x, stroke.y);
+    }
   }
   for (const arrow of board.arrows) {
     if (!visible || segmentVisible(arrow.from[0], arrow.from[1], arrow.to[0], arrow.to[1], visible.region)) {
