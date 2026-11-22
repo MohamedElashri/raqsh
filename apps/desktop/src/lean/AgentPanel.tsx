@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { id, type Id, type Scope } from "../model";
 
 type Binding = { id: Id; boardId: Id | null; label: string };
-type Client = { id: string; name: string; installed: boolean; automatic: boolean };
+type Client = { id: string; name: string; installed: boolean; automatic: boolean; skillPath: string | null };
 type Configuration = { text: string; instructions: string | null; server: string };
 type Feedback = {
   id: Id; bindingId: Id; sequence: number; text: string;
@@ -163,6 +163,21 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
       <label className="project-grant"><input type="checkbox" name="project" /> Allow access to all boards in this project</label>
       <button type="submit" disabled={busy}>Approve pairing</button>
     </form>
+    <details className="agent-skill">
+      <summary>Raqsh skill</summary>
+      <p>Give a paired agent instructions for updating cards and responding to board feedback.</p>
+      {selectedClient?.skillPath && <p>Install in this project at <code>{selectedClient.skillPath}</code>.</p>}
+      <div className="agent-actions">
+        {selectedClient?.skillPath && <button type="button" disabled={busy} onClick={() => run(async () => {
+          const installed = await invoke<boolean>("install_board_skill", { scope, provider: selectedClient.id });
+          setConnected(installed ? "Skill installed. Open a new client session from this project."
+            : "A skill file already exists at this path and was kept.");
+        })}>Install skill</button>}
+        <button type="button" disabled={busy} onClick={() => run(async () => {
+          if (await invoke<boolean>("save_board_skill")) setConnected("SKILL.md saved. Place it in your client’s skill folder under raqsh-board.");
+        })}>Save SKILL.md</button>
+      </div>
+    </details>
     {binding && <>
       <label>Pairing<select name="binding" value={binding.id} onChange={(event) => setSelected(event.target.value)}>
         {bindings.map((item) => <option key={item.id} value={item.id}>{item.label} · {item.boardId ? "This board" : "Project"}</option>)}

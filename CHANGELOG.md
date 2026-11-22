@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.1
+
+- Install the optional Raqsh skill from Agents to guide board selection, task updates, and feedback across supported coding clients.
+- Save the skill for manual setup or read it from the Raqsh website.
+
 ## v0.2.0
 
 - Draw with Excalidraw, including images, frames, and editable Mermaid diagrams.

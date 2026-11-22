@@ -1,6 +1,7 @@
 use std::sync::atomic::Ordering;
 use tauri::{Emitter, Manager, WebviewWindowBuilder, WindowEvent};
 
+mod board_skill;
 mod bridge;
 mod commands;
 mod file_dialog;
@@ -83,6 +84,8 @@ fn main() -> tauri::Result<()> {
             commands::finish_close,
             commands::pair_client,
             commands::mcp_clients,
+            commands::install_board_skill,
+            commands::save_board_skill,
             commands::connect_client,
             commands::client_config,
             commands::list_bindings,

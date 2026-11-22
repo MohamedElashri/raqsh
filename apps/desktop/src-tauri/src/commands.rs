@@ -1,4 +1,4 @@
-use crate::mcp_setup;
+use crate::{board_skill, file_dialog::Save, mcp_setup};
 use board_domain::{Board, Drawing, Id, Operation, Project};
 use board_store::{OpenBoard, Page, Scope, Store};
 use std::{
@@ -188,18 +188,18 @@ pub async fn export_board(
     scope: Scope,
 ) -> Reply<bool> {
     let document = state.call(move |store| store.export(scope)).await?;
-    save_file(window, "raqsh", document.into_bytes()).await
+    save_board_file(window, "board.raqsh", "raqsh", document.into_bytes()).await
 }
 
 #[tauri::command]
 pub async fn export_preview(window: WebviewWindow, request: Request<'_>) -> Reply<bool> {
-    let format = match request
+    let (filename, format) = match request
         .headers()
         .get("x-board-image")
         .and_then(|header| header.to_str().ok())
     {
-        Some("png") => "png",
-        Some("svg") => "svg",
+        Some("png") => ("board.png", "png"),
+        Some("svg") => ("board.svg", "svg"),
         _ => return Err("Unsupported image format.".into()),
     };
     let InvokeBody::Raw(payload) = request.body() else {
@@ -208,11 +208,29 @@ pub async fn export_preview(window: WebviewWindow, request: Request<'_>) -> Repl
     if payload.len() > 24 * 1024 * 1024 {
         return Err("Image exceeds the export size limit.".into());
     }
-    save_file(window, format, payload.clone()).await
+    save_board_file(window, filename, format, payload.clone()).await
 }
 
-async fn save_file(window: WebviewWindow, suffix: &'static str, data: Vec<u8>) -> Reply<bool> {
-    let Some(destination) = crate::file_dialog::choose(window, Some(suffix)).await? else {
+async fn save_board_file(
+    window: WebviewWindow,
+    filename: &'static str,
+    suffix: &'static str,
+    data: Vec<u8>,
+) -> Reply<bool> {
+    save_file(
+        window,
+        Save {
+            title: "Export board",
+            filename,
+            suffix,
+        },
+        data,
+    )
+    .await
+}
+
+async fn save_file(window: WebviewWindow, save: Save, data: Vec<u8>) -> Reply<bool> {
+    let Some(destination) = crate::file_dialog::choose(window, Some(save)).await? else {
         return Ok(false);
     };
     tauri::async_runtime::spawn_blocking(move || write_export(&destination, &data))
@@ -325,6 +343,34 @@ pub async fn pair_client(
 #[tauri::command]
 pub fn mcp_clients() -> Vec<mcp_setup::Client> {
     mcp_setup::clients()
+}
+
+#[tauri::command]
+pub async fn install_board_skill(
+    state: State<'_, Desktop>,
+    scope: Scope,
+    provider: String,
+) -> Reply<bool> {
+    let directory = mcp_setup::named(&provider)?
+        .skill_directory()
+        .ok_or("Save SKILL.md to install the skill for this client.")?;
+    let root = state
+        .call(move |store| store.open_project_root(scope))
+        .await?;
+    tauri::async_runtime::spawn_blocking(move || board_skill::install(&root, directory))
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| format!("Could not install the Raqsh skill. {error}"))
+}
+
+#[tauri::command]
+pub async fn save_board_skill(window: WebviewWindow) -> Reply<bool> {
+    let save = Save {
+        title: "Save Raqsh skill",
+        filename: board_skill::FILE,
+        suffix: "md",
+    };
+    save_file(window, save, board_skill::DOCUMENT.to_vec()).await
 }
 
 async fn confirm_binding(state: &Desktop, scope: Scope, binding: Id) -> Reply<()> {

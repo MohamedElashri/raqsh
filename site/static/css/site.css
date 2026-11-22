@@ -190,6 +190,7 @@ section[id], h2[id], #install, #macos-first-launch { scroll-margin-top: 1.5rem; 
 .example-action { max-width: 59rem; margin: 1.5rem auto 0; }
 .pairing { padding: clamp(1.25rem, 3vw, 2.25rem); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .pairing p { margin-top: .75rem; color: var(--muted); }
+.pairing-skill { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
 
 #download-title { max-width: none; }
 .package-list { list-style: ""; }

@@ -18,6 +18,8 @@ fn main() {
             "finish_close",
             "pair_client",
             "mcp_clients",
+            "install_board_skill",
+            "save_board_skill",
             "connect_client",
             "client_config",
             "list_bindings",
