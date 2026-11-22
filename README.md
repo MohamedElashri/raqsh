@@ -1,6 +1,10 @@
 <p align="center"><img src="docs/images/raqsh-mark.png" alt="" width="76" height="76"></p>
 <h1 align="center">Raqsh</h1>
 <p align="center">A local-first whiteboard for planning with coding agents.</p>
+<p align="center">
+  <a href="https://github.com/MohamedElashri/raqsh/releases/latest"><img src="https://img.shields.io/github/v/release/MohamedElashri/raqsh" alt="Latest release"></a>
+  <a href="https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml"><img src="https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status on main"></a>
+</p>
 
 <table>
   <tr>
@@ -33,4 +37,21 @@ Open a project folder, create a board, and press **N** on the canvas to add a ca
 
 Check for updates under **Settings → About**. Checking, downloading, installing, and restarting are each started from the app. Boards are stored on your device.
 
-[Development and release guide](docs/development.md)
+## Development
+
+Install the dependencies and start the desktop app in development mode.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm desktop:dev
+```
+
+Run `pnpm desktop:build` to build the desktop app and MCP helper. [Prerequisites, tests, and packaging](docs/development.md)
+
+## Contributing
+
+Bug reports, ideas, and fixes are welcome. [Open an issue](https://github.com/MohamedElashri/raqsh/issues/new) or [submit a pull request](https://github.com/MohamedElashri/raqsh/compare).
+
+## License
+
+Raqsh is free for personal and noncommercial community use under the [PolyForm Noncommercial License 1.0.0](LICENSE), with a separate license required for commercial use outside those terms.
