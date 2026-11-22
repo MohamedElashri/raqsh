@@ -89,8 +89,10 @@ jobs:
           pnpm --filter raqsh-desktop exec tauri build --target universal-apple-darwin --no-bundle -- --locked
           pnpm desktop:bundle --target universal-apple-darwin --bundles app
           app=target/universal-apple-darwin/release/bundle/macos/Raqsh.app
-          lipo "$app/Contents/MacOS/raqsh" -verify_arch arm64 x86_64
-          lipo "$app/Contents/MacOS/raqsh-mcp" -verify_arch arm64 x86_64
+          for binary in raqsh raqsh-mcp; do
+            lipo "$app/Contents/MacOS/$binary" -verify_arch arm64
+            lipo "$app/Contents/MacOS/$binary" -verify_arch x86_64
+          done
           codesign --verify --deep --strict "$app"
           mkdir release-assets
           ditto -c -k --keepParent "$app" release-assets/raqsh-macos-universal.zip
