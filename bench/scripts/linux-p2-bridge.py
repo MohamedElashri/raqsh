@@ -42,13 +42,16 @@ def ready(session):
 
 def add_pairing(session, label, project=False):
     session.evaluate('''
+        const provider = document.querySelector('.agent-panel select[name="provider"]');
+        provider.value = 'generic';
+        provider.dispatchEvent(new Event('change', {bubbles: true}));
         const name = document.querySelector('.agent-panel input[name="label"]');
         name.value = arguments[0];
         document.querySelector('.agent-panel input[name="project"]').checked = arguments[1];
     ''', label, project)
     button(session, "Approve pairing")
     return wait_until(lambda: session.evaluate('''
-        const select = document.querySelector(".agent-panel select");
+        const select = document.querySelector('.agent-panel select[name="binding"]');
         return select?.selectedOptions[0]?.textContent.startsWith(arguments[0] + " ·") ? select.value : null;
     ''', label), f"approved {label} pairing")
 
@@ -292,9 +295,9 @@ async def proof(launch, parent, desktop, helper, root):
             await call(one, "board_get", {**scope, "offset": 12, "revision": 1}, "revision_conflict")
 
             button(web, "Agents")
-            wait_until(lambda: web.evaluate('return document.querySelector(".agent-panel select")?.options.length === 3;'), "paired clients shown")
+            wait_until(lambda: web.evaluate('return document.querySelector(".agent-panel select[name=binding]")?.options.length === 3;'), "paired clients shown")
             web.evaluate('''
-                const select = document.querySelector(".agent-panel select");
+                const select = document.querySelector('.agent-panel select[name="binding"]');
                 select.value = arguments[0];
                 select.dispatchEvent(new Event("change", {bubbles: true}));
             ''', a)

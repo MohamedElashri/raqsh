@@ -55,7 +55,8 @@ textarea { padding: 7px 9px; }
 
 .workspace { min-height: 100dvh; }
 .library { min-height: 100dvh; display: grid; grid-template-columns: minmax(180px, 235px) minmax(0, 1fr); }
-.library-sidebar { background: var(--nav); border-inline-end: 1px solid var(--line); padding: 18px 14px; }
+.library-sidebar { display: flex; flex-direction: column; background: var(--nav); border-inline-end: 1px solid var(--line); padding: 18px 14px; }
+.settings-link { margin-block-start: auto; padding-block: 9px; }
 .app-mark { display: flex; gap: 10px; align-items: center; margin: 2px 4px 28px; }
 .app-mark h1 { font-size: 1.15rem; margin: 0; letter-spacing: -0.035em; }
 .library-heading, .library-actions, .board-row, .dialog-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -110,6 +111,17 @@ dialog {
 dialog::backdrop { background: #241f1966; }
 dialog h2 { margin: 0 0 12px; font-size: 1.25rem; letter-spacing: -.02em; }
 dialog p:first-child { margin-top: 0; }
+
+.about-settings { width: min(29rem, calc(100% - 32px)); }
+.settings-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+.settings-header h2, .about-settings h3, .about-brand p { margin: 0; }
+.about-settings h3 { font-size: .95rem; }
+.about-brand { display: flex; align-items: center; gap: 15px; margin-block: 8px 20px; }
+.about-brand strong { display: block; font-size: 1.8rem; letter-spacing: -.045em; line-height: 1.15; }
+.about-brand p, .about-updates [role="status"] { color: var(--muted); }
+.about-updates { border-block-start: 1px solid var(--line); padding-block-start: 16px; }
+.about-updates p { margin: 7px 0 12px; overflow-wrap: anywhere; }
+.about-updates .primary { min-width: 9rem; }
 
 .board-workspace { height: 100dvh; background: var(--canvas); }
 .board-loading { display: grid; height: 100%; margin: 0; place-items: center; color: var(--muted); }

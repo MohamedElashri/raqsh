@@ -28,6 +28,7 @@ const icons = {
   pen: <><path d="m5 15-1 5 5-1L20 8l-4-4L5 15Z" /><path d="m14 6 4 4" /></>,
   plug: <><path d="M9 3v5m6-5v5M7 8h10v3a5 5 0 0 1-10 0V8Zm5 8v5" /></>,
   select: <path d="m5 4 14 5-6 2-2 7L5 4Zm8 7 5 5" />,
+  settings: <><path d="M4 6h16M4 12h16M4 18h16" /><path d="M8 4v4m8 2v4m-6 2v4" strokeWidth="3" /></>,
   text: <path d="m5 20 6-16h2l6 16m-12-5h10M3 20h5m8 0h5" />,
   undo: <path d="M8 6 4 10l4 4m-4-4h11a4 4 0 0 1 0 8h-3" />,
   undoInk: <><path d="M8 6 4 10l4 4m-4-4h10a4 4 0 0 1 0 8h-3m7-14 2 2" /></>,

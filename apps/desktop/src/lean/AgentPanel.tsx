@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { id, type Id, type Scope } from "../model";
 
 type Binding = { id: Id; boardId: Id | null; label: string };
+type Provider = "codex" | "claude";
+const providerNames: Record<Provider, string> = { codex: "Codex", claude: "Claude Code" };
 type Feedback = {
   id: Id; bindingId: Id; sequence: number; text: string;
   state: "queued" | "offered" | "acknowledged" | "cancelled"; response: string | null;
@@ -17,10 +19,12 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
   const [recent, setRecent] = useState<Feedback[]>([]);
   const [history, setHistory] = useState<Feedback[]>([]);
   const [selected, setSelected] = useState<Id>();
-  const [setup, setSetup] = useState<Id>();
-  const [format, setFormat] = useState("json");
+  const [config, setConfig] = useState<{ binding: Id; text: string }>();
+  const [clients, setClients] = useState<Provider[]>([]);
+  const [provider, setProvider] = useState<Provider | "generic">();
   const [revoking, setRevoking] = useState<Id>();
   const [message, setMessage] = useState("");
+  const [connected, setConnected] = useState("");
   const [busy, setBusy] = useState(false);
   const nextFeedback = useRef<{ id: Id; text: string; binding: Id }>();
   const inFlight = useRef(false);
@@ -28,6 +32,7 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
 
   const loadBindings = async () => setBindings(await invoke<Binding[]>("list_bindings", { scope }));
   const loadFeedback = async () => setRecent(await invoke<Feedback[]>("list_feedback", { scope, before: null }));
+  const selectedProvider = provider ?? clients[0] ?? "generic";
 
   useEffect(() => {
     let alive = true;
@@ -35,6 +40,9 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
     let running = false;
     let needFeedback = false;
     let needBindings = false;
+
+    void invoke<Provider[]>("mcp_clients").then((value) => { if (alive) setClients(value); })
+      .catch((error) => { if (alive) setMessage(String(error)); });
 
     function schedule() {
       if (!alive || timer || running || (!needFeedback && !needBindings)) return;
@@ -85,6 +93,7 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
     inFlight.current = true;
     setBusy(true);
     setMessage("");
+    setConnected("");
     void task().catch((error) => setMessage(String(error))).finally(() => {
       inFlight.current = false;
       setBusy(false);
@@ -95,14 +104,18 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
+    const client = data.get("provider");
+    const provider = client === "codex" || client === "claude" ? client : null;
     run(async () => {
       const created = await invoke<Binding>("pair_client", {
-        scope, label: String(data.get("label")).trim(), projectWide: data.has("project"),
+        scope, provider, label: String(data.get("label")).trim() || (provider ? providerNames[provider] : ""),
+        projectWide: data.has("project"),
       });
       setSelected(created.id);
-      setSetup(created.id);
+      setConfig(undefined);
       form.reset();
       await loadBindings();
+      if (provider) setConnected(`${providerNames[provider]} connected. Open a new session to use this pairing.`);
     });
   }
 
@@ -129,35 +142,45 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
   return <aside id="board-agents" className="agent-panel" aria-label="Paired agents">
     <header><h2>Paired agents</h2><button type="button" onClick={onClose}>Close</button></header>
     <form onSubmit={pair}>
-      <label>Client name<input name="label" required maxLength={90} dir="auto" /></label>
+      <label>Client<select name="provider" value={selectedProvider}
+        onChange={(event) => setProvider(event.target.value as Provider | "generic")}>
+        {(Object.keys(providerNames) as Provider[]).map((item) => <option key={item} value={item} disabled={!clients.includes(item)}>
+          {providerNames[item]}{clients.includes(item) ? "" : " (not installed)"}
+        </option>)}
+        <option value="generic">Other MCP client</option>
+      </select></label>
+      <label>Pairing name<input name="label" required={selectedProvider === "generic"} maxLength={90} dir="auto"
+        placeholder={selectedProvider === "generic" ? "Client name" : providerNames[selectedProvider]} /></label>
       <label className="project-grant"><input type="checkbox" name="project" /> Allow access to all boards in this project</label>
       <button type="submit" disabled={busy}>Approve pairing</button>
     </form>
     {binding && <>
-      <label>Client<select value={binding.id} onChange={(event) => setSelected(event.target.value)}>
+      <label>Pairing<select name="binding" value={binding.id} onChange={(event) => setSelected(event.target.value)}>
         {bindings.map((item) => <option key={item.id} value={item.id}>{item.label} · {item.boardId ? "This board" : "Project"}</option>)}
       </select></label>
       <div className="agent-actions">
-        <button type="button" onClick={() => setSetup(setup === binding.id ? undefined : binding.id)}>Setup command</button>
+        <button type="button" disabled={busy} onClick={() => {
+          if (config?.binding === binding.id) { setConfig(undefined); return; }
+          run(async () => setConfig({ binding: binding.id, text: await invoke<string>("client_config", { scope, binding: binding.id }) }));
+        }}>MCP configuration</button>
         <button type="button" disabled={busy} onClick={() => setRevoking(binding.id)}>Revoke access</button>
       </div>
-      {setup === binding.id && <>
-        <label>MCP client<select value={format} onChange={(event) => setFormat(event.target.value)}>
-          <option value="json">Generic MCP</option>
-          <option value="codex">Codex</option>
-          <option value="claude">Claude Code</option>
-        </select></label>
-        <input aria-label="MCP setup command" readOnly
-          value={`visual-board-mcp setup --pairing ${binding.id}${format === "json" ? "" : ` --format ${format}`}`}
+      {config?.binding === binding.id && <>
+        <textarea aria-label="MCP configuration" rows={5} spellCheck={false} readOnly value={config.text}
           onFocus={(event) => event.target.select()} />
-        <small>Feedback via MCP tools. Live steering is unsupported.</small>
+        <div className="agent-actions">{clients.map((item) => <button key={item} type="button" disabled={busy} onClick={() => run(async () => {
+          await invoke("connect_client", { scope, binding: binding.id, provider: item });
+          setConnected(`${providerNames[item]} connected. Open a new session to use this pairing.`);
+        })}>Connect {providerNames[item]}</button>)}</div>
       </>}
       {revoking === binding.id && <div className="agent-actions" role="alert">
         <button type="button" disabled={busy} onClick={() => run(async () => {
-          await invoke("revoke_client", { scope, binding: binding.id });
-          setRevoking(undefined);
-          setSetup(undefined);
-          await Promise.all([loadBindings(), loadFeedback()]);
+          try { await invoke("revoke_client", { scope, binding: binding.id }); }
+          finally {
+            setRevoking(undefined);
+            setConfig(undefined);
+            await Promise.all([loadBindings(), loadFeedback()]);
+          }
         })}>Revoke pairing</button>
         <button type="button" onClick={() => setRevoking(undefined)}>Keep pairing</button>
       </div>}
@@ -167,6 +190,7 @@ export default function AgentPanel({ scope, onClose }: { scope: Scope; onClose: 
       </form>
     </>}
     {message && <output role="alert">{message}</output>}
+    {connected && <output role="status">{connected}</output>}
     {items.length > 0 && <ol aria-label="Board feedback">
       {items.map((item) => <li key={item.id}>
         <small>{bindings.find((client) => client.id === item.bindingId)?.label ?? "Previous pairing"} · {states[item.state]}</small>

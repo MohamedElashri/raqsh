@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "rea
 import { createRoot } from "react-dom/client";
 import { Icon } from "./Icon";
 import { Modal } from "./Modal";
+import { AboutSettings } from "./AboutSettings";
 import { brand } from "./generated/brand";
 import icon from "./generated/icon.svg";
 import type { BoardInfo, OpenBoard, Page, Project } from "./model";
@@ -26,6 +27,7 @@ function Workspace() {
   const [action, setAction] = useState<{ kind: "rename" | "delete"; board: BoardInfo }>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [settings, setSettings] = useState(false);
   const pending = useRef(false);
   const close = useRef<CloseEditor>();
   const active = useRef(false);
@@ -154,6 +156,9 @@ function Workspace() {
             </li>)}</ul>
             {projects.nextOffset !== null && <button className="ui-button" disabled={busy} onClick={() => void run(() => loadProjects(projects.nextOffset!))}>More projects</button>}
           </section>}
+          <button type="button" className="project-link settings-link" disabled={busy} onClick={() => setSettings(true)}>
+            <Icon name="settings" />Settings
+          </button>
         </div>
         {Editor && <div className="library-content">
         {project ? <section aria-label="Boards">
@@ -219,6 +224,7 @@ function Workspace() {
         {error && !action && <p className="library-error" role="alert">{error}</p>}
         </div>}
       </div>
+      {settings && <AboutSettings onClose={() => setSettings(false)} />}
     </main>
   );
 }

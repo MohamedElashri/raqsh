@@ -1,3 +1,4 @@
+use crate::mcp_setup::{self, Provider};
 use board_domain::{Board, Drawing, Id, Operation, Project};
 use board_store::{OpenBoard, Page, Scope, Store};
 use std::{
@@ -21,6 +22,7 @@ type Reply<T> = Result<T, String>;
 pub struct Desktop {
     queue: SyncSender<Job>,
     library: PathBuf,
+    mcp_setup: tokio::sync::Mutex<()>,
     pub permit_close: AtomicBool,
 }
 
@@ -39,6 +41,7 @@ impl Desktop {
         Ok(Self {
             queue,
             library,
+            mcp_setup: tokio::sync::Mutex::new(()),
             permit_close: AtomicBool::new(false),
         })
     }
@@ -256,7 +259,7 @@ pub async fn open_benchmark(
         .ok_or("Benchmark project was not enabled at launch.")?;
     if !matches!(
         fixture.as_str(),
-        "empty" | "tiny" | "ordinary" | "normal" | "stress"
+        "empty" | "tiny" | "ordinary" | "normal" | "stress" | "showcase"
     ) {
         return Err("Unknown benchmark fixture.".into());
     }
@@ -293,9 +296,11 @@ pub async fn pair_client(
     scope: Scope,
     label: String,
     project_wide: bool,
+    provider: Option<Provider>,
 ) -> Reply<board_store::bridge::Binding> {
+    let _guard = state.mcp_setup.lock().await;
     let library = state.library.clone();
-    state
+    let binding = state
         .call(move |store| {
             let credential = board_ipc::Credential::new()?;
             let binding = store.pair(scope, &label, project_wide, &credential)?;
@@ -305,7 +310,46 @@ pub async fn pair_client(
             }
             Ok(binding)
         })
-        .await
+        .await?;
+    if let Some(provider) = provider
+        && let Err(error) = mcp_setup::configure(&state.library, binding.id, provider).await
+    {
+        revoke_binding(&state, scope, binding.id).await?;
+        return Err(error);
+    }
+    Ok(binding)
+}
+
+#[tauri::command]
+pub fn mcp_clients() -> Vec<Provider> {
+    mcp_setup::installed_clients()
+}
+
+async fn confirm_binding(state: &Desktop, scope: Scope, binding: Id) -> Reply<()> {
+    let bindings = state.call(move |store| store.bindings(scope)).await?;
+    if bindings.iter().any(|item| item.id == binding) {
+        Ok(())
+    } else {
+        Err("That pairing is no longer available.".into())
+    }
+}
+
+#[tauri::command]
+pub async fn connect_client(
+    state: State<'_, Desktop>,
+    scope: Scope,
+    binding: Id,
+    provider: Provider,
+) -> Reply<()> {
+    let _guard = state.mcp_setup.lock().await;
+    confirm_binding(&state, scope, binding).await?;
+    mcp_setup::configure(&state.library, binding, provider).await
+}
+
+#[tauri::command]
+pub async fn client_config(state: State<'_, Desktop>, scope: Scope, binding: Id) -> Reply<String> {
+    confirm_binding(&state, scope, binding).await?;
+    mcp_setup::generic_config(binding)
 }
 
 #[tauri::command]
@@ -318,6 +362,12 @@ pub async fn list_bindings(
 
 #[tauri::command]
 pub async fn revoke_client(state: State<'_, Desktop>, scope: Scope, binding: Id) -> Reply<()> {
+    let _guard = state.mcp_setup.lock().await;
+    revoke_binding(&state, scope, binding).await?;
+    mcp_setup::unregister(&state.library, binding).await
+}
+
+async fn revoke_binding(state: &Desktop, scope: Scope, binding: Id) -> Reply<()> {
     let library = state.library.clone();
     state
         .call(move |store| {

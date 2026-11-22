@@ -95,11 +95,25 @@ def run_cli(command, root, env, timeout=10):
     return result.stdout.strip()
 
 
-def update_status_with_provider(helper, pairing, root, env, provider):
+def update_status_with_provider(helper, pairing, root, env, provider, registration_env):
     cli = "codex" if provider == "codex" else "claude"
     auth_env = dict(env, DISABLE_TELEMETRY="1", DISABLE_ERROR_REPORTING="1", DISABLE_AUTOUPDATER="1")
     probe = json.loads(run_cli([helper, "doctor", "--pairing", pairing["binding"]], root, env))
     require(probe["binding"]["id"] == pairing["binding"], "The helper reported a different pairing")
+    alias = f"raqsh-{pairing['binding']}"
+    inspect = [cli, "mcp", "get", alias]
+    if provider == "codex":
+        registration = json.loads(run_cli([*inspect, "--json"], root, registration_env))
+        entry = registration["transport"]
+        require(entry["command"] == str(helper) and entry["args"] == ["serve", "--pairing", pairing["binding"]],
+                "Raqsh did not configure the bundled helper in Codex")
+    else:
+        profile = Path(registration_env["CLAUDE_CONFIG_DIR"], ".claude.json")
+        entries = json.loads(profile.read_text()).get("mcpServers", {}) if profile.exists() else {}
+        require(alias in entries, f"Claude profile is missing the pairing (recorded aliases: {list(entries)})")
+        description = run_cli(inspect, root, registration_env)
+        require(str(helper) in description and pairing["binding"] in description and "Connected" in description,
+                "Raqsh did not configure a working bundled helper in Claude Code")
     arguments = status_arguments(pairing, probe["binding"]["boardId"])
     prompt = (f"This is an isolated synthetic integration test. Call {STATUS_TOOL} on the {SERVER} MCP server "
               f"exactly once with these arguments: {json.dumps(arguments)}. Do not use any other tools. "
@@ -146,10 +160,20 @@ def update_status_with_provider(helper, pairing, root, env, provider):
 
 def run_app(desktop, helper, root, env, mode, provider):
     fixture = "stress" if mode == "stress" else "empty"
-    command = [desktop, f"--fixture={fixture}", f"--macos-live={mode}"]
+    command = [desktop, f"--macos-live={mode}"]
+    if mode != "about":
+        command.append(f"--fixture={fixture}")
+    app_env = dict(env, VISUAL_BOARD_TEST_PROVIDER="generic")
+    if mode == "provider":
+        codex_profile = root / "codex-profile"
+        claude_profile = root / "claude-profile"
+        codex_profile.mkdir(mode=0o700)
+        claude_profile.mkdir(mode=0o700)
+        app_env.update(CODEX_HOME=str(codex_profile), CLAUDE_CONFIG_DIR=str(claude_profile),
+                       VISUAL_BOARD_TEST_PROVIDER="codex" if provider == "codex" else "claude")
     log_path = root / f"{mode}.log"
     with log_path.open("wb") as output, log_path.open(encoding="utf8") as log:
-        with child(command, env=env, stdout=output, stderr=subprocess.STDOUT) as process:
+        with child(command, env=app_env, stdout=output, stderr=subprocess.STDOUT) as process:
             deadline = time.monotonic() + (PROVIDER_TIMEOUT + 45 if mode == "provider" else 45)
             version = None
             try:
@@ -161,7 +185,7 @@ def run_app(desktop, helper, root, env, mode, provider):
                             raise RuntimeError(report["message"])
                         if report["event"] == "paired":
                             if mode == "provider":
-                                version = update_status_with_provider(helper, report, root, env, provider)
+                                version = update_status_with_provider(helper, report, root, env, provider, app_env)
                             else:
                                 update_status(helper, report, env)
                         if report["event"] == "pass":
@@ -199,7 +223,7 @@ def main():
         (root / "runtime").mkdir(mode=0o700)
         env = dict(os.environ, VISUAL_BOARD_BENCH_PROJECT=str(root / "project"),
                    VISUAL_BOARD_RUNTIME_DIR=str(root / "runtime"), VISUAL_BOARD_TEST_LIBRARY=str(root / "library"))
-        modes = ("provider", "reopen") if args.provider else ("edit", "reopen", "stress")
+        modes = ("provider", "reopen") if args.provider else ("about", "edit", "reopen", "stress")
         if args.stress_only:
             modes = ("stress",)
         for mode in modes:

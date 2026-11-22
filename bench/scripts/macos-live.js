@@ -44,10 +44,71 @@
     return waitFor(() => find(".lean-card"), "the saved card");
   }
 
+  async function pair(provider, name) {
+    find(".lean-presence").click();
+    const select = await waitFor(() => find(`.agent-panel [name="provider"] option[value="${provider}"]:enabled`)?.parentElement,
+      "the requested MCP client");
+    select.value = provider;
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    const placeholder = { codex: "Codex", claude: "Claude Code", generic: "Client name" }[provider];
+    await waitFor(() => find('.agent-panel input[name="label"]')?.placeholder === placeholder, "the selected client to be applied");
+    find('.agent-panel input[name="label"]').value = name;
+    button("Approve pairing").click();
+    if (provider !== "generic") {
+      await waitFor(() => find('.agent-panel output[role="status"]')?.textContent.includes("connected"),
+        "the provider to finish registering");
+    }
+    return waitFor(() => find('.agent-panel select[name="binding"]')?.value, "a pairing ID");
+  }
+
   async function run() {
     const started = performance.now();
-    const editor = await waitFor(() => find('[data-editor-ready="true"]'), "the first editor paint");
     const mode = window.__RAQSH_LIVE_MODE__;
+    if (mode === "about" || mode === "updater") {
+      (await waitFor(() => button("Settings"), "the Settings entry")).click();
+      await waitFor(() => find(".about-brand p")?.textContent.startsWith("Version "), "the local app version");
+      const state = find(".about-updates [role=status]").textContent;
+      check(state.includes("signed release") || (state.includes("contacts GitHub when you check") && button("Check for updates")),
+        "About must start in a manual or unavailable update state");
+      if (mode === "updater") {
+        report("updater-ready");
+        const hold = () => new Promise((resolve) => setTimeout(resolve, 550));
+        await hold();
+        button("Check for updates").click();
+        await waitFor(() => button("Download update"), "a newer signed release");
+        await hold();
+        button("Download update").click();
+        await waitFor(() => find('.about-updates [role="alert"]'), "the corrupted package to be rejected");
+        check(!button("Install update"), "A corrupted package must not be installable");
+        button("Download update").click();
+        await waitFor(() => button("Install update"), "a verified package");
+        report("updater-downloaded");
+        await hold();
+        button("Install update").click();
+        await waitFor(() => button("Restart Raqsh"), "the install to complete");
+        report("updater-installed");
+        await hold();
+        button("Restart Raqsh").click();
+        return;
+      }
+      button("Done").click();
+      await waitFor(() => !find("dialog[open]"), "Settings to close");
+      report("pass", { mode });
+      return;
+    }
+    const editor = await waitFor(() => find('[data-editor-ready="true"]'), "the first editor paint");
+    if (mode.startsWith("screenshot")) {
+      if (mode === "screenshot-agents") {
+        await pair("generic", "Codex");
+        find('.agent-panel textarea[name="feedback"]').value = "Check the welcome screen at narrow widths before review.";
+        button("Queue feedback").click();
+        await waitFor(() => find(".agent-panel ol li"), "the demo feedback");
+      }
+      await document.fonts.ready;
+      await new Promise(requestAnimationFrame);
+      report("screenshot", { mode });
+      return;
+    }
     check(canvas().width === Math.round(canvas().clientWidth * devicePixelRatio), "Canvas backing width must match the device scale");
     if (mode === "reopen") {
       check(find(".lean-card")?.textContent.includes(title), "The card title did not survive reopening");
@@ -88,11 +149,7 @@
     key("z", { metaKey: true });
     await waitFor(() => !find(".lean-card"), "Cmd+Z to undo the card");
     const card = await createCard();
-    find(".lean-presence").click();
-    const label = await waitFor(() => find('.agent-panel input[name="label"]'), "the agent pairing form");
-    label.value = "macOS live test";
-    button("Approve pairing").click();
-    const binding = await waitFor(() => find(".agent-panel select")?.value, "a pairing ID");
+    const binding = await pair(window.__RAQSH_LIVE_PROVIDER__, "macOS live test");
     report("paired", { binding, task: card.dataset.cardId, revision: Number(editor.dataset.semanticRevision) });
     await waitFor(() => find(".lean-card")?.dataset.status === "done", "the status update from the MCP process",
       mode === "provider" ? 120_000 : 10_000);

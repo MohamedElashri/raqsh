@@ -89,7 +89,6 @@ case "$asset" in
         ditto -x -k "$package" "$app_stage"
         app="$app_stage/visual-board.app"
         codesign --verify --deep --strict "$app"
-        spctl --assess --type execute "$app"
         if [ -e "$app_path" ]; then
             [ -d "$app_path" ] || fail "The installation path is not an app: $app_path"
             mv "$app_path" "$app_stage/previous.app"

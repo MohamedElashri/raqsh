@@ -17,3 +17,7 @@ cargo build --release --locked --target "$triple" -p visual-board -p visual-boar
   --features visual-board/custom-protocol,visual-board/macos-live-test
 python3 bench/scripts/macos-live.py "$directory/$triple/release/visual-board" \
   "$directory/$triple/release/visual-board-mcp" "$@"
+if (( $# == 0 )); then
+  python3 bench/scripts/macos-updater.py "$directory/$triple/release/visual-board" \
+    "$directory/$triple/release/visual-board-mcp"
+fi

@@ -31,10 +31,15 @@ def seed(web, root):
     revision(web, 1)
     annotation(web, NOTE)
     button(web, "Agents")
+    web.evaluate('''
+        const provider = document.querySelector('.agent-panel select[name="provider"]');
+        provider.value = 'generic';
+        provider.dispatchEvent(new Event('change', {bubbles: true}));
+    ''')
     text(web, '.agent-panel input[name="label"]', "Lifecycle fixture")
     button(web, "Approve pairing")
     binding = wait_until(lambda: web.evaluate("""
-        return document.querySelector('.agent-panel select')?.value;
+        return document.querySelector('.agent-panel select[name="binding"]')?.value;
     """), "paired fixture")
     setup = command([HELPER, "setup", "--pairing", binding])
     registration = json.loads(setup)["mcpServers"]["visual-board"]

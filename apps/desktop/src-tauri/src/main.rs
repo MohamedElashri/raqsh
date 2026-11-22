@@ -4,6 +4,8 @@ use tauri::{Emitter, Manager, WebviewWindowBuilder, WindowEvent};
 mod bridge;
 mod commands;
 mod file_dialog;
+mod mcp_setup;
+mod updates;
 
 fn main() -> tauri::Result<()> {
     #[cfg(feature = "combined-mcp")]
@@ -16,10 +18,28 @@ fn main() -> tauri::Result<()> {
     let live_test = std::env::args().find_map(|arg| match arg.as_str() {
         "--macos-live=edit" => Some("edit"),
         "--macos-live=provider" => Some("provider"),
+        "--macos-live=about" => Some("about"),
+        "--macos-live=updater" => Some("updater"),
+        "--macos-live=screenshot" => Some("screenshot"),
+        "--macos-live=screenshot-agents" => Some("screenshot-agents"),
         "--macos-live=reopen" => Some("reopen"),
         "--macos-live=stress" => Some("stress"),
         _ => None,
     });
+    #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
+    if live_test == Some("updater") {
+        let executable = std::env::current_exe()?;
+        let contents = executable.parent().and_then(std::path::Path::parent);
+        if contents.is_some_and(|path| path.join("Resources/update-fixture").is_file())
+            && let Some(result) = std::env::args().find_map(|arg| {
+                arg.strip_prefix("--update-fixture-result=")
+                    .map(str::to_owned)
+            })
+        {
+            std::fs::write(result, "restarted")?;
+            return Ok(());
+        }
+    }
     #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
     let live_library = if live_test.is_some() {
         if std::env::var_os("VISUAL_BOARD_TEST_LIBRARY").is_none()
@@ -41,6 +61,8 @@ fn main() -> tauri::Result<()> {
         .build()?;
     tauri::async_runtime::set(runtime.handle().clone());
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updates::Updates::default())
         .invoke_handler(tauri::generate_handler![
             commands::list_projects,
             commands::choose_project,
@@ -58,12 +80,20 @@ fn main() -> tauri::Result<()> {
             commands::open_benchmark,
             commands::finish_close,
             commands::pair_client,
+            commands::mcp_clients,
+            commands::connect_client,
+            commands::client_config,
             commands::list_bindings,
             commands::revoke_client,
             commands::queue_feedback,
             commands::list_feedback,
             commands::cancel_feedback,
             commands::board_deltas,
+            updates::update_info,
+            updates::check_update,
+            updates::download_update,
+            updates::install_update,
+            updates::restart_updated,
         ])
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
@@ -103,6 +133,7 @@ fn main() -> tauri::Result<()> {
                 "--fixture=ordinary" => Some("ordinary"),
                 "--fixture=normal" => Some("normal"),
                 "--fixture=stress" => Some("stress"),
+                "--fixture=showcase" => Some("showcase"),
                 _ => None,
             }) {
                 window = window
@@ -111,9 +142,14 @@ fn main() -> tauri::Result<()> {
             #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
             if let Some(mode) = live_test {
                 let script = include_str!("../../../../bench/scripts/macos-live.js");
+                let provider = match std::env::var("VISUAL_BOARD_TEST_PROVIDER").as_deref() {
+                    Ok("codex") => "codex",
+                    Ok("claude") => "claude",
+                    _ => "generic",
+                };
                 window = window
                     .initialization_script(format!(
-                        "window.__RAQSH_LIVE_MODE__ = '{mode}';\n{script}"
+                        "window.__RAQSH_LIVE_MODE__ = '{mode}'; window.__RAQSH_LIVE_PROVIDER__ = '{provider}';\n{script}"
                     ))
                     .on_document_title_changed(|window, title| {
                         if let Some(report) = title.strip_prefix("raqsh-live:") {
