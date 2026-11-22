@@ -3,29 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fdfdfc">
+  <meta name="theme-color" content="#faf9f6">
   {{ template "site-seo" . }}
   <link rel="icon" type="image/png" href="{{ asset "images/raqsh-mark.png" }}">
   <link rel="stylesheet" href="{{ asset "css/site.css" }}">
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="masthead wrap">
-    <a class="wordmark" href="{{ relURL .HomeURL }}">
-      <img src="{{ asset "images/raqsh-mark.png" }}" alt="" width="22" height="22"> {{ .Config.Title }}
-    </a>
-    <nav aria-label="Main">
-      <a href="{{ relURL "/#install" }}">Install</a>
-      <a href="{{ .Data.downloads.source }}">GitHub</a>
-    </nav>
+  <header class="site-header">
+    <div class="masthead wrap">
+      <a class="wordmark" href="{{ relURL .HomeURL }}">
+        <img src="{{ asset "images/raqsh-mark.png" }}" alt="" width="28" height="28"> {{ .Config.Title }}
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="{{ relURL "/#why-raqsh" }}">Why Raqsh</a>
+        <a class="nav-workflow" href="{{ relURL "/#how-it-works" }}">How it works</a>
+        <a href="{{ relURL "/#integrations" }}">Integrations</a>
+        <a href="{{ .Data.downloads.source }}">GitHub</a>
+      </nav>
+      <a class="button button-primary header-download" href="{{ relURL "/#download" }}">Download</a>
+    </div>
   </header>
   {{ template "content" . }}
-  <footer class="footer wrap">
-    <nav aria-label="Footer">
-      <a href="{{ .Data.downloads.releases }}">Releases</a>
-      <a href="{{ .Data.downloads.source }}/issues">Issues</a>
-      <a href="{{ .Data.downloads.source }}/blob/main/LICENSE">License</a>
-    </nav>
+  <footer class="site-footer">
+    <div class="footer wrap">
+      <a class="wordmark" href="{{ relURL .HomeURL }}">
+        <img src="{{ asset "images/raqsh-mark.png" }}" alt="" width="28" height="28"> {{ .Config.Title }}
+      </a>
+      <nav aria-label="Footer">
+        <a href="{{ .Data.downloads.source }}">GitHub</a>
+        <a href="{{ .Data.downloads.releases }}">Releases</a>
+        <a href="{{ .Data.downloads.source }}/issues">Issues</a>
+        <a href="{{ .Data.downloads.source }}/blob/main/LICENSE">License</a>
+      </nav>
+    </div>
   </footer>
 </body>
 </html>{{ end }}

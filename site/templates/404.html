@@ -1,6 +1,6 @@
 {{ define "404" }}{{ template "base" . }}{{ end }}
 {{ define "content" }}
-<main id="main" class="wrap prose">
+<main id="main" tabindex="-1" class="wrap prose">
   <h1>Page not found</h1>
   <p><a class="text-link" href="{{ relURL .HomeURL }}">Back to Raqsh</a></p>
 </main>

@@ -1,6 +1,6 @@
 base_url = "https://melashri.net/raqsh/"
 title = "Raqsh"
-description = "A local-first whiteboard for planning with Codex and Claude Code."
+description = "Raqsh is a local-first whiteboard for coding agents. Review task dependencies, sketch changes, and send feedback to Codex or Claude Code."
 language = "en"
 minify_html = true
 robots_meta = "max-image-preview:large"

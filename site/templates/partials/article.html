@@ -1,5 +1,5 @@
 {{ define "article" }}
-<main id="main" class="wrap prose">
+<main id="main" tabindex="-1" class="wrap prose">
   <h1>{{ .Title }}</h1>
   {{ with .Page }}{{ safeHTML .BodyHTML }}{{ end }}
 </main>

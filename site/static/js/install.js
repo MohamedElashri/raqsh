@@ -1,38 +1,48 @@
-const installTools = document.querySelector(".install-tools");
-const methods = installTools.querySelectorAll("[data-method]");
-const commands = document.querySelectorAll("[data-command]");
-const copy = installTools.querySelector(".copy");
-const status = installTools.querySelector("[role='status']");
-let activeCommand = document.querySelector("[data-command='curl'] code");
+const installer = document.querySelector("[data-installer]");
 
-for (const method of methods) {
-  method.addEventListener("click", () => {
-    for (const button of methods) {
-      button.setAttribute("aria-pressed", String(button === method));
-    }
-    for (const command of commands) {
-      command.hidden = command.dataset.command !== method.dataset.method;
-      if (!command.hidden) activeCommand = command.querySelector("code");
-    }
-    copy.textContent = "Copy";
-    status.textContent = "";
-  });
-}
+if (installer) {
+  const tools = installer.querySelector(".install-tools");
+  const methods = tools.querySelectorAll("[data-method]");
+  const commands = installer.querySelectorAll("[data-command]");
+  const copy = tools.querySelector(".copy");
+  const status = tools.querySelector("[role='status']");
+  let active = installer.querySelector("[data-command='curl'] code");
+  let copyRequest = 0;
 
-copy.addEventListener("click", async () => {
-  const command = activeCommand;
-  try {
-    await navigator.clipboard.writeText(command.textContent.trim());
-    if (command !== activeCommand) return;
-    copy.textContent = "Copied";
-    status.textContent = "Install command copied.";
-  } catch {
-    if (command !== activeCommand) return;
-    window.getSelection().selectAllChildren(command);
-    status.textContent = "Install command selected for manual copying.";
+  for (const method of methods) {
+    method.addEventListener("click", () => {
+      for (const button of methods) {
+        button.setAttribute("aria-pressed", String(button === method));
+      }
+      for (const command of commands) {
+        command.hidden = command.dataset.command !== method.dataset.method;
+        if (!command.hidden) active = command.querySelector("code");
+      }
+      copyRequest++;
+      copy.textContent = "Copy command";
+      status.textContent = "";
+    });
   }
-});
 
-document.querySelector("[data-command='wget']").hidden = true;
-copy.hidden = !navigator.clipboard;
-installTools.hidden = false;
+  copy.addEventListener("click", async () => {
+    const request = ++copyRequest;
+    const command = active;
+    try {
+      await navigator.clipboard.writeText(command.textContent.trim());
+      if (request !== copyRequest) return;
+      copy.textContent = "Copied";
+      status.textContent = "Install command copied.";
+    } catch {
+      if (request !== copyRequest) return;
+      const selection = window.getSelection();
+      selection?.selectAllChildren(command);
+      copy.textContent = selection ? "Command selected" : "Copy command";
+      status.textContent = selection
+        ? "Install command selected for manual copying."
+        : "Select and copy the install command manually.";
+    }
+  });
+
+  installer.querySelector("[data-command='wget']").hidden = true;
+  tools.hidden = false;
+}

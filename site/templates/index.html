@@ -1,122 +1,201 @@
 {{ define "index" }}{{ template "base" . }}{{ end }}
 {{ define "content" }}
-<main id="main" class="wrap">
-  <header class="intro">
-    <h1>Review your agent’s plan on a board</h1>
-    <p>Turn a plan into task cards, then pair Codex or Claude Code to share progress and send feedback. Your boards stay on your device.</p>
-  </header>
-
-  <section id="how-it-works" class="walkthrough" aria-labelledby="walkthrough-title">
-    <h2 id="walkthrough-title">Plan, review, and follow the work</h2>
-    <ol class="walkthrough-steps">
-      <li>
-        <h3>Put the plan on the board</h3>
-        <p>Ask Codex or Claude Code to turn its plan into task cards and connect the steps that depend on each other.</p>
-      </li>
-      <li>
-        <h3>Mark up the plan</h3>
-        <p>Sketch, circle, or move cards as you review. Use <strong>Queue feedback</strong> to tell your agent what to change.</p>
-      </li>
-      <li>
-        <h3>Follow the agent’s reply</h3>
-        <p>Your agent can acknowledge feedback, reply on the board, and update cards as work starts or finishes.</p>
-      </li>
-    </ol>
-
-    <div class="walkthrough-examples">
-      <figure>
-        <div class="board-sketch" aria-hidden="true"><del class="sketch-card">Extra export format</del></div>
-        <figcaption><strong>Trim the scope</strong><p>“Leave the extra export format out of this release.”</p></figcaption>
-      </figure>
-      <figure>
-        <div class="board-sketch" aria-hidden="true"><span class="sketch-card sketch-priority">Verify signatures</span></div>
-        <figcaption><strong>Set a priority</strong><p>“Verify signatures first, before testing the installer.”</p></figcaption>
-      </figure>
-      <figure>
-        <div class="board-sketch" aria-hidden="true"><span class="sketch-card">Test ZIP</span><span class="sketch-arrow">→</span><span class="sketch-card">Ship</span></div>
-        <figcaption><strong>Change the sequence</strong><p>“Move ZIP testing ahead of publication.”</p></figcaption>
-      </figure>
-      <figure>
-        <div class="board-sketch" aria-hidden="true"><span class="sketch-card">Verify signatures</span><span class="sketch-question">?</span></div>
-        <figcaption>
-          <strong>Ask for a reply</strong>
-          <p>“Which archive does the Mac updater verify?”</p>
-          <p class="walkthrough-reply"><strong>Reply</strong> “The signed app archive.”</p>
-        </figcaption>
-      </figure>
-    </div>
-    <p class="walkthrough-pause">Need to pause the work? Queue “Pause packaging until we review the checks” and ask your agent to read the feedback.</p>
-  </section>
-
-  <section class="example" aria-labelledby="example-title">
-    <div class="example-header">
-      <h2 id="example-title">Reviewing the Raqsh release</h2>
-      <a href="{{ asset "examples/raqsh-release-board.raqsh" }}" download>Download example board</a>
-    </div>
-    <div class="example-steps">
-      <figure>
-        <a class="window" href="{{ asset "images/feedback-queued-full.webp" }}" aria-label="View the full board with feedback queued">
-          <img src="{{ asset "images/feedback-queued.webp" }}" width="1408" height="500"
-            alt="Verify update signatures is To do, and the Agents panel shows feedback queued for Codex.">
-        </a>
-        <figcaption>
-          <strong>1. Send feedback</strong>
-          <p>Ask Codex to start verifying the update signatures.</p>
-        </figcaption>
-      </figure>
-      <figure>
-        <a class="window" href="{{ asset "images/feedback-acknowledged-full.webp" }}" aria-label="View the full board after Codex updates the task">
-          <img src="{{ asset "images/feedback-acknowledged.webp" }}" width="1408" height="500"
-            alt="Codex has acknowledged the feedback, and Verify update signatures is now In progress.">
-        </a>
-        <figcaption>
-          <strong>2. See the task update</strong>
-          <p>Codex acknowledges the feedback and moves the task to In progress.</p>
-        </figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section id="agents" class="agent-integration" aria-labelledby="agent-integration-title">
-    <h2 id="agent-integration-title">What Raqsh adds to Codex and Claude Code</h2>
-    <ul>
-      <li><strong>A bundled MCP server.</strong> Every macOS and Linux package ships with the local Raqsh MCP server.</li>
-      <li><strong>Automatic client setup.</strong> Choose Codex or Claude Code in <strong>Agents</strong> and approve the pairing. Raqsh adds the server to that client’s MCP settings. Start a new session to use it.</li>
-      <li><strong>Tools for the board.</strong> Read the plan, create and edit cards, link dependencies, and update task status.</li>
-      <li><strong>Tools for feedback.</strong> Read queued feedback, acknowledge it, and reply on the board.</li>
-      <li><strong>Board-scoped access.</strong> A pairing gets access to the current board by default. You can grant access to the whole project when pairing.</li>
-    </ul>
-    <p>Choose <strong>Revoke pairing</strong> in <strong>Agents</strong> to end access and remove the pairing’s MCP entry.</p>
-  </section>
-
-  {{ $installer := printf "%s/download/install.sh" .Data.downloads.releases }}
-  <section id="install" class="install" aria-labelledby="install-title">
-    <h2 id="install-title">Install Raqsh</h2>
-    <div class="install-box">
-      <div class="install-tools" hidden>
-        <div class="install-methods" role="group" aria-label="Install method">
-          <button type="button" data-method="curl" aria-pressed="true">curl</button>
-          <button type="button" data-method="wget" aria-pressed="false">wget</button>
+{{ $downloads := .Data.downloads }}
+{{ $installer := printf "%s/download/%s" $downloads.releases $downloads.installer }}
+{{ $license := printf "%s/blob/main/LICENSE" $downloads.source }}
+{{ $example := asset "examples/raqsh-release-board.raqsh" }}
+<main id="main" tabindex="-1">
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero-intro">
+      <div>
+        <p class="eyebrow">A local-first whiteboard for coding agents</p>
+        <h1 id="hero-title"><span>Draw the plan.</span> <span>Steer the agent.</span></h1>
+      </div>
+      <div class="hero-summary">
+        <p class="lede">Review task dependencies, sketch changes, and send feedback to Codex or Claude Code from the same board.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#download">Download Raqsh</a>
+          <a class="button button-secondary" href="{{ $downloads.source }}">View on GitHub</a>
         </div>
-        <button class="copy" type="button" hidden>Copy</button>
-        <span class="visually-hidden" role="status"></span>
+        <p class="platforms">macOS (Apple silicon + Intel) · Ubuntu / Debian · Fedora</p>
       </div>
-      <pre data-command="curl"><code>curl -fsSL {{ $installer }} | sh</code></pre>
-      <pre data-command="wget"><code>wget --https-only -qO- {{ $installer }} | sh</code></pre>
     </div>
-    <p class="install-links">
-      <span>Manual downloads</span>
-      {{ range .Data.downloads.packages }}
-      <a href="{{ $.Data.downloads.releases }}/download/{{ .file }}" title="{{ .details }}">{{ .title }}</a>
-      {{ end }}
-    </p>
-    <details class="macos-help">
-      <summary>macOS first launch</summary>
-      <div class="macos-help-content">
-        <p>Gatekeeper may block Raqsh because the app isn’t notarized by Apple. The shell installer verifies the download. If you downloaded the ZIP manually, verify it against the release’s <a href="{{ .Data.downloads.releases }}/download/SHA256SUMS">SHA256SUMS</a> first.</p>
-        <p>If Gatekeeper blocks the verified app, type <code>xattr -dr com.apple.quarantine</code> followed by a space in Terminal. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return. The shell installer puts Raqsh in <code>~/Applications</code>.</p>
+    <figure class="hero-figure">
+      <a class="screenshot hero-screenshot" href="{{ asset "images/feedback-acknowledged-full.webp" }}" aria-label="Open the full Raqsh release board screenshot">
+        <img src="{{ asset "images/feedback-acknowledged-full.webp" }}"
+          srcset="{{ asset "images/feedback-acknowledged-800.webp" }} 800w, {{ asset "images/feedback-acknowledged-1600.webp" }} 1600w, {{ asset "images/feedback-acknowledged-full.webp" }} 2688w"
+          sizes="(min-width: 1248px) 1150px, (min-width: 400px) 92vw, calc(100vw - 2rem)"
+          width="2688" height="1300" fetchpriority="high"
+          alt="The Raqsh desktop app shows Mac and Linux release tasks linked by arrows, handwritten notes, and acknowledged Codex feedback in the Agents panel.">
+      </a>
+      <figcaption>The Raqsh release board with task dependencies, handwritten review notes, and Codex feedback.</figcaption>
+    </figure>
+  </section>
+
+  <section id="why-raqsh" class="section wrap" aria-labelledby="why-title">
+    <div class="section-intro section-split">
+      <h2 id="why-title">See how the plan fits together.</h2>
+      <p class="lede">A long chat makes it easy to lose track of what’s blocked or why a task comes first. On a board, you can see those relationships and leave feedback where it applies.</p>
+    </div>
+    <ul class="feature-list">
+      <li>
+        <h3>See the work</h3>
+        <p>Trace dependencies between task cards and see what’s planned, in progress, or done.</p>
+      </li>
+      <li>
+        <h3>Shape the plan</h3>
+        <p>Move cards, sketch ideas, and mark what should change or move up in priority.</p>
+      </li>
+      <li>
+        <h3>Stay in the loop</h3>
+        <p>See when feedback is queued, when the agent acknowledges it, and how the board changes.</p>
+      </li>
+    </ul>
+  </section>
+
+  <section id="how-it-works" class="section tinted" aria-labelledby="workflow-title">
+    <div class="wrap">
+      <div class="section-intro section-split">
+        <h2 id="workflow-title">Plan. Review.<br> Keep moving.</h2>
+        <p class="lede">Follow a request to verify update signatures on the Raqsh release board.</p>
       </div>
-    </details>
+      <ol class="workflow-steps">
+        <li>
+          <h3>Build the board</h3>
+          <p>Create or import a board, then ask a paired agent to add task cards and connect their dependencies.</p>
+        </li>
+        <li>
+          <h3>Review the plan</h3>
+          <p>Move cards and add notes as you review. Use <strong>Queue feedback</strong> in Agents to request a change.</p>
+        </li>
+        <li>
+          <h3>See the response</h3>
+          <p>Ask the agent to read feedback. It can acknowledge the request, reply on the board, and update task status.</p>
+        </li>
+      </ol>
+      <div class="feedback-comparison">
+        <figure>
+          <figcaption>
+            <strong>Feedback queued</strong>
+            <span>Verification is still To do. The request is waiting for Codex to read it.</span>
+          </figcaption>
+          <a class="screenshot" href="{{ asset "images/feedback-queued-full.webp" }}" aria-label="Open the full board screenshot with feedback queued">
+            <img src="{{ asset "images/feedback-queued.webp" }}" width="1408" height="500" loading="lazy"
+              alt="Verify update signatures is To do, and the Agents panel shows the request queued for Codex.">
+          </a>
+        </figure>
+        <figure>
+          <figcaption>
+            <strong>Feedback acknowledged</strong>
+            <span>Codex acknowledges the request and moves verification to In progress.</span>
+          </figcaption>
+          <a class="screenshot" href="{{ asset "images/feedback-acknowledged-full.webp" }}" aria-label="Open the full board screenshot after Codex acknowledges feedback">
+            <img src="{{ asset "images/feedback-acknowledged.webp" }}" width="1408" height="500" loading="lazy"
+              alt="The Agents panel shows Codex acknowledged the request, and Verify update signatures is now In progress.">
+          </a>
+        </figure>
+      </div>
+      <div class="example-action">
+        <a class="button button-secondary" href="{{ $example }}" download>Download example board</a>
+        <p>Open it with <strong>Import board</strong> in Raqsh.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="integrations" class="section wrap" aria-labelledby="agents">
+    <div class="section-split integrations">
+      <div>
+        <h2 id="agents">Works with Codex and Claude Code.</h2>
+        <p class="lede">Raqsh bundles a local MCP server. Within the access you grant, paired clients can read and edit cards, connect dependencies, update statuses, and respond to feedback.</p>
+      </div>
+      <div class="pairing">
+        <h3>Pair an agent</h3>
+        <p>Open <strong>Agents</strong>, choose Codex or Claude Code, and approve the pairing. Raqsh adds its MCP server to the client’s settings. Start a new session in that client to use the board tools.</p>
+        <p>Pairings are board-scoped by default. You can explicitly approve project-wide access or revoke a pairing in the app.</p>
+        <p>Boards are stored on your device. Paired clients may connect to their own services.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="download" class="section tinted" aria-labelledby="download-title">
+    <div id="install" class="wrap">
+      <div class="section-intro">
+        <h2 id="download-title">Get Raqsh for your desktop.</h2>
+        <p class="lede">Choose the package for your operating system.</p>
+      </div>
+      <ul class="package-list">
+        {{ range $downloads.packages }}
+        <li class="package">
+          <h3>{{ .title }}</h3>
+          <p>{{ .architecture }}</p>
+          <a class="button button-primary" href="{{ $downloads.releases }}/download/{{ .file }}" aria-label="Download {{ .format }} for {{ .title }}">Download {{ .format }}</a>
+        </li>
+        {{ end }}
+      </ul>
+
+      <div class="install-secondary">
+        <div class="terminal" data-installer>
+          <h3>Install via terminal</h3>
+          <p>The installer checks the package against the release checksum. A matching checksum verifies package integrity. Trust in the publisher requires separate verification.</p>
+          <div class="install-box">
+            <div class="install-tools" hidden>
+              <div class="install-methods" role="group" aria-label="Install method">
+                <button type="button" data-method="curl" aria-pressed="true">curl</button>
+                <button type="button" data-method="wget" aria-pressed="false">wget</button>
+              </div>
+              <button class="copy" type="button">Copy command</button>
+              <span class="visually-hidden" role="status"></span>
+            </div>
+            <pre data-command="curl"><code>curl -fsSL {{ $installer }} | sh</code></pre>
+            <pre data-command="wget"><code>wget --https-only -qO- {{ $installer }} | sh</code></pre>
+          </div>
+        </div>
+
+        <div class="install-help">
+          <details>
+            <summary>macOS first launch</summary>
+            <div id="macos-first-launch" class="disclosure-body">
+              <p>Unzip the download and move Raqsh to Applications. The app is ad hoc signed, and Gatekeeper may block it because Apple hasn’t notarized it.</p>
+              <p>If you downloaded the ZIP manually, verify it against <a href="{{ $downloads.releases }}/download/{{ $downloads.checksums }}">SHA256SUMS</a> from the same release before removing quarantine. The shell installer verifies the download and installs Raqsh in <code>~/Applications</code>.</p>
+              <p>If Gatekeeper blocks the verified app, type <code>xattr -dr com.apple.quarantine</code> followed by a space in Terminal. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return.</p>
+            </div>
+          </details>
+          <ul class="resource-links">
+            <li><a href="{{ $downloads.releases }}">Release notes and assets</a></li>
+            <li><a href="{{ $license }}">PolyForm Noncommercial license</a></li>
+            <li><a href="{{ $example }}" download>Download example board</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap faq" aria-labelledby="faq-title">
+    <div class="section-split">
+      <h2 id="faq-title">Frequently asked questions</h2>
+      <div class="faq-list">
+        <details>
+          <summary>Which operating systems and processors are supported?</summary>
+          <p class="disclosure-body">Raqsh ships a universal ZIP for Apple silicon and Intel Macs, a DEB for x86-64 Ubuntu and Debian, and an RPM for x86-64 Fedora. For the DEB, use Ubuntu 24.04 or later, or Debian 13 or later.</p>
+        </details>
+        <details>
+          <summary>Which coding agents can I pair?</summary>
+          <p class="disclosure-body">Raqsh sets up MCP for Codex and Claude Code from the Agents panel. Start a new client session after approving the pairing.</p>
+        </details>
+        <details>
+          <summary>Where are my boards stored?</summary>
+          <p class="disclosure-body">Raqsh stores boards on your device. A paired agent can read the boards you grant it access to through MCP, and its client may send requests to its own provider.</p>
+        </details>
+        <details>
+          <summary>Why does macOS show a first-launch warning?</summary>
+          <p class="disclosure-body">Raqsh is ad hoc signed and has no Apple notarization ticket. If Gatekeeper blocks it, follow the <a href="#macos-first-launch">macOS first-launch instructions</a> to verify the download before allowing your installed copy to open.</p>
+        </details>
+        <details>
+          <summary>Can I use Raqsh commercially?</summary>
+          <p class="disclosure-body">The <a href="{{ $license }}">PolyForm Noncommercial License 1.0.0</a> permits personal and other noncommercial uses under its terms. Commercial use outside those terms requires a separate license.</p>
+        </details>
+      </div>
+    </div>
   </section>
 </main>
 <script src="{{ asset "js/install.js" }}" defer></script>
