@@ -34,7 +34,7 @@ pub async fn choose(window: WebviewWindow, save: Option<Save>) -> Result<Option<
                         dialog.set_current_name(save.filename);
                         let filter = gtk::FileFilter::new();
                         filter.add_pattern(&format!("*.{}", save.suffix));
-                        dialog.add_filter(&filter);
+                        dialog.add_filter(filter);
                         dialog.set_do_overwrite_confirmation(true);
                     }
                     let selected = dialog.run_future().await == gtk::ResponseType::Accept;
