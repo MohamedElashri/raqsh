@@ -1,14 +1,15 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MutableRefObject, type PointerEvent } from "react";
-import { id, kinds, makeCard, priorities, statuses, type Arrow, type Card, type Change, type Id, type Ink, type Label, type OpenBoard,
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type MutableRefObject } from "react";
+import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
+import { id, kinds, makeCard, priorities, statuses, type Card, type Change, type Id, type Ink, type Label, type OpenBoard,
   type Operation, type Point, type Receipt, type Stroke } from "../model";
-import { arrowPoints, edgePoints, exportImage, paintPaths, type Board, type View } from "./board";
+import { exportImage, type Board, type View } from "./board";
 import { Checkpoint, type SaveState } from "./checkpoint";
-import { getStrokeBounds, insideClosedStroke, nearPath, nearStroke, outline, type Bounds, type Shape } from "./geometry";
-import { applyMarks, boundedOffset, boxBetween, cardBounds, drawingKinds, duplicateSelection, emptySelection, geometry,
-  includesPoint, invertMarks, movableBounds, removeSelection, selectedTarget, selectionSize, toggleTarget, topmost, translateMark, within,
-  type BoardEdit, type DrawingKind, type Mark, type MarkChange, type Selection, type Target } from "./editing";
+import type { Bounds } from "./geometry";
+import { applyMarks, boundedOffset, drawingKinds, duplicateSelection, emptySelection, geometry, invertMarks, movableBounds,
+  removeSelection, selectionSize, toggleTarget, type BoardEdit, type Mark, type MarkChange, type Selection } from "./editing";
+import EditorSurface, { type Tool } from "./EditorSurface";
 import AgentPanel from "./AgentPanel";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
@@ -16,18 +17,6 @@ import { Modal } from "../Modal";
 import "../editor.css";
 import "./lean.css";
 
-type Tool = "select" | "pan" | "pen" | "text" | "arrow" | "connect" | "eraser" | Shape;
-type Gesture =
-  | { kind: "pan"; start: Point; view: View }
-  | { kind: "move"; start: Point; cards: Card[]; bounds: Bounds; offset: Point }
-  | { kind: "resize"; start: Point; card: Card; preview: Card }
-  | { kind: "resize-mark"; mark: Stroke | Arrow; box: Bounds; start: Point; preview: Stroke | Arrow; end?: "from" | "to" }
-  | { kind: "box"; start: Point; end: Point; extend: boolean }
-  | { kind: "text"; at: Point }
-  | { kind: "pen"; stroke: Stroke }
-  | { kind: "shape"; shape: Shape; stroke: Stroke }
-  | { kind: "eraser"; removed: Set<Mark> }
-  | { kind: "arrow"; arrow: Arrow };
 type Edit = { kind: "card"; card: Card; fresh: boolean } | { kind: "text"; point: Point; label?: Label };
 type Delta = Pick<Receipt, "revision" | "changes">;
 type DeltaPage = { revision: number; deltas: Delta[]; nextRevision: number };
@@ -52,7 +41,6 @@ const tools: { id: Tool | "image"; label: string; key?: string; number?: string 
   { id: "image", label: "Image attachments unavailable", number: "9" },
   { id: "eraser", label: "Eraser", key: "e", number: "0" },
 ];
-const noOffset: Point = [0, 0];
 const inkChoices: Partial<Record<Ink, string>> = { slate: "Graphite", blue: "Blue", red: "Red" };
 const ordered = (a: Card, b: Card) => a.order - b.order || a.id.localeCompare(b.id);
 const setNode = (node: Card): Change => ({ type: "setNode", node });
@@ -93,18 +81,17 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const menu = useRef<HTMLDetailsElement>(null);
   const moreTools = useRef<HTMLDetailsElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
+  const canvas = useRef<HTMLDivElement>(null);
+  const controller = useRef<ExcalidrawImperativeAPI>(null);
+  const settleScene = useRef<() => void>();
+  const active = useRef(false);
   const cardsLayer = useRef<HTMLDivElement>(null);
   const cards = useRef(new Map<Id, HTMLDivElement>());
-  const labels = useRef(new Map<Label, HTMLSpanElement>());
-  const movedStrokes = useRef(new Map<Stroke, Stroke>());
-  const movedArrows = useRef(new Map<Arrow, Arrow>());
   const list = useRef<HTMLOListElement>(null);
   const listToggle = useRef<HTMLButtonElement>(null);
   const agentsToggle = useRef<HTMLButtonElement>(null);
   const selectionRef = useRef(selection);
   const focusedCard = useRef<Id>();
-  const gesture = useRef<Gesture>();
   const view = useRef<View>({ x: 0, y: 0, zoom: 1 });
   const revision = useRef(info.semanticRevision);
   const undoHistory = useRef<BoardEdit[]>([]);
@@ -118,122 +105,30 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   const locked = useRef(false);
   const draftChanged = useRef(false);
   const editAnchor = useRef<HTMLElement>();
-  const space = useRef(false);
-  const frame = useRef(0);
   const remoteTimer = useRef(0);
   const remoteNeeded = useRef(false);
   const remoteBusy = useRef(false);
   const mounted = useRef(false);
   const remoteRefresh = useRef<() => void>();
   const [saver] = useState(() => new Checkpoint(scope, info.drawingRevision, drawing, setSaveState));
-  const [darkMode] = useState(() => window.matchMedia("(prefers-color-scheme: dark)"));
-
-  const repaint = useCallback(() => {
-    if (frame.current || document.hidden) return;
-    frame.current = requestAnimationFrame(() => {
-      frame.current = 0;
-      const surface = canvas.current;
-      if (!surface || !cardsLayer.current) return;
-      const ratio = window.devicePixelRatio;
-      const cssWidth = surface.clientWidth;
-      const cssHeight = surface.clientHeight;
-      const width = Math.round(cssWidth * ratio);
-      const height = Math.round(cssHeight * ratio);
-      if (surface.width !== width) surface.width = width;
-      if (surface.height !== height) surface.height = height;
-      const context = surface.getContext("2d")!;
-      const camera = view.current;
-      context.setTransform(1, 0, 0, 1, 0, 0);
-      context.clearRect(0, 0, width, height);
-      context.setTransform(ratio * camera.zoom, 0, 0, ratio * camera.zoom, ratio * camera.x, ratio * camera.y);
-      const active = gesture.current;
-      const draft = active?.kind === "pen" || active?.kind === "shape" ? active.stroke : active?.kind === "arrow" ? active.arrow : undefined;
-      paintPaths(context, board, draft, {
-        cards: nodeIndex, strokes: strokeBounds, dark: darkMode.matches,
-        movedStrokes: movedStrokes.current, movedArrows: movedArrows.current, region: {
-          left: -camera.x / camera.zoom, top: -camera.y / camera.zoom,
-          right: (cssWidth - camera.x) / camera.zoom, bottom: (cssHeight - camera.y) / camera.zoom,
-        },
-      });
-      const picked = selectionRef.current;
-      const handles = selectionSize(picked) === 1;
-      const focus = darkMode.matches ? "#f0bf69" : "#9c631b";
-      const handleSize = 7 / camera.zoom;
-      const drawHandle = ([x, y]: Point) => {
-        context.fillStyle = focus;
-        context.fillRect(x - handleSize / 2, y - handleSize / 2, handleSize, handleSize);
-      };
-      context.strokeStyle = focus;
-      context.lineWidth = 1.5 / camera.zoom;
-      if (picked.edges.size) {
-        for (const edge of board.edges) {
-          if (!picked.edges.has(edge.id)) continue;
-          const from = nodeIndex.get(edge.from);
-          const to = nodeIndex.get(edge.to);
-          if (!from || !to) continue;
-          const [start, ...path] = edgePoints(from, to);
-          context.beginPath();
-          context.moveTo(...start);
-          for (const point of path) context.lineTo(...point);
-          context.stroke();
-        }
-      }
-      context.setLineDash([4 / camera.zoom, 3 / camera.zoom]);
-      for (const mark of picked.marks) {
-        if ("points" in mark) {
-          const box = getStrokeBounds(movedStrokes.current.get(mark) ?? mark, strokeBounds);
-          context.strokeRect(box.left - 3, box.top - 3, box.right - box.left + 6, box.bottom - box.top + 6);
-          if (handles) drawHandle([box.right, box.bottom]);
-        } else if ("from" in mark) {
-          const arrow = movedArrows.current.get(mark) ?? mark;
-          context.beginPath();
-          context.moveTo(...arrow.from);
-          context.lineTo(...arrow.to);
-          context.stroke();
-          if (handles) {
-            drawHandle(arrow.from);
-            drawHandle(arrow.to);
-          }
-        }
-      }
-      if (active?.kind === "box") {
-        const box = boxBetween(active.start, active.end);
-        context.strokeRect(box.left, box.top, box.right - box.left, box.bottom - box.top);
-      }
-      context.setLineDash([]);
-      const transform = `translate(${camera.x}px, ${camera.y}px) scale(${camera.zoom})`;
-      if (cardsLayer.current.style.transform !== transform) cardsLayer.current.style.transform = transform;
-      if (panel.current && !panel.current.dataset.editorReady) panel.current.dataset.editorReady = "true";
-    });
-  }, [board, nodeIndex, strokeBounds, darkMode]);
+  const [dark, setDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   useEffect(() => {
-    const observer = new ResizeObserver(repaint);
-    if (canvas.current) observer.observe(canvas.current);
-    canvas.current?.focus({ preventScroll: true });
-    repaint();
-    const release = () => { space.current = false; };
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const changeTheme = (event: MediaQueryListEvent) => setDark(event.matches);
     const flushHidden = () => {
-      if (document.hidden) {
-        cancelAnimationFrame(frame.current);
-        frame.current = 0;
-        if (!locked.current) void saver.flush().catch(() => {});
-      } else repaint();
+      if (document.hidden && !locked.current) void saver.flush().catch(() => {});
     };
-    window.addEventListener("blur", release);
     document.addEventListener("visibilitychange", flushHidden);
-    darkMode.addEventListener("change", repaint);
+    media.addEventListener("change", changeTheme);
     registerClose.current = (windowClose) => latestClose.current?.(windowClose);
     return () => {
       registerClose.current = undefined;
-      observer.disconnect();
-      cancelAnimationFrame(frame.current);
       saver.dispose();
-      window.removeEventListener("blur", release);
       document.removeEventListener("visibilitychange", flushHidden);
-      darkMode.removeEventListener("change", repaint);
+      media.removeEventListener("change", changeTheme);
     };
-  }, [registerClose, repaint, saver, darkMode]);
+  }, [registerClose, saver]);
 
   useEffect(() => {
     mounted.current = true;
@@ -253,7 +148,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function scheduleRemote() {
     remoteNeeded.current = true;
-    if (!mounted.current || remoteTimer.current || remoteBusy.current || gesture.current || semantic.current
+    if (!mounted.current || remoteTimer.current || remoteBusy.current || active.current || semantic.current
       || failed.current || locked.current || edit) return;
     remoteTimer.current = window.setTimeout(() => {
       remoteTimer.current = 0;
@@ -262,7 +157,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   remoteRefresh.current = () => {
-    if (!mounted.current || !remoteNeeded.current || remoteBusy.current || gesture.current || semantic.current
+    if (!mounted.current || !remoteNeeded.current || remoteBusy.current || active.current || semantic.current
       || failed.current || locked.current || edit) return;
     remoteNeeded.current = false;
     remoteBusy.current = true;
@@ -291,18 +186,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     if (!edit && remoteNeeded.current) scheduleRemote();
   }, [edit]);
 
-  function showCard(card: Card) {
-    const button = cards.current.get(card.id);
-    if (button) {
-      button.style.left = `${card.x}px`;
-      button.style.top = `${card.y}px`;
-      button.style.width = `${card.width}px`;
-      button.style.height = `${card.height}px`;
-    }
-  }
-
   function project(deltas: Delta[]) {
-    let geometryChanged = false;
     const picked = selectionRef.current;
     let pruned: Selection | undefined;
     for (const delta of deltas) {
@@ -310,13 +194,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         switch (change.type) {
           case "setNode": {
             const index = board.nodes.findIndex((node) => node.id === change.node.id);
-            const previous = board.nodes[index];
             const node = change.node;
-            if (!previous || previous.x !== node.x || previous.y !== node.y
-              || previous.width !== node.width || previous.height !== node.height) {
-              geometryChanged = true;
-              showCard(node);
-            }
             if (index < 0) board.nodes.push(node);
             else board.nodes[index] = node;
             nodeIndex.set(node.id, node);
@@ -330,14 +208,12 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
               pruned ??= { ...picked, cards: new Set(picked.cards), edges: new Set(picked.edges) };
               pruned.cards.delete(change.id);
             }
-            geometryChanged = true;
             break;
           }
           case "setEdge": {
             const index = board.edges.findIndex((edge) => edge.id === change.edge.id);
             if (index < 0) board.edges.push(change.edge);
             else board.edges[index] = change.edge;
-            geometryChanged = true;
             break;
           }
           case "removeEdge": {
@@ -347,7 +223,6 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
               pruned ??= { ...picked, cards: new Set(picked.cards), edges: new Set(picked.edges) };
               pruned.edges.delete(change.id);
             }
-            geometryChanged = true;
             break;
           }
         }
@@ -357,14 +232,12 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     if (pruned) chooseSelection(pruned);
     board.nodes.sort(ordered);
     update();
-    if (geometryChanged) repaint();
   }
 
   function chooseSelection(next: Selection) {
     selectionRef.current = next;
     if (next.cards.size === 1) focusedCard.current = next.cards.values().next().value;
     setSelection(next);
-    repaint();
   }
 
   function send(submission: Submission) {
@@ -415,8 +288,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       }
       if (!selected && current.marks.size) chooseSelection({ ...current, marks: next });
       saver.changed();
-      repaint();
-    }
+      }
     if (selected) chooseSelection(selected);
     const entry = { changes: inverse, marks: invertMarks(marks) };
     if (history === "undo") {
@@ -432,198 +304,9 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   function changeHistory(redo = false) {
-    if (gesture.current || edit) return;
+    if (active.current || edit) return;
     const entry = (redo ? redoHistory : undoHistory).current.at(-1);
     if (entry) commit(entry.changes, entry.marks, redo ? "redo" : "undo");
-  }
-
-  function addMark<K extends DrawingKind>(kind: K, mark: Board[K][number]) {
-    return commit([], [{ kind, index: drawing[kind].length, after: mark }]);
-  }
-
-  function eraseAt(event: PointerEvent<HTMLCanvasElement>, removed: Set<Mark>) {
-    const [x, y] = point(event);
-    const radius = 6 / view.current.zoom;
-    for (const stroke of drawing.strokes) {
-      if (!removed.has(stroke) && nearStroke(stroke, x, y, radius, strokeBounds)) {
-        removed.add(stroke);
-      }
-    }
-    for (const arrow of drawing.arrows) {
-      if (nearPath([arrow.from, arrow.to], x, y, radius)) removed.add(arrow);
-    }
-    cardsLayer.current?.querySelectorAll(".lean-label").forEach((element, index) => {
-      const rect = element.getBoundingClientRect();
-      if (event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom) {
-        removed.add(drawing.labels[index]);
-      }
-    });
-  }
-
-  function point(event: PointerEvent<HTMLCanvasElement>, convert = true): Point {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const position: Point = [event.clientX - rect.left, event.clientY - rect.top];
-    const camera = view.current;
-    return convert ? [geometry((position[0] - camera.x) / camera.zoom), geometry((position[1] - camera.y) / camera.zoom)] : position;
-  }
-
-  function hit([x, y]: Point) {
-    for (let index = board.nodes.length - 1; index >= 0; index--) {
-      const card = board.nodes[index];
-      if (x >= card.x && x <= card.x + card.width && y >= card.y && y <= card.y + card.height) return card;
-    }
-  }
-
-  function labelBounds(label: Label): Bounds {
-    const element = labels.current.get(label);
-    return { left: label.x, top: label.y - 17, right: label.x + (element?.offsetWidth ?? 0),
-      bottom: label.y - 17 + (element?.offsetHeight ?? 22) };
-  }
-
-  function markBounds(mark: Mark): Bounds {
-    if ("points" in mark) return getStrokeBounds(mark, strokeBounds);
-    if ("from" in mark) return boxBetween(mark.from, mark.to);
-    return labelBounds(mark);
-  }
-
-  function hitTarget(at: Point): Target | undefined {
-    const [x, y] = at;
-    const radius = 6 / view.current.zoom;
-    const label = topmost(drawing.labels, (item) => includesPoint(labelBounds(item), at));
-    if (label) return { kind: "marks", mark: label };
-    const card = hit(at);
-    if (card) return { kind: "cards", id: card.id };
-    const arrow = topmost(drawing.arrows, (item) => nearPath(arrowPoints(item.from, item.to), x, y, radius));
-    if (arrow) return { kind: "marks", mark: arrow };
-    const stroke = topmost(drawing.strokes, (item) => nearStroke(item, x, y, radius, strokeBounds)
-      || insideClosedStroke(item, x, y, strokeBounds));
-    if (stroke) return { kind: "marks", mark: stroke };
-    const edge = topmost(board.edges, (item) => {
-      const from = nodeIndex.get(item.from);
-      const to = nodeIndex.get(item.to);
-      return !!from && !!to && nearPath(edgePoints(from, to), x, y, radius);
-    });
-    if (edge) return { kind: "edges", id: edge.id };
-  }
-
-  function markChanges(map: (mark: Mark) => Mark): MarkChange[] {
-    const picked = selectionRef.current.marks;
-    if (picked.size === 0) return [];
-    const changes: MarkChange[] = [];
-    for (const kind of drawingKinds) {
-      drawing[kind].forEach((before, index) => {
-        if (picked.has(before)) changes.push({ kind, index, before, after: map(before) });
-      });
-    }
-    return changes;
-  }
-
-  function showLabel(label: Label, next: Label) {
-    const element = labels.current.get(label);
-    if (!element) return;
-    element.style.left = `${next.x}px`;
-    element.style.top = `${next.y}px`;
-  }
-
-  function showMark(mark: Mark, next: Mark) {
-    if ("points" in mark && "points" in next) movedStrokes.current.set(mark, next);
-    else if ("from" in mark && "from" in next) movedArrows.current.set(mark, next);
-    else if ("text" in mark && "text" in next) showLabel(mark, next);
-  }
-
-  function pickedCards() {
-    return [...selectionRef.current.cards].flatMap((id) => nodeIndex.get(id) ?? []);
-  }
-
-  function movePicked(before: Card[], offset: Point) {
-    if (!offset[0] && !offset[1]) return false;
-    return commit(before.map((card) => setNode({ ...card, x: card.x + offset[0], y: card.y + offset[1] })),
-      markChanges((mark) => translateMark(mark, offset)));
-  }
-
-  function settlePreview(cards: readonly Card[], marks: ReadonlySet<Mark>, committed: boolean) {
-    const settle = () => {
-      if (cards.length) {
-        const touched = new Set(cards.map(({ id }) => id));
-        for (const card of board.nodes) {
-          if (!touched.has(card.id)) continue;
-          nodeIndex.set(card.id, card);
-          showCard(card);
-        }
-      }
-      for (const mark of marks) if ("text" in mark) showLabel(mark, mark);
-      movedStrokes.current.clear();
-      movedArrows.current.clear();
-      repaint();
-    };
-    // Keep the pointer preview visible until the durable operation settles.
-    // Only the receipt updates the semantic records and drawing checkpoint.
-    if (committed && semantic.current) void semantic.current.then(settle);
-    else settle();
-  }
-
-  function selectArea(region: Bounds, extend: boolean) {
-    const current = selectionRef.current;
-    const next = extend ? { cards: new Set(current.cards), marks: new Set(current.marks), edges: new Set(current.edges) }
-      : emptySelection();
-    for (const card of board.nodes) if (within(cardBounds(card), region)) next.cards.add(card.id);
-    for (const kind of drawingKinds) {
-      for (const mark of drawing[kind]) if (within(markBounds(mark), region)) next.marks.add(mark);
-    }
-    chooseSelection(next);
-  }
-
-  function beginSelection(at: Point, extend: boolean): Gesture | undefined {
-    const current = selectionRef.current;
-    if (!extend && selectionSize(current) === 1) {
-      const margin = 9 / view.current.zoom;
-      const close = ([x, y]: Point) => Math.abs(at[0] - x) <= margin && Math.abs(at[1] - y) <= margin;
-      const node = pickedCards()[0];
-      if (node && close([node.x + node.width, node.y + node.height])) {
-        return { kind: "resize", start: at, card: node, preview: node };
-      }
-      const mark = current.marks.values().next().value;
-      if (mark && !("text" in mark)) {
-        const box = markBounds(mark);
-        if ("points" in mark && close([box.right, box.bottom])) {
-          return { kind: "resize-mark", mark, box, start: at, preview: mark };
-        }
-        if ("from" in mark && (close(mark.to) || close(mark.from))) {
-          return { kind: "resize-mark", mark, box, start: at, preview: mark, end: close(mark.to) ? "to" : "from" };
-        }
-      }
-    }
-    const target = hitTarget(at);
-    if (!target) {
-      if (!extend) chooseSelection(emptySelection());
-      return { kind: "box", start: at, end: at, extend };
-    }
-    if (extend || !selectedTarget(current, target)) chooseSelection(toggleTarget(current, target, extend));
-    const picked = selectionRef.current;
-    if (!selectedTarget(picked, target) || target.kind === "edges") return;
-    const cards = pickedCards();
-    return { kind: "move", start: at, cards, bounds: movableBounds(cards, picked.marks, strokeBounds), offset: noOffset };
-  }
-
-  function resizeMark(active: Extract<Gesture, { kind: "resize-mark" }>, [x, y]: Point) {
-    const { mark, box, start, end } = active;
-    if ("from" in mark && end) {
-      const old = mark[end];
-      const next: Point = [geometry(old[0] + x - start[0]), geometry(old[1] + y - start[1])];
-      const other = mark[end === "from" ? "to" : "from"];
-      if (next[0] !== other[0] || next[1] !== other[1]) active.preview = { ...mark, [end]: next };
-    } else if ("points" in mark) {
-      const width = box.right - box.left;
-      const height = box.bottom - box.top;
-      const right = Math.max(box.left + 1, geometry(box.right + x - start[0]));
-      const bottom = Math.max(box.top + 1, geometry(box.bottom + y - start[1]));
-      const scaleX = width ? (right - box.left) / width : 1;
-      const scaleY = height ? (bottom - box.top) / height : 1;
-      active.preview = { ...mark, x: box.left, y: box.top,
-        points: mark.points.map(([px, py]) => [geometry(box.left + (mark.x + px - box.left) * scaleX) - box.left,
-          geometry(box.top + (mark.y + py - box.top) * scaleY) - box.top]) };
-    }
-    showMark(mark, active.preview);
   }
 
   function connect(card?: Card) {
@@ -638,124 +321,8 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     }
   }
 
-  function start(event: PointerEvent<HTMLCanvasElement>) {
-    if (event.button !== 0 || locked.current || gesture.current || edit || remoteBusy.current) return;
-    event.currentTarget.focus({ preventScroll: true });
-    if (tool !== "pan" && !space.current && !canEdit()) return;
-    const start = point(event);
-    if (tool === "pan" || space.current) {
-      gesture.current = { kind: "pan", start: point(event, false), view: { ...view.current } };
-    } else if (tool === "pen") {
-      if (drawing.strokes.length >= 2_000 || points.current > 179_998) return setNotice("This board reached its stroke limit.");
-      gesture.current = { kind: "pen", stroke: { id: id(), x: start[0], y: start[1], points: [[0, 0]], width: 3, color: "slate" } };
-    } else if (tool === "rectangle" || tool === "diamond" || tool === "ellipse" || tool === "line") {
-      if (drawing.strokes.length >= 2_000 || points.current + outline(tool, [0, 0]).length > 180_000) {
-        return setNotice("This board reached its stroke limit.");
-      }
-      gesture.current = { kind: "shape", shape: tool, stroke: { id: id(), x: start[0], y: start[1], points: [], width: 2, color: "slate" } };
-    } else if (tool === "eraser") {
-      const removed = new Set<Mark>();
-      eraseAt(event, removed);
-      gesture.current = { kind: "eraser", removed };
-    } else if (tool === "arrow") {
-      if (drawing.arrows.length >= 1_000) return setNotice("This board reached its arrow limit.");
-      gesture.current = { kind: "arrow", arrow: { from: start, to: start, color: "slate" } };
-    } else if (tool === "text") {
-      gesture.current = { kind: "text", at: start };
-    } else if (tool === "connect" && canEdit()) {
-      const card = hit(start);
-      selectCard(card);
-      connect(card);
-      return;
-    } else if (tool === "select" && canEdit()) {
-      gesture.current = beginSelection(start, event.shiftKey);
-    }
-    if (gesture.current) event.currentTarget.setPointerCapture(event.pointerId);
-  }
-
-  function move(event: PointerEvent<HTMLCanvasElement>) {
-    const active = gesture.current;
-    if (!active || active.kind === "text") return;
-    if (active.kind === "pan") {
-      const [x, y] = point(event, false);
-      view.current.x = active.view.x + x - active.start[0];
-      view.current.y = active.view.y + y - active.start[1];
-    } else if (active.kind === "move") {
-      const [x, y] = point(event);
-      active.offset = boundedOffset([x - active.start[0], y - active.start[1]], active.bounds);
-      const [dx, dy] = active.offset;
-      for (const card of active.cards) {
-        const next = { ...card, x: card.x + dx, y: card.y + dy };
-        nodeIndex.set(card.id, next);
-        showCard(next);
-      }
-      for (const mark of selectionRef.current.marks) showMark(mark, translateMark(mark, active.offset));
-    } else if (active.kind === "resize") {
-      const [x, y] = point(event);
-      const { card } = active;
-      active.preview = { ...card,
-        width: Math.min(4096, Math.max(48, geometry(card.width + x - active.start[0]))),
-        height: Math.min(4096, Math.max(32, geometry(card.height + y - active.start[1]))) };
-      nodeIndex.set(card.id, active.preview);
-      showCard(active.preview);
-    } else if (active.kind === "resize-mark") resizeMark(active, point(event));
-    else if (active.kind === "box") active.end = point(event);
-    else if (active.kind === "arrow") active.arrow.to = point(event);
-    else if (active.kind === "eraser") eraseAt(event, active.removed);
-    else if (active.kind === "shape") {
-      const [x, y] = point(event);
-      active.stroke.points = outline(active.shape, [x - active.stroke.x, y - active.stroke.y]);
-    } else if (active.stroke.points.length < Math.min(1024, 180_000 - points.current)) {
-      const [x, y] = point(event);
-      active.stroke.points.push([x - active.stroke.x, y - active.stroke.y]);
-    }
-    repaint();
-  }
-
-  function finish(canceled: boolean) {
-    const active = gesture.current;
-    gesture.current = undefined;
-    if (!active) return;
-    if (active.kind === "move") {
-      const marks = selectionRef.current.marks;
-      settlePreview(active.cards, marks, !canceled && movePicked(active.cards, active.offset));
-    } else if (active.kind === "resize") {
-      const changed = active.card.width !== active.preview.width || active.card.height !== active.preview.height;
-      settlePreview([active.card], selectionRef.current.marks, !canceled && changed && commit([setNode(active.preview)]));
-    } else if (active.kind === "resize-mark") {
-      movedStrokes.current.clear();
-      movedArrows.current.clear();
-      if (!canceled && active.preview !== active.mark) commit([], markChanges(() => active.preview));
-    } else if (!canceled && active.kind === "text") {
-      const target = hitTarget(active.at);
-      const card = target?.kind === "cards" ? nodeIndex.get(target.id) : undefined;
-      if (card) editCard(card);
-      else if (target?.kind === "marks" && "text" in target.mark) editLabel(target.mark);
-      else openEdit({ kind: "text", point: active.at });
-    } else if (!canceled && active.kind === "box") {
-      if (active.end !== active.start) selectArea(boxBetween(active.start, active.end), active.extend);
-    } else if (!canceled && (active.kind === "pen" || active.kind === "shape") && active.stroke.points.length >= 2) {
-      addMark("strokes", active.stroke);
-      if (active.kind === "shape" && !keepTool) {
-        setTool("select");
-        chooseSelection(toggleTarget(selectionRef.current, { kind: "marks", mark: active.stroke }, false));
-      }
-    } else if (!canceled && active.kind === "arrow" &&
-      (active.arrow.from[0] !== active.arrow.to[0] || active.arrow.from[1] !== active.arrow.to[1])) {
-      addMark("arrows", active.arrow);
-      if (!keepTool) {
-        setTool("select");
-        chooseSelection(toggleTarget(selectionRef.current, { kind: "marks", mark: active.arrow }, false));
-      }
-    } else if (!canceled && active.kind === "eraser" && active.removed.size) {
-      commit([], removeSelection(board, { ...emptySelection(), marks: active.removed }).marks);
-    }
-    repaint();
-    if (remoteNeeded.current) scheduleRemote();
-  }
-
   function addCard() {
-    if (edit || locked.current || gesture.current || semantic.current || failed.current || remoteBusy.current) return;
+    if (edit || locked.current || active.current || semantic.current || failed.current || remoteBusy.current) return;
     const camera = view.current;
     const shift = 32 * (board.nodes.length % 7);
     const at: Point = [geometry((70 + shift - camera.x) / camera.zoom), geometry((90 + shift - camera.y) / camera.zoom)];
@@ -794,7 +361,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       if (card.parent !== edit.card.parent) card.order = (board.nodes.at(-1)?.order ?? -1) + 1;
       if (!commit([setNode(card)], [], "record", toggleTarget(selectionRef.current, { kind: "cards", id: card.id }, false))) return;
     }
-    closeEdit(canvas.current);
+    closeEdit(surface());
   }
 
   async function flush() {
@@ -805,7 +372,11 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function leave(windowClose: boolean, discard = false) {
     if (locked.current) return;
-    finish(true);
+    if (!discard && controller.current?.getAppState().editingTextElement) {
+      setCloseFailure({ windowClose, message: "Finish editing the board text before closing." });
+      return;
+    }
+    settleScene.current?.();
     locked.current = true;
     setPending(true);
     setCloseFailure(undefined);
@@ -831,7 +402,8 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   latestClose.current = leave;
 
   async function prepareExport(format: "png" | "svg" | "board") {
-    if (locked.current || gesture.current) return;
+    if (locked.current || active.current) return;
+    settleScene.current?.();
     locked.current = true;
     setPending(true);
     try {
@@ -850,17 +422,30 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   function zoom(factor: number) {
-    if (gesture.current) return;
-    view.current.zoom = Math.min(2, Math.max(0.3, view.current.zoom * factor));
-    setZoomPercent(Math.round(view.current.zoom * 100));
-    repaint();
+    const api = controller.current;
+    if (!api || active.current) return;
+    const { zoom, scrollX, scrollY, width, height } = api.getAppState();
+    const value = Math.min(3, Math.max(0.1, zoom.value * factor)) as typeof zoom.value;
+    api.updateScene({ appState: { zoom: { value },
+      scrollX: scrollX + width / 2 * (1 / value - 1 / zoom.value),
+      scrollY: scrollY + height / 2 * (1 / value - 1 / zoom.value) } });
   }
 
   function resetView() {
-    if (gesture.current) return;
-    view.current = { x: 0, y: 0, zoom: 1 };
-    setZoomPercent(100);
-    repaint();
+    const api = controller.current;
+    if (api && !active.current) {
+      const { zoom } = api.getAppState();
+      api.updateScene({ appState: { scrollX: 0, scrollY: 0, zoom: { value: 1 as typeof zoom.value } } });
+    }
+  }
+
+  function markChanges(map: (mark: Mark) => Mark): MarkChange[] {
+    return drawingKinds.flatMap((kind) => drawing[kind].flatMap((before, index) =>
+      selectionRef.current.marks.has(before) ? [{ kind, index, before, after: map(before) }] : []));
+  }
+
+  function pickedCards() {
+    return board.nodes.filter((card) => selectionRef.current.cards.has(card.id));
   }
 
   function reorder(card: Card, direction: number) {
@@ -893,13 +478,13 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   function deleteSelected() {
-    if (gesture.current || edit) return;
+    if (active.current || edit) return;
     const { changes, marks } = removeSelection(board, selectionRef.current);
     commit(changes, marks);
   }
 
   function duplicateSelected() {
-    if (gesture.current || edit || !canEdit()) return;
+    if (active.current || edit || !canEdit()) return;
     const picked = selectionRef.current;
     const offset = boundedOffset([24, 24], movableBounds(pickedCards(), picked.marks, strokeBounds));
     const { changes, marks, selected } = duplicateSelection(board, picked, offset);
@@ -928,29 +513,17 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function selectCard(card?: Card, reveal = false) {
     chooseSelection(card ? toggleTarget(selectionRef.current, { kind: "cards", id: card.id }, false) : emptySelection());
-    if (!card || !reveal || !canvas.current) return;
-    const camera = view.current;
-    const left = card.x * camera.zoom + camera.x;
-    const top = card.y * camera.zoom + camera.y;
-    const width = canvas.current.clientWidth;
-    const height = canvas.current.clientHeight;
-    const tools = panel.current?.querySelector(".lean-toolbar")?.getBoundingClientRect();
-    const shelf = panel.current?.querySelector(".lean-shelf, .agent-panel")?.getBoundingClientRect();
-    const bounds = canvas.current.getBoundingClientRect();
-    const leftLimit = 12;
-    const rightLimit = shelf ? shelf.left - bounds.left - 12 : width - 12;
-    const topLimit = tools ? tools.bottom - bounds.top + 12 : 62;
-    const bottomLimit = height - 62;
-    if (left < leftLimit || top < topLimit || left + card.width * camera.zoom > rightLimit
-      || top + card.height * camera.zoom > bottomLimit) {
-      camera.x += (leftLimit + Math.max(leftLimit, rightLimit)) / 2 - left - card.width * camera.zoom / 2;
-      camera.y += (topLimit + bottomLimit) / 2 - top - card.height * camera.zoom / 2;
-      repaint();
-    }
+    const api = controller.current;
+    const element = card && api?.getSceneElements().find(({ customData }) => customData?.raqshCard === card.id);
+    if (reveal && element) api?.scrollToContent(element, { animate: false });
   }
 
   function cancelEdit() {
     closeEdit(editAnchor.current);
+  }
+
+  function surface() {
+    return canvas.current?.querySelector<HTMLElement>(".excalidraw");
   }
 
   function closeEdit(anchor?: HTMLElement | null) {
@@ -958,7 +531,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
     draftChanged.current = false;
     setEdit(undefined);
     requestAnimationFrame(() => {
-      const target = anchor?.isConnected && !anchor.matches(":disabled") ? anchor : canvas.current;
+      const target = anchor?.isConnected && !anchor.matches(":disabled") ? anchor : surface();
       target?.focus({ preventScroll: true });
     });
   }
@@ -970,9 +543,8 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   function selectTool(next: Tool) {
-    if (gesture.current) finish(true);
     setTool(next);
-    canvas.current?.focus({ preventScroll: true });
+    surface()?.focus({ preventScroll: true });
     dependency.current = undefined;
     setNotice("");
   }
@@ -986,96 +558,47 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
 
   function onBoardKey(event: KeyboardEvent<HTMLDivElement>) {
     if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp) return;
-    const surface = event.target === canvas.current;
-    if (event.key === "Escape") {
-      if (gesture.current) finish(true);
-      else if (closeDisclosure(menu.current) || closeDisclosure(moreTools.current)) {
-        event.preventDefault();
-        return;
-      } else if (agents) closePanel("agents");
-      else if (inspector) closePanel("cards");
-      else {
-        dependency.current = undefined;
-        chooseSelection(emptySelection());
-        setNotice("");
-        canvas.current?.focus({ preventScroll: true });
-      }
-      event.preventDefault();
-      return;
-    }
     const target = event.target as HTMLElement;
     if (locked.current || target.closest("input, textarea, select, [contenteditable], .agent-panel")) return;
     const shortcut = event.key.toLowerCase();
+    const consume = () => { event.preventDefault(); event.stopPropagation(); };
     if ((event.ctrlKey || event.metaKey) && !event.altKey) {
-      if (shortcut === "z" || shortcut === "y") {
-        event.preventDefault();
-        changeHistory(shortcut === "y" || event.shiftKey);
-      } else if (shortcut === "d" && !event.shiftKey) {
-        event.preventDefault();
-        duplicateSelected();
-      } else if (shortcut === "a" && !event.shiftKey && !gesture.current) {
-        event.preventDefault();
-        chooseSelection({ cards: new Set(board.nodes.map((card) => card.id)),
-          marks: new Set([...drawing.strokes, ...drawing.arrows, ...drawing.labels]), edges: new Set(board.edges.map((edge) => edge.id)) });
+      if (["z", "y", "d"].includes(shortcut)) {
+        consume();
+        settleScene.current?.();
+        if (shortcut === "d") duplicateSelected();
+        else changeHistory(shortcut === "y" || event.shiftKey);
       }
       return;
     }
-    if (event.altKey || event.ctrlKey || event.metaKey || gesture.current) return;
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key === "Escape") {
+      if (active.current) return;
+      consume();
+      if (closeDisclosure(menu.current) || closeDisclosure(moreTools.current)) return;
+      if (agents) closePanel("agents");
+      else if (inspector) closePanel("cards");
+      else {
+        if (tool === "connect") selectTool("select");
+        chooseSelection(emptySelection());
+        setNotice("");
+      }
+      return;
+    }
+    if (active.current) return;
     const next = tools.find((item) => item.key === shortcut || item.number === shortcut);
-    if (next && next.id !== "image") {
-      event.preventDefault();
-      selectTool(next.id);
-      return;
-    }
-    if (shortcut === "c") {
-      event.preventDefault();
-      selectTool("connect");
-      return;
-    }
-    if (shortcut === "q" || shortcut === "?" || shortcut === "f1") {
-      event.preventDefault();
-      if (shortcut === "q") setKeepTool(!keepTool);
-      else setKeyboardHelp(true);
-      return;
-    }
-    if (event.key === "Delete" || event.key === "Backspace") {
-      event.preventDefault();
-      deleteSelected();
-    } else if (event.key === "Insert" || shortcut === "n") {
-      event.preventDefault();
-      addCard();
-    } else if (event.key === "+" || event.key === "=" || event.key === "-") {
-      event.preventDefault();
-      zoom(event.key === "-" ? 1 / 1.1 : 1.1);
-    } else if (surface) {
-      const direction = ({ ArrowLeft: [-1, 0], ArrowUp: [0, -1], ArrowRight: [1, 0], ArrowDown: [0, 1] } as Record<string, Point>)[event.key];
-      if (direction) {
-        event.preventDefault();
-        const [dx, dy] = direction;
-        if (tool === "pan") {
-          view.current.x -= 64 * dx;
-          view.current.y -= 64 * dy;
-          repaint();
-        } else if (tool === "connect" || !selectionSize(selectionRef.current)) {
-          cycleCards(dx + dy);
-        } else if (tool === "select" && canEdit()) {
-          const cards = pickedCards();
-          const size = event.shiftKey ? 10 : 1;
-          const bounds = movableBounds(cards, selectionRef.current.marks, strokeBounds);
-          movePicked(cards, boundedOffset([dx * size, dy * size], bounds));
-        }
-      } else if (event.key === "[" || event.key === "]") {
-        event.preventDefault();
-        cycleCards(event.key === "[" ? -1 : 1);
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        if (tool === "connect") connect(pickedCards()[0]);
-        else editSelected();
-      } else if (event.key === " ") {
-        event.preventDefault();
-        space.current = true;
-      }
-    }
+    if (next && next.id !== "image" && !event.shiftKey) { consume(); selectTool(next.id); }
+    else if (shortcut === "insert" || shortcut === "n") { consume(); addCard(); }
+    else if (shortcut === "c") { consume(); selectTool("connect"); }
+    else if (shortcut === "q") { consume(); setKeepTool(!keepTool); }
+    else if (shortcut === "?" || shortcut === "f1") { consume(); setKeyboardHelp(true); }
+    else if (shortcut === "[" || shortcut === "]") { consume(); cycleCards(shortcut === "[" ? -1 : 1); }
+    else if (shortcut === "enter" && (selectionRef.current.cards.size > 0 || tool === "connect")
+      && canvas.current?.contains(target)) {
+      consume();
+      if (tool === "connect") connect(pickedCards()[0]);
+      else editSelected();
+    } else if (["+", "=", "-"].includes(shortcut)) { consume(); zoom(shortcut === "-" ? 1 / 1.1 : 1.1); }
   }
 
   const count = selectionSize(selection);
@@ -1087,16 +610,14 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   return (
     <div className="board-editor lean-editor" ref={panel} data-fixture={window.__BOARD_FIXTURE__}
       data-initial-elements={opened.nodes.length * 2 + opened.edges.length + drawing.strokes.length}
-      data-semantic-revision={revision.current} data-renderer="lean"
+      data-semantic-revision={revision.current} data-renderer="excalidraw"
       onPointerDownCapture={(event) => {
         const target = event.target as Node;
         for (const disclosure of [menu.current, moreTools.current]) {
           if (disclosure?.open && !disclosure.contains(target)) disclosure.open = false;
         }
       }}
-      onKeyDown={onBoardKey} onKeyUp={(event) => {
-        if (event.key === " ") space.current = false;
-      }}>
+      onKeyDownCapture={onBoardKey}>
       <h1 className="visually-hidden" dir="auto">{info.title}</h1>
       <details ref={menu} className="board-header">
         <summary className="board-control" aria-label="Board menu" title="Board menu"><Icon name="menu" size={16} /></summary>
@@ -1118,38 +639,27 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
           <button type="button" disabled={pending} onClick={() => leave(false)}><Icon name="back" size={16} />Close board</button>
         </div>
       </details>
-      <p id="board-keyboard-summary" className="visually-hidden">Press N to add a card. Arrow keys move the selection. Enter edits selected text. F1 opens all shortcuts.</p>
+      <p id="board-keyboard-summary" className="visually-hidden">Press N to add a card. Arrow keys move the selection. Enter edits the selected card or text. F1 opens all shortcuts.</p>
       <div role="status" aria-atomic="true" className="visually-hidden">{card ? `Selected ${card.title}` : count ? `${count} selected` : ""}</div>
-      <canvas ref={canvas} className={`interactive lean-canvas tool-${tool}`} data-board-surface tabIndex={0}
-        aria-label="Drawing canvas" aria-describedby="board-keyboard-summary"
-        onPointerDown={start} onPointerMove={move} onPointerUp={() => finish(false)} onPointerCancel={() => finish(true)}
-        onLostPointerCapture={() => finish(true)}
-        onDoubleClick={(event) => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          const camera = view.current;
-          if (tool !== "select") return;
-          const target = hitTarget([(event.clientX - rect.left - camera.x) / camera.zoom, (event.clientY - rect.top - camera.y) / camera.zoom]);
-          if (target?.kind === "cards") {
-            const card = nodeIndex.get(target.id);
-            if (card) editCard(card);
-          } else if (target?.kind === "marks" && "text" in target.mark) editLabel(target.mark);
-        }} />
+      <EditorSurface board={board} container={canvas} cardsLayer={cardsLayer} cards={cards} active={active}
+        controller={controller} sync={settleScene} selection={selection} view={view} tool={tool} keepTool={keepTool}
+        dark={dark} canEdit={canEdit} readOnly={pending || !!edit || keyboardHelp || !!closeFailure}
+        onReady={() => { if (panel.current) panel.current.dataset.editorReady = "true"; }} onView={setZoomPercent} onTool={setTool} onSelection={chooseSelection} onEditCard={editCard} onConnect={(card) => {
+          selectCard(card);
+          connect(card);
+        }} onSettle={() => { if (remoteNeeded.current) scheduleRemote(); }} onNotice={setNotice}
+        onCommit={(changes, marks, selected) => commit(changes, marks, "record", selected)} />
       <div className="lean-cards" aria-hidden="true" ref={cardsLayer}>
         {board.nodes.map((item) => (
           <div key={item.id} dir="auto" className="lean-card" data-card-id={item.id}
             data-kind={item.kind} data-status={item.status} data-priority={item.priority} data-dropped={item.dropped}
             data-badge={item.dropped ? "Dropped" : statuses[item.status]}
-            data-selected={selection.cards.has(item.id)} data-resizable={count === 1}
+            data-selected={selection.cards.has(item.id)}
             ref={(element) => { if (element) cards.current.set(item.id, element); else cards.current.delete(item.id); }}
-            style={{ left: item.x, top: item.y, width: item.width, height: item.height }}
-            onClick={() => tool === "connect" ? connect(item) : editCard(item)}>
+            style={{ left: item.x, top: item.y, width: item.width, height: item.height }}>
             <span className="card-title">{item.title}</span>
           </div>
         ))}
-        {drawing.labels.map((label, index) => <span className="lean-label" dir="auto" key={index}
-          data-selected={selection.marks.has(label)}
-          ref={(element) => { if (element) labels.current.set(label, element); else labels.current.delete(label); }}
-          style={{ left: label.x, top: label.y }}>{label.text}</span>)}
       </div>
       {!board.nodes.length && !drawing.strokes.length && !drawing.labels.length && !drawing.arrows.length && <div className="lean-empty">
         <strong>{brand.displayName}</strong>
@@ -1291,7 +801,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         <h2>Board shortcuts</h2>
         <dl className="board-shortcuts">
           <dt>V / 1</dt><dd>Selection. Drag an empty area to select objects, or Shift-click to add and remove objects.</dd>
-          <dt>Arrow keys</dt><dd>Move the selection. Hold Shift for larger steps. In Hand mode, arrows pan.</dd>
+          <dt>Arrow keys</dt><dd>Move the selection. Hold Shift for larger steps.</dd>
           <dt>[ / ]</dt><dd>Select the previous or next card.</dd>
           <dt>Enter / double-click</dt><dd>Edit a card or existing board text. In Dependency mode, Enter links cards.</dd>
           <dt>N / Insert</dt><dd>Add a card.</dd>

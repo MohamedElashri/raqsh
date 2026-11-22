@@ -30,6 +30,7 @@
     "license": "PolyForm-Noncommercial-1.0.0",
     "resources": {
       "../../../LICENSE": "licenses/Raqsh-LICENSE.txt",
+      "licenses/Excalidraw-MIT.txt": "licenses/Excalidraw-MIT.txt",
       "../src/lean/fonts/OFL-Assistant.txt": "licenses/OFL-Assistant.txt",
       "../src/lean/fonts/OFL-Excalifont.txt": "licenses/OFL-Excalifont.txt",
       "../src/lean/fonts/OFL-Nunito.txt": "licenses/OFL-Nunito.txt"

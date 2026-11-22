@@ -46,7 +46,7 @@
 .lean-canvas:focus { outline: none; }
 .lean-canvas:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
 .lean-cards { transform-origin: 0 0; pointer-events: none; }
-.lean-card, .lean-label { position: absolute; white-space: pre-wrap; }
+.lean-card { position: absolute; white-space: pre-wrap; }
 .lean-card {
   display: grid;
   place-items: center;
@@ -73,18 +73,6 @@
   letter-spacing: .04em;
   white-space: nowrap;
 }
-.lean-card[data-selected="true"] { outline: 1.5px dashed var(--focus); outline-offset: 5px; border-radius: 12px; }
-.lean-card[data-selected="true"][data-resizable="true"]::after {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  width: 8px;
-  height: 8px;
-  border: 1.5px solid var(--focus);
-  background: var(--toolbar-surface);
-  border-radius: 2px;
-  content: "";
-}
 .lean-card[data-kind="group"] { border: 1px dashed var(--status-marker); background-image: none; }
 .lean-card[data-kind="blocker"] { border-color: var(--danger); }
 .lean-card[data-priority="high"]::before { border-color: var(--status-marker); font-weight: 800; }
@@ -94,11 +82,9 @@
 .lean-card[data-status="blocked"] { --card-badge: var(--card-blocked); }
 .lean-card[data-status="done"] { --card-badge: var(--card-done); }
 .lean-card[data-dropped="true"] { --card-badge: var(--card-done); color: var(--muted); text-decoration: line-through; }
-.lean-label, .lean-edit .lean-note-input {
+.lean-edit .lean-note-input {
   font: 400 17px/22px Excalifont, Nunito, system-ui, sans-serif;
 }
-.lean-label { width: max-content; transform: translateY(-17px); unicode-bidi: plaintext; }
-.lean-label[data-selected="true"] { outline: 1.5px dashed var(--focus); outline-offset: 4px; }
 .lean-empty {
   position: absolute;
   top: 58.5%;
@@ -318,4 +304,20 @@
     --pill: #242421;
     --pill-text: #8c8981;
   }
+}
+
+.excalidraw-surface {
+  isolation: isolate;
+  overflow: hidden;
+}
+.excalidraw-surface .excalidraw {
+  --ui-font: Assistant, system-ui, sans-serif;
+  --color-primary: var(--focus);
+  --color-primary-darker: var(--focus);
+  --color-selection: var(--focus);
+}
+.excalidraw-surface .excalidraw :is(.App-menu, .App-menu_top, .App-toolbar, .HintViewer, .App-bottom-bar, .layer-ui__wrapper__footer-left,
+  .layer-ui__wrapper__footer-right, .layer-ui__wrapper__top-right, .default-sidebar, .mobile-misc-tools,
+  .mobile-menu, .hint, .help-icon, .welcome-screen-center) {
+  display: none;
 }

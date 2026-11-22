@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Verify keyboard and pointer editing in the native Linux webview."""
+"""Verify Excalidraw editing and Raqsh persistence in the native Linux webview."""
 
 import argparse
 import json
 from pathlib import Path
 import runpy
 import sqlite3
+import time
 
 from webkit_driver import isolated_library, wait_until, webdriver
 
@@ -71,7 +72,8 @@ def add_card(web, title, x):
 
 def edit_board(web, root):
     ready(web)
-    assert web.evaluate('return document.activeElement.matches("[data-board-surface]");')
+    assert web.evaluate('return document.activeElement.closest("[data-board-surface]") !== null;')
+    assert web.evaluate('return document.querySelector(".lean-editor").dataset.renderer;') == "excalidraw"
     key(web, F1)
     wait_until(lambda: web.evaluate('return document.querySelector("dialog[open]")?.ariaLabel === "Board shortcuts";'),
                "board shortcuts")
@@ -80,102 +82,83 @@ def edit_board(web, root):
     revision(web, 1)
     add_card(web, "Second task", 400)
     revision(web, 2)
+
     key(web, "c")
     click_canvas(web, 155, 175)
     click_canvas(web, 445, 175)
     revision(web, 3)
 
-    # A marquee selects both cards. The drag previews both before committing one edit.
+    # Excalidraw moves both cards in the live scene. Raqsh writes once on release.
     key(web, "v")
     drag(web, (55, 108), (640, 240))
-    assert all(card["selected"] for card in cards(web))
+    wait_until(lambda: all(card["selected"] for card in cards(web)), "native marquee")
     drag(web, (130, 160), (160, 180), lifted=False)
-    assert [card["x"] for card in cards(web)] == [120, 430]
+    wait_until(lambda: [card["x"] for card in cards(web)] == [120, 430], "live card drag")
     assert web.evaluate('return document.querySelector(".lean-editor").dataset.semanticRevision;') == "3"
-    web.evaluate("""
-        const fetch = window.fetch;
-        window.fetch = function(url) {
-            const response = fetch.apply(this, arguments);
-            if (!String(url).endsWith('/apply_operation')) return response;
-            window.fetch = fetch;
-            return response.then(value => new Promise(resolve => {
-                window.releaseMove = () => resolve(value);
-            }));
-        };
-    """)
     pointer(web, {"type": "pointerUp", "button": 0})
-    wait_until(lambda: web.evaluate("return !!window.releaseMove;"), "held drag receipt")
-    assert [card["x"] for card in cards(web)] == [120, 430]
-    assert web.evaluate('return document.querySelector(".lean-editor").dataset.semanticRevision;') == "3"
-    web.evaluate("window.releaseMove();")
     revision(web, 4)
     key(web, RIGHT, SHIFT)
     revision(web, 5)
-    assert [card["x"] for card in cards(web)] == [130, 440]
-    key(web, "d", CONTROL)
-    revision(web, 6)
-    assert len(cards(web)) == 4
-    key(web, DELETE)
-    revision(web, 7)
-    assert len(cards(web)) == 2
+    assert [card["x"] for card in cards(web)] == [125, 435]
     key(web, "z", CONTROL)
-    revision(web, 8)
-    assert len(cards(web)) == 4
-    key(web, "y", CONTROL)
-    revision(web, 9)
-    assert len(cards(web)) == 2
+    revision(web, 6)
+    assert [card["x"] for card in cards(web)] == [120, 430]
 
-    # Select the interior of a rectangle, move it, resize it and change its ink.
     key(web, "r")
     drag(web, (320, 365), (440, 435))
-    click_canvas(web, 380, 400)
-    drag(web, (380, 400), (416, 420))
-    drag(web, (476, 455), (496, 480))
-    text(web, '.lean-selection label:first-of-type select', "blue")
-    frame = checkpoint(root, lambda d: d["strokes"] and d["strokes"][0]["color"] == "blue")
+    frame = checkpoint(root, lambda d: len(d["strokes"]) == 1)
     stroke, = frame["strokes"]
-    assert [stroke["x"], stroke["y"]] == [356, 385]
-    assert max(x for x, _ in stroke["points"]) == 140
-    assert max(y for _, y in stroke["points"]) == 95
+    assert [stroke["x"], stroke["y"]] == [320, 365]
+    assert max(x for x, _ in stroke["points"]) == 120
+    assert max(y for _, y in stroke["points"]) == 70
+
+    key(web, "p")
+    drag(web, (210, 350), (270, 395))
+    checkpoint(root, lambda d: len(d["strokes"]) == 2)
 
     key(web, "a")
-    drag(web, (530, 350), (576, 390))
-    drag(web, (576, 390), (602, 370))
-    arrow = checkpoint(root, lambda d: d["arrows"] and d["arrows"][0]["to"] == [602, 370])["arrows"][0]
-    assert arrow["from"] == [530, 350]
+    drag(web, (530, 350), (610, 405))
+    arrow, = checkpoint(root, lambda d: len(d["arrows"]) == 1)["arrows"]
+    assert arrow["from"] == [530, 350] and arrow["to"] == [610, 405]
 
     key(web, "t")
-    click_canvas(web, 270, 320)
-    text(web, 'dialog[open] [name="title"]', "Draft")
-    key(web, ENTER, CONTROL)
-    wait_until(lambda: web.evaluate('return document.querySelector(".lean-label")?.textContent;'), "placed text")
-    key(web, ENTER)
-    text(web, 'dialog[open] [name="title"]', "مراجعة")
-    key(web, ENTER, CONTROL)
-    checkpoint(root, lambda d: d["labels"] and d["labels"][0]["text"] == "مراجعة")
+    click_canvas(web, 275, 320)
+    wait_until(lambda: web.evaluate('return !!document.querySelector("textarea.excalidraw-wysiwyg");'), "native text editor")
+    for letter in "Review":
+        key(web, letter)
+    key(web, ESCAPE)
+    checkpoint(root, lambda d: d["labels"] and d["labels"][0]["text"] == "Review")
 
-    # Cards and drawing objects move together and undo as one action.
-    drag(web, (91, 117), (355, 350))
-    assert web.evaluate('return document.querySelector(".lean-selection strong")?.textContent;') == "2 objects selected"
-    drag(web, (150, 176), (170, 196))
-    revision(web, 10)
-    assert cards(web)[0]["x"] == 150
-    checkpoint(root, lambda d: d["labels"][0]["x"] == 290)
+    # One history entry covers a mixed card-and-text move.
+    key(web, "v")
+    drag(web, (75, 110), (348, 344))
+    wait_until(lambda: web.evaluate('return document.querySelector(".lean-selection strong")?.textContent;') == "2 objects selected",
+               "mixed selection")
+    drag(web, (150, 175), (170, 195))
+    revision(web, 7)
+    checkpoint(root, lambda d: d["labels"][0]["x"] == 295)
     key(web, "z", CONTROL)
-    revision(web, 11)
-    assert cards(web)[0]["x"] == 130
-    checkpoint(root, lambda d: d["labels"][0]["x"] == 270)
-    key(web, "z", CONTROL, SHIFT)
-    revision(web, 12)
-    assert cards(web)[0]["x"] == 150
-    checkpoint(root, lambda d: d["labels"][0]["x"] == 290)
-    click_canvas(web, 410, 200)
-    assert "First task → Second task" in web.evaluate('return document.querySelector(".lean-selection")?.innerText;')
+    revision(web, 8)
+    assert [card["x"] for card in cards(web)] == [120, 430]
+    expected = checkpoint(root, lambda d: d["labels"][0]["x"] == 275)
+
+    key(web, "v")
+    click_canvas(web, 160, 180)
+    wait_until(lambda: cards(web)[0]["selected"], "card selection")
+    key(web, ENTER)
+    wait_until(lambda: web.evaluate('return document.querySelector("dialog[open] textarea")?.value;') == "First task",
+               "keyboard card details")
+    key(web, ESCAPE)
+    click_canvas(web, 160, 180)
+    wait_until(lambda: cards(web)[0]["selected"], "card selected before delete")
     key(web, DELETE)
-    revision(web, 13)
+    revision(web, 9)
+    assert [card["title"] for card in cards(web)] == ["Second task"]
     key(web, "z", CONTROL)
-    revision(web, 14)
+    revision(web, 10)
+    assert [card["title"] for card in cards(web)] == ["First task", "Second task"]
     close_editor(web)
+    return expected
 
 
 def main():
@@ -184,13 +167,27 @@ def main():
     args = parser.parse_args()
     with isolated_library() as root, webdriver() as (launch, _):
         with launch(args.binary, ("--fixture=empty",)) as web:
-            edit_board(web, root)
+            drawing = edit_board(web, root)
         with launch(args.binary, ("--fixture=empty",)) as web:
             ready(web)
-            revision(web, 14)
-            assert [card["x"] for card in cards(web)] == [150, 440]
-            assert web.evaluate('return document.querySelector(".lean-label").textContent;') == "مراجعة"
-            checkpoint(root, lambda d: d["labels"][0]["x"] == 290 and d["strokes"][0]["color"] == "blue")
+            revision(web, 10)
+            assert [card["x"] for card in cards(web)] == [120, 430]
+            assert checkpoint(root, lambda snapshot: snapshot == drawing)
+            click_canvas(web, 175, 175)
+            wait_until(lambda: web.evaluate('return document.querySelector(".lean-selection")?.innerText.includes("Required by Second task");'),
+                       "saved dependency")
+        with launch(args.binary, ("--fixture=normal",)) as web:
+            ready(web)
+            key(web, "+")
+            key(web, "-")
+            time.sleep(0.8)
+            database = root / "data/dev.local.raqsh/library/boards.sqlite3"
+            with sqlite3.connect(database) as connection:
+                drawing_revision, payload = connection.execute(
+                    "SELECT drawing_revision, drawing FROM boards WHERE title = 'normal'"
+                ).fetchone()
+            assert drawing_revision == 0, "Opening or zooming changed the fixture's drawing revision"
+            assert len(json.loads(payload)["strokes"]) == 300
     print("Native editing and persistence passed.")
 
 
