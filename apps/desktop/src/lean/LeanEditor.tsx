@@ -176,6 +176,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
         if (mounted.current) setNotice(String(error));
       }).finally(() => {
         remoteBusy.current = false;
+        if (mounted.current) update();
         if (remoteNeeded.current) scheduleRemote();
       });
   };
@@ -324,7 +325,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   }
 
   function addCard() {
-    if (edit || locked.current || active.current || semantic.current || failed.current || remoteBusy.current) return;
+    if (edit || locked.current || active.current || semantic.current || failed.current) return;
     const camera = view.current;
     const shift = 32 * (board.nodes.length % 7);
     const at: Point = [geometry((70 + shift - camera.x) / camera.zoom), geometry((90 + shift - camera.y) / camera.zoom)];
@@ -352,7 +353,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
       height: Number(values.get("height")), x: Number(values.get("x")), y: Number(values.get("y")),
       parent: (values.get("parent") || null) as Card["parent"],
     };
-    if (card.parent !== edit.card.parent) card.order = (board.nodes.at(-1)?.order ?? -1) + 1;
+    if (edit.fresh || card.parent !== edit.card.parent) card.order = (board.nodes.at(-1)?.order ?? -1) + 1;
     if (!commit([setNode(card)], undefined, "record", { ...blankSelection(), cards: new Set([card.id]) })) return;
     closeEdit(surface());
   }
@@ -823,6 +824,7 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
             </select></label>
           </div>
         <div className="dialog-actions">
+          {remoteBusy.current && <span role="status">Syncing board…</span>}
           <button type="button" onClick={cancelEdit}>Cancel</button>
           <button type="submit" disabled={unavailable}>{edit.fresh ? "Create card" : "Save card"}</button>
         </div>

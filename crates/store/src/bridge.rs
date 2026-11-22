@@ -318,7 +318,9 @@ impl Store {
 
     fn scene_page(&self, info: &Board, input: &board_ipc::Get) -> Result<Value> {
         let offset = input.offset.unwrap_or(0);
-        if offset > 0 && input.revision != Some(info.semantic_revision) {
+        if (offset > 0 || input.revision.is_some())
+            && input.revision != Some(info.semantic_revision)
+        {
             return Err(board_domain::Error::Conflict {
                 current: info.semantic_revision,
             }

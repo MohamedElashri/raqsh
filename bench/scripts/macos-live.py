@@ -160,7 +160,7 @@ def update_status_with_provider(helper, pairing, root, env, provider, registrati
 
 
 def run_app(desktop, helper, root, env, mode, provider):
-    fixture = {"stress": "stress", "legacy": "showcase"}.get(mode, "empty")
+    fixture = {"stress": "stress", "legacy": "showcase", "feedback-history": "tiny"}.get(mode, "empty")
     command = [desktop, f"--macos-live={mode}"]
     if mode != "about":
         command.append(f"--fixture={fixture}")
@@ -243,7 +243,9 @@ def main():
         (root / "runtime").mkdir(mode=0o700)
         env = dict(os.environ, RAQSH_BENCH_PROJECT=str(root / "project"),
                    RAQSH_RUNTIME_DIR=str(root / "runtime"), RAQSH_TEST_LIBRARY=str(root / "library"))
-        modes = ("provider", "reopen") if args.provider else ("about", "edit", "reopen-edits", "legacy", "stress")
+        modes = ("provider", "reopen") if args.provider else (
+            "about", "edit", "reopen-edits", "legacy", "stress", "sync-card", "feedback-history",
+        )
         if args.stress_only:
             modes = ("stress",)
         for mode in modes:

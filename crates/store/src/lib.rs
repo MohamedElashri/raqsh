@@ -1066,6 +1066,53 @@ mod tests {
     }
 
     #[test]
+    fn snapshot_rejects_revision_changes_between_sections() {
+        use board_ipc::{Call, Credential, Get, Request, Section, VERSION};
+
+        let folder = Folder::new();
+        let mut store = Store::open(&folder.database()).unwrap();
+        let project = store.add_project(&folder.0).unwrap();
+        let board = store.create_board(project.id, "Snapshot").unwrap();
+        let opened = store.open_board(project.id, board.id).unwrap();
+        let credential = Credential::new().unwrap();
+        store
+            .pair(opened.scope, "Reader", false, &credential)
+            .unwrap();
+        let read = |section, revision, offset| Request {
+            version: VERSION,
+            request_id: Id::new_v4(),
+            credential: credential.clone(),
+            call: Call::BoardGet(Get {
+                board_id: board.id,
+                section: Some(section),
+                offset,
+                since_revision: None,
+                revision,
+            }),
+        };
+
+        let (nodes, _) = store.bridge(read(Section::Nodes, None, None)).unwrap();
+        let revision = nodes["board"]["semanticRevision"].as_u64().unwrap();
+        let receipt = store.apply(opened.scope, operation()).unwrap();
+        let reply = store.bridge(read(Section::Edges, Some(revision), Some(0)));
+        let failure = match reply {
+            Err(failure) => failure,
+            Ok((page, _)) => panic!(
+                "Accepted a stale revision {revision} and returned revision {}",
+                page["board"]["semanticRevision"]
+            ),
+        };
+        assert_eq!(failure.code, "revision_conflict");
+        assert_eq!(failure.current_revision, Some(receipt.revision));
+        assert!(
+            store
+                .bridge(read(Section::Edges, Some(receipt.revision), None))
+                .is_ok()
+        );
+        assert!(store.bridge(read(Section::Nodes, None, Some(1))).is_err());
+    }
+
+    #[test]
     fn feedback_is_bound_and_acknowledgement_is_explicit() {
         use board_ipc::{Ack, Call, Credential, GetFeedback, Request, VERSION};
         let folder = Folder::new();

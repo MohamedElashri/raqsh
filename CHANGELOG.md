@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.2
+
+- Open the Add Card draft when you press N during board sync.
+- Keep loaded feedback history visible as new feedback arrives or an older item is cancelled.
+- Reject stale revision requests when reading across MCP snapshot sections.
+- Expand About with project links, creator credit, and offline license information.
+
 ## v0.2.1
 
 - Install the optional Raqsh skill from Agents to guide board selection, task updates, and feedback across supported coding clients.

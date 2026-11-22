@@ -52,7 +52,7 @@
   },
   {
     "name": "board_get",
-    "description": "Read a typed nodes or edges page. Pass the returned semanticRevision as revision on subsequent offsets. Or read committed operations after sinceRevision.",
+    "description": "Read a typed nodes or edges page. Pass the returned semanticRevision as revision on later pages, including the first page of another section. Or read committed operations after sinceRevision.",
     "inputSchema": {
       "type": "object",
       "properties": {
