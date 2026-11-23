@@ -66,6 +66,10 @@ jobs:
           mkdir release-assets
           cp target/release/bundle/deb/*.deb release-assets/raqsh-linux-x86_64.deb
           cp target/release/bundle/rpm/*.rpm release-assets/raqsh-linux-x86_64.rpm
+          bash scripts/bundle-linux-user.sh \
+            release-assets/raqsh-linux-x86_64.deb release-assets/raqsh-linux-x86_64.tar.gz
+          python3 bench/scripts/linux-user-install.py release-assets/raqsh-linux-x86_64.tar.gz \
+            --legacy-deb release-assets/raqsh-linux-x86_64.deb
       - name: Smoke-test Debian and RPM installation
         if: runner.os == 'Linux'
         run: |
@@ -150,7 +154,7 @@ jobs:
           node scripts/release-update.mjs "$RELEASE_TAG" release-assets
           cp install.sh release-assets/install.sh
           cd release-assets
-          assets=(install.sh raqsh-linux-x86_64.deb raqsh-linux-x86_64.rpm raqsh-macos-universal.zip raqsh-macos-universal.app.tar.gz latest.json)
+          assets=(install.sh raqsh-linux-x86_64.deb raqsh-linux-x86_64.rpm raqsh-linux-x86_64.tar.gz raqsh-macos-universal.zip raqsh-macos-universal.app.tar.gz latest.json)
           sha256sum "${assets[@]}" > SHA256SUMS
           options=(--verify-tag --generate-notes)
           if [[ "$RELEASE_DRAFT" == true ]]; then options+=(--draft); fi

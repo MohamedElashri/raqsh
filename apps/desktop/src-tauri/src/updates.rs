@@ -61,8 +61,19 @@ pub struct UpdateInfo {
 fn package_asset() -> Option<&'static str> {
     match bundle_type() {
         Some(BundleType::App) => Some("raqsh-macos-universal.app.tar.gz"),
-        Some(BundleType::Deb) => Some("raqsh-linux-x86_64.deb"),
-        Some(BundleType::Rpm) => Some("raqsh-linux-x86_64.rpm"),
+        Some(bundle @ (BundleType::Deb | BundleType::Rpm)) => {
+            // The user archive has the same binaries as the DEB. Only a system
+            // installation should hand updates to the native package manager.
+            let executable = std::env::current_exe().ok()?;
+            if executable.parent()? != std::path::Path::new("/usr/bin") {
+                return None;
+            }
+            Some(if bundle == BundleType::Deb {
+                "raqsh-linux-x86_64.deb"
+            } else {
+                "raqsh-linux-x86_64.rpm"
+            })
+        }
         _ => None,
     }
 }

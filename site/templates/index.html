@@ -1,7 +1,8 @@
 {{ define "index" }}{{ template "base" . }}{{ end }}
 {{ define "content" }}
 {{ $downloads := .Data.downloads }}
-{{ $installer := printf "%s/download/%s" $downloads.releases $downloads.installer }}
+{{ $installer := absURL $downloads.installer }}
+{{ $checksum := printf "%s/download/%s" $downloads.releases $downloads.checksums }}
 {{ $license := printf "%s/blob/main/LICENSE" $downloads.source }}
 {{ $example := asset "examples/raqsh-release-board.raqsh" }}
 <main id="main" tabindex="-1">
@@ -158,22 +159,12 @@
     <div id="install" class="wrap">
       <div class="section-intro">
         <h2 id="download-title">Get Raqsh for your desktop.</h2>
-        <p class="lede">Choose the noncommercial package for your operating system. The DEB supports Ubuntu 24.04 or later and Debian 13 or later.</p>
+        <p class="lede">Install the free noncommercial edition on macOS or <span class="platform-name">x86-64 Linux</span>. <a href="#package-downloads">Browse packages</a></p>
       </div>
-      <ul class="package-list">
-        {{ range $downloads.packages }}
-        <li class="package">
-          <h3>{{ .title }}</h3>
-          <p>{{ .architecture }}</p>
-          <a class="button button-primary" href="{{ $downloads.releases }}/download/{{ .file }}" aria-label="Download {{ .format }} for {{ .title }}">Download {{ .format }}</a>
-        </li>
-        {{ end }}
-      </ul>
-
       <div class="install-secondary">
         <div class="terminal" data-installer>
-          <h3>Install via terminal</h3>
-          <p>The installer checks the package against the release checksum. A matching checksum verifies package integrity. Trust in the publisher requires separate verification.</p>
+          <h3>Install for your account</h3>
+          <p>The installer verifies the release checksum and installs to <code>~/Applications</code> on macOS or <code>~/.local</code> on Linux. Run it as your regular user.</p>
           <div class="install-box">
             <div class="install-tools" hidden>
               <div class="install-methods" role="group" aria-label="Install method">
@@ -186,23 +177,54 @@
             <pre data-command="curl"><code>curl -fsSL {{ $installer }} | sh</code></pre>
             <pre data-command="wget"><code>wget --https-only -qO- {{ $installer }} | sh</code></pre>
           </div>
+          <div class="install-script">
+            <a class="button button-secondary" href="{{ relURL $downloads.installer }}" download="install.sh">Download install.sh</a>
+            <p>Run <code>sh ./install.sh</code> after saving it.</p>
+          </div>
         </div>
 
         <div class="install-help">
+          <details id="linux-user-install" open>
+            <summary>Linux without sudo</summary>
+            <div class="disclosure-body">
+              <p>The installer adds Raqsh to your app menu and puts the command in <code>~/.local/bin</code>. The machine needs GTK 3 and WebKitGTK 4.1.</p>
+              {{ if $downloads.linux_archive }}
+              <p><a href="{{ $downloads.releases }}/download/{{ $downloads.linux_archive }}">Download Linux archive (.tar.gz)</a>, verify it against <a href="{{ $checksum }}">SHA256SUMS</a>, and extract it. Run <code>./raqsh/bin/raqsh</code> to launch it directly.</p>
+              {{ else }}
+              <p>For releases that ship only DEB and RPM, the installer extracts a package into your home directory. You can also <a href="{{ $downloads.source }}/blob/main/docs/linux-install.md#extract-an-older-deb-or-rpm">extract a downloaded package manually</a>.</p>
+              {{ end }}
+              <p>For a system-wide install on Linux, use <code>sh ./install.sh --system</code>.</p>
+            </div>
+          </details>
           <details id="macos-first-launch">
             <summary>macOS first launch</summary>
             <div class="disclosure-body">
               <p>Unzip the download and move Raqsh to Applications. The app is ad hoc signed, and Gatekeeper may block it because Apple hasn’t notarized it.</p>
-              <p>If you downloaded the ZIP manually, verify it against <a href="{{ $downloads.releases }}/download/{{ $downloads.checksums }}">SHA256SUMS</a> from the same release before removing quarantine. The shell installer verifies the download and installs Raqsh in <code>~/Applications</code>.</p>
+              <p>If you downloaded the ZIP manually, verify it against <a href="{{ $checksum }}">SHA256SUMS</a> from the same release before removing quarantine. The shell installer verifies the download and installs Raqsh in <code>~/Applications</code>.</p>
               <p>If Gatekeeper blocks the verified app, type <code>xattr -dr com.apple.quarantine</code> followed by a space in Terminal. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return.</p>
             </div>
           </details>
-          <ul class="resource-links">
-            <li><a href="{{ $downloads.releases }}">Release notes and assets</a></li>
-            <li><a href="{{ $license }}">PolyForm Noncommercial license</a></li>
-            <li><a href="{{ $example }}" download>Download example board</a></li>
-          </ul>
         </div>
+      </div>
+
+      <div id="package-downloads" class="download-packages">
+        <h3>Download a package</h3>
+        <p>Unzip the macOS download or use the DEB and RPM for system-wide Linux installation.</p>
+        <ul class="package-list">
+          {{ range $downloads.packages }}
+          <li class="package">
+            <h4>{{ .title }}</h4>
+            <p>{{ .architecture }}</p>
+            <a class="button button-secondary" href="{{ $downloads.releases }}/download/{{ .file }}" aria-label="Download {{ .format }} for {{ .title }}">Download {{ .format }}</a>
+          </li>
+          {{ end }}
+        </ul>
+        <ul class="resource-links download-links">
+          <li><a href="{{ $checksum }}">SHA256SUMS</a></li>
+          <li><a href="{{ $downloads.releases }}">Release notes and assets</a></li>
+          <li><a href="{{ $license }}">PolyForm Noncommercial license</a></li>
+          <li><a href="{{ $example }}" download>Download example board</a></li>
+        </ul>
       </div>
     </div>
   </section>

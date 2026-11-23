@@ -17,7 +17,7 @@ Raqsh is a local-first whiteboard for planning software work on macOS and Linux.
 - **Noncommercial edition.** Free for personal use and other uses permitted by the public licence. [Download the free edition](https://github.com/MohamedElashri/raqsh/releases/latest)
 - **Commercial edition.** **$10 USD once per person** for use on up to five computers they own, across macOS and Linux. Each user needs their own licence. [Coming to Ko-fi](https://melashri.net/raqsh/#licensing)
 
-Both editions include the same features. [Installation and system requirements](https://melashri.net/raqsh/#download)
+Both editions include the same features. [Installation and system requirements](https://melashri.net/raqsh/#download) · [Install on Linux without sudo](docs/linux-install.md)
 
 For volume licensing, email [mail@elashri.com](mailto:mail@elashri.com).
 

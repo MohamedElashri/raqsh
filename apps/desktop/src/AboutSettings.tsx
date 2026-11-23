@@ -48,7 +48,7 @@ export function AboutSettings({ onClose, onBack }: { onClose: () => void; onBack
   const action = edition.publicUpdates && info && info.stage !== "disabled" ? actions[info.stage] : undefined;
   const messages: Record<Stage, string> = {
     disabled: edition.publicUpdates
-      ? "Install a signed release of Raqsh to get in-app updates."
+      ? "Get updates for this build from Release notes. In-app updates require a supported signed release package."
       : "Download commercial updates from your Ko-fi order.",
     idle: "Raqsh contacts GitHub when you check for or download an update.",
     current: "Raqsh is up to date.",

@@ -2,6 +2,7 @@ releases = "https://github.com/MohamedElashri/raqsh/releases/latest"
 source = "https://github.com/MohamedElashri/raqsh"
 installer = "install.sh"
 checksums = "SHA256SUMS"
+linux_archive = ""
 commercial_price = "$10"
 commercial_product = ""
 commercial_terms = ""
@@ -14,12 +15,12 @@ file = "raqsh-macos-universal.zip"
 
 [[packages]]
 title = "Ubuntu / Debian"
-architecture = "Linux x86-64"
+architecture = "x86-64 · Ubuntu 24.04+ / Debian 13+"
 format = "DEB"
 file = "raqsh-linux-x86_64.deb"
 
 [[packages]]
 title = "Fedora"
-architecture = "Linux x86-64"
+architecture = "x86-64"
 format = "RPM"
 file = "raqsh-linux-x86_64.rpm"

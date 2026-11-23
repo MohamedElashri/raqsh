@@ -3,12 +3,11 @@
 Build and preview with Nida 0.8.5 or newer from the repository root.
 
 ```sh
-nida check site
-nida build site
-nida serve site --base-url http://127.0.0.1:1702/
+sh site/build.sh --base-url http://127.0.0.1:1702/
+python3 -m http.server 1702 --directory site/public
 ```
 
-The static output is in `site/public/`. For a deploy under a subdirectory, pass the full URL with `nida build site --base-url URL`.
+The static output is in `site/public/`. The build copies the repository’s installer into that directory. Use `sh site/build.sh` for the production URL configured in `config.toml`.
 
 The screenshots show `static/examples/raqsh-release-board.raqsh` open in the native macOS app during a live Codex pairing. The cropped images highlight queued feedback and the acknowledged task update. Each links to the full app screenshot. Open the example with **Import board** in Raqsh.
 
@@ -24,3 +23,7 @@ The pricing section uses the amount in `data/downloads.toml`. It shows
 “Coming to Ko-fi” until both `commercial_product` and `commercial_terms`
 contain the live product and approved versioned terms URLs. Keep the
 `#licensing` section ID for links from the desktop app.
+
+## Linux downloads
+
+The website installer defaults to a user install and checks release assets against `SHA256SUMS`. Set `linux_archive` in `data/downloads.toml` to `raqsh-linux-x86_64.tar.gz` once the latest public release includes that file. The download page links to the current DEB, RPM and macOS ZIP while the archive link is pending.

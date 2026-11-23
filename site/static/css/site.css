@@ -239,6 +239,8 @@ section[id], h2[id], #install, #macos-first-launch { scroll-margin-top: 1.5rem; 
 .pairing-skill { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
 
 #download-title { max-width: none; }
+.platform-name, .install-help code { white-space: nowrap; }
+#package-downloads { scroll-margin-top: 1.5rem; }
 .package-list { list-style: ""; }
 .package {
   display: flex;
@@ -255,9 +257,14 @@ section[id], h2[id], #install, #macos-first-launch { scroll-margin-top: 1.5rem; 
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
   gap: 1.5rem clamp(1.5rem, 4vw, 3.5rem);
-  margin-top: clamp(2rem, 5vw, 3.75rem);
 }
 .terminal > p { max-width: 58ch; margin-block: .5rem 1rem; color: var(--muted); }
+.install-script { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin-top: 1rem; }
+.install-script p, .download-packages > p { color: var(--muted); }
+.download-packages { margin-top: clamp(2rem, 5vw, 3.75rem); }
+.download-packages > p { margin-block: .5rem 1.25rem; }
+.package h4 { margin: 0 0 .5rem; font-size: 1.125rem; }
+.download-links { display: flex; flex-wrap: wrap; column-gap: 1.25rem; }
 .install-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .install-tools {
   display: flex;
