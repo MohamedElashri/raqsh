@@ -2,6 +2,9 @@ releases = "https://github.com/MohamedElashri/raqsh/releases/latest"
 source = "https://github.com/MohamedElashri/raqsh"
 installer = "install.sh"
 checksums = "SHA256SUMS"
+commercial_price = "$10"
+commercial_product = ""
+commercial_terms = ""
 
 [[packages]]
 title = "macOS"
