@@ -14,8 +14,8 @@
       <div class="hero-summary">
         <p class="lede">Review task dependencies, sketch changes, and send feedback to Codex or Claude Code from the same board.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="#download">Download Raqsh</a>
-          <a class="button button-secondary" href="{{ $downloads.source }}">View on GitHub</a>
+          <a class="button button-primary" href="#download">Download free edition</a>
+          <a class="button button-secondary" href="#pricing">See pricing</a>
         </div>
         <p class="platforms">macOS (Apple silicon + Intel) · Ubuntu / Debian · Fedora</p>
       </div>
@@ -122,11 +122,43 @@
     </div>
   </section>
 
+  <section id="licensing" class="section tinted pricing" aria-labelledby="pricing">
+    <div class="wrap">
+      <div class="section-intro section-split">
+        <h2 id="pricing">Pricing</h2>
+        <p class="lede">Both editions include the same board and agent features on macOS and Linux.</p>
+      </div>
+      <ul class="pricing-options">
+        <li class="price-card">
+          <h3>Personal and noncommercial</h3>
+          <p class="price"><strong>Free</strong></p>
+          <p class="price-detail">For personal and other uses permitted by the <a href="{{ $license }}">PolyForm Noncommercial License 1.0.0</a>.</p>
+          <div class="price-action">
+            <a class="button button-secondary" href="#download">Download free edition</a>
+          </div>
+        </li>
+        <li class="price-card price-card-commercial">
+          <h3>Commercial</h3>
+          <p class="price"><strong>{{ $downloads.commercial_price }}</strong> <span>USD once per person</span></p>
+          <p class="price-detail">For commercial use on up to five computers you own. Each user needs their own license.</p>
+          <div class="price-action">
+            {{ if and $downloads.commercial_product $downloads.commercial_terms }}
+            <a class="button button-primary" href="{{ $downloads.commercial_product }}">Buy on Ko-fi</a>
+            <a href="{{ $downloads.commercial_terms }}">Commercial license terms</a>
+            {{ else }}
+            <p>Coming to Ko-fi</p>
+            {{ end }}
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
   <section id="download" class="section tinted" aria-labelledby="download-title">
     <div id="install" class="wrap">
       <div class="section-intro">
         <h2 id="download-title">Get Raqsh for your desktop.</h2>
-        <p class="lede">Choose the package for your operating system.</p>
+        <p class="lede">Choose the noncommercial package for your operating system.</p>
       </div>
       <ul class="package-list">
         {{ range $downloads.packages }}
@@ -157,9 +189,9 @@
         </div>
 
         <div class="install-help">
-          <details>
+          <details id="macos-first-launch">
             <summary>macOS first launch</summary>
-            <div id="macos-first-launch" class="disclosure-body">
+            <div class="disclosure-body">
               <p>Unzip the download and move Raqsh to Applications. The app is ad hoc signed, and Gatekeeper may block it because Apple hasn’t notarized it.</p>
               <p>If you downloaded the ZIP manually, verify it against <a href="{{ $downloads.releases }}/download/{{ $downloads.checksums }}">SHA256SUMS</a> from the same release before removing quarantine. The shell installer verifies the download and installs Raqsh in <code>~/Applications</code>.</p>
               <p>If Gatekeeper blocks the verified app, type <code>xattr -dr com.apple.quarantine</code> followed by a space in Terminal. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return.</p>
@@ -197,7 +229,7 @@
         </details>
         <details>
           <summary>Can I use Raqsh commercially?</summary>
-          <p class="disclosure-body">The <a href="{{ $license }}">PolyForm Noncommercial License 1.0.0</a> permits personal and other noncommercial uses under its terms. Commercial use outside those terms requires a separate license.</p>
+          <p class="disclosure-body">The <a href="{{ $license }}">PolyForm Noncommercial License 1.0.0</a> permits personal and other noncommercial uses under its terms. Commercial use outside those terms requires a separate license. See <a href="#pricing">pricing and availability</a>.</p>
         </details>
       </div>
     </div>
