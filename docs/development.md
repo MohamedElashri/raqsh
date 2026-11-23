@@ -95,3 +95,5 @@ The check uses a disposable board and exercises keyboard shortcuts, grouped poin
 3. Download the draft’s packages, verify `SHA256SUMS`, and smoke-test the installers. Publish the draft after those checks pass.
 
 Release builds embed the updater public key. The workflow signs the macOS, Debian, and RPM update packages against the release version and publishes a `latest.json` manifest to GitHub Releases. The download and manifest must be publicly reachable by the app. On Linux, installation may request system authorization. Local builds without the updater key show version information in About.
+
+The public release workflow and shell installer distribute the noncommercial edition. The build generates the edition label, license resource and updater configuration together from the edition selected in `branding/edition.json`. The commercial release uses the same app and package identities and delivers updates through Ko-fi.

@@ -17,7 +17,7 @@ cargo build --release --locked --target "$triple" -p raqsh -p raqsh-mcp \
   --features raqsh/custom-protocol,raqsh/macos-live-test
 python3 bench/scripts/macos-live.py "$directory/$triple/release/raqsh" \
   "$directory/$triple/release/raqsh-mcp" "$@"
-if (( $# == 0 )); then
+if (( $# == 0 )) && [[ $(<apps/desktop/src-tauri/generated/edition) == noncommercial ]]; then
   python3 bench/scripts/macos-updater.py "$directory/$triple/release/raqsh" \
     "$directory/$triple/release/raqsh-mcp"
 fi

@@ -27,9 +27,8 @@
   },
   "bundle": {
     "active": true,
-    "license": "PolyForm-Noncommercial-1.0.0",
     "resources": {
-      "../../../LICENSE": "licenses/Raqsh-LICENSE.txt",
+      "generated/Raqsh-LICENSE.txt": "licenses/Raqsh-LICENSE.txt",
       "licenses/Excalidraw-MIT.txt": "licenses/Excalidraw-MIT.txt",
       "licenses/Cascadia-OFL.txt": "licenses/Cascadia-OFL.txt",
       "licenses/ComicShanns-MIT.txt": "licenses/ComicShanns-MIT.txt",

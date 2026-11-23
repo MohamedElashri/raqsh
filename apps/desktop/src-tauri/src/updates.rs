@@ -10,7 +10,15 @@ use tokio::sync::Mutex;
 const RELEASES: &str = "https://github.com/MohamedElashri/raqsh/releases/download";
 const PUBLIC_KEY: Option<&str> = option_env!("RAQSH_UPDATER_PUBLIC_KEY");
 
+fn ensure_public_updates() -> Result<(), String> {
+    match include_str!("../generated/edition") {
+        "noncommercial" => Ok(()),
+        _ => Err("Commercial edition updates are available from your Ko-fi order.".into()),
+    }
+}
+
 fn public_key() -> Option<String> {
+    ensure_public_updates().ok()?;
     #[cfg(all(target_os = "macos", feature = "macos-live-test"))]
     if fixture_origin().is_some() {
         return std::env::var("RAQSH_TEST_UPDATE_KEY").ok();
@@ -90,6 +98,7 @@ pub async fn check_update(
     app: AppHandle,
     updates: State<'_, Updates>,
 ) -> Result<UpdateInfo, String> {
+    ensure_public_updates()?;
     let mut session = updates
         .0
         .try_lock()
@@ -152,6 +161,7 @@ pub async fn download_update(
     app: AppHandle,
     updates: State<'_, Updates>,
 ) -> Result<UpdateInfo, String> {
+    ensure_public_updates()?;
     let mut session = updates
         .0
         .try_lock()
@@ -172,6 +182,7 @@ pub async fn install_update(
     app: AppHandle,
     updates: State<'_, Updates>,
 ) -> Result<UpdateInfo, String> {
+    ensure_public_updates()?;
     let mut session = updates
         .0
         .try_lock()
@@ -191,6 +202,7 @@ pub async fn install_update(
 
 #[tauri::command]
 pub async fn restart_updated(app: AppHandle, updates: State<'_, Updates>) -> Result<(), String> {
+    ensure_public_updates()?;
     if !matches!(
         *updates
             .0

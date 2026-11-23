@@ -59,6 +59,8 @@ textarea { padding: 7px 9px; }
 .settings-link { margin-block-start: auto; padding-block: 9px; }
 .app-mark { display: flex; gap: 10px; align-items: center; margin: 2px 4px 28px; }
 .app-mark h1 { font-size: 1.15rem; margin: 0; letter-spacing: -0.035em; }
+.edition-label { color: var(--muted); font-size: .8rem; margin: 2px 0 0; }
+.about-license-summary { margin-block: 0 12px; }
 .library-heading, .library-actions, .board-row, .dialog-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .library-heading { justify-content: space-between; margin-bottom: 14px; }
 .library-sidebar h2 { font-size: .83rem; color: var(--muted); margin: 0; }

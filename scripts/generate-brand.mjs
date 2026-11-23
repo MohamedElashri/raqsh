@@ -28,11 +28,34 @@ function readBrand(sources) {
   return { displayName, tagline, accent };
 }
 
+export function readEdition(sources) {
+  const { id } = JSON.parse(readFileSync(join(sources, "edition.json"), "utf8"));
+  if (id !== "noncommercial" && id !== "commercial") {
+    throw new Error("Edition must be noncommercial or commercial.");
+  }
+  const commercial = id === "commercial";
+  const licensePath = commercial ? join(sources, "COMMERCIAL-LICENSE.txt") : join(root, "LICENSE");
+  const license = readFileSync(licensePath, "utf8");
+  if (!license.trim()) throw new Error("The edition license is empty.");
+  return {
+    id,
+    label: commercial ? "Commercial edition" : "Noncommercial edition",
+    summary: commercial ? "Licensed for commercial use." : "Free for personal and other permitted noncommercial use.",
+    licenseTitle: commercial ? "Raqsh Commercial License" : "PolyForm Noncommercial License 1.0.0",
+    packageLicense: commercial ? "LicenseRef-Raqsh-Commercial" : "PolyForm-Noncommercial-1.0.0",
+    publicUpdates: !commercial,
+    license,
+  };
+}
+
 export async function generateBrand(sources = join(root, "branding"), output = desktop) {
   const brand = readBrand(sources);
+  const { id, label, summary, licenseTitle, packageLicense, publicUpdates, license } = readEdition(sources);
   const svg = readFileSync(join(sources, "icon.svg"), "utf8").replaceAll('fill="currentColor"', `fill="${brand.accent}"`);
   const tauri = structuredClone(tauriBase);
   tauri.app.windows[0].title = brand.displayName;
+  tauri.bundle.license = packageLicense;
+  if (!publicUpdates) tauri.plugins.updater.endpoints = [];
   const markupEscapes = { "&": "&amp;", "<": "&lt;", ">": "&gt;" };
   const plistName = brand.displayName.replace(/[&<>]/g, (character) => markupEscapes[character]);
   const desktopName = brand.displayName.replaceAll("{{", "\\{{");
@@ -47,6 +70,8 @@ export async function generateBrand(sources = join(root, "branding"), output = d
       writeGenerated(join(output, "src-tauri", icon), readFileSync(join(iconOutput, icon.slice("icons/".length))));
     }
     writeGenerated(join(output, "src-tauri/tauri.conf.json"), `${JSON.stringify(tauri, null, 2)}\n`);
+    writeGenerated(join(output, "src-tauri/generated/Raqsh-LICENSE.txt"), license);
+    writeGenerated(join(output, "src-tauri/generated/edition"), id);
     writeGenerated(join(output, "src-tauri/generated/main.desktop"), `[Desktop Entry]
 Type=Application
 Name=${desktopName}
@@ -67,6 +92,8 @@ Terminal=false
     writeGenerated(join(output, "src/generated/icon.svg"), svg);
     writeGenerated(join(output, "src/generated/brand.css"), `:root { --brand-accent: ${brand.accent}; }\n`);
     writeGenerated(join(output, "src/generated/brand.ts"), `export const brand = ${JSON.stringify(brand, null, 2)} as const;\n`);
+    const edition = { label, summary, licenseTitle, publicUpdates };
+    writeGenerated(join(output, "src/generated/edition.ts"), `export const edition = ${JSON.stringify(edition, null, 2)} as const;\n`);
   } finally {
     rmSync(scratch, { force: true, recursive: true });
   }

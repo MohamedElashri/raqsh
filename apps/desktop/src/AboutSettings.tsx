@@ -4,9 +4,15 @@ import { Icon } from "./Icon";
 import { Modal } from "./Modal";
 import aboutLinks from "./about-links.json";
 import { brand } from "./generated/brand";
+import { edition } from "./generated/edition";
 import icon from "./generated/icon.svg";
-import license from "../../../LICENSE?raw";
+import license from "../src-tauri/generated/Raqsh-LICENSE.txt?raw";
 import excalidrawLicense from "../src-tauri/licenses/Excalidraw-MIT.txt?raw";
+
+const fontNotices = import.meta.glob<string>(
+  ["../src-tauri/licenses/*OFL.txt", "../src-tauri/licenses/ComicShanns-MIT.txt", "./lean/fonts/OFL-*.txt"],
+  { eager: true, query: "?raw", import: "default" },
+);
 
 type Stage = "disabled" | "idle" | "current" | "available" | "downloaded" | "installed";
 type UpdateInfo = { currentVersion: string; version: string | null; stage: Stage };
@@ -39,9 +45,11 @@ export function AboutSettings({ onClose }: { onClose: () => void }) {
     return () => { mounted = false; };
   }, []);
 
-  const action = info && info.stage !== "disabled" ? actions[info.stage] : undefined;
+  const action = edition.publicUpdates && info && info.stage !== "disabled" ? actions[info.stage] : undefined;
   const messages: Record<Stage, string> = {
-    disabled: "Install a signed release of Raqsh to get in-app updates.",
+    disabled: edition.publicUpdates
+      ? "Install a signed release of Raqsh to get in-app updates."
+      : "Download commercial updates from your Ko-fi order.",
     idle: "Raqsh contacts GitHub when you check for or download an update.",
     current: "Raqsh is up to date.",
     available: `Version ${info?.version} is available.`,
@@ -86,10 +94,14 @@ export function AboutSettings({ onClose }: { onClose: () => void }) {
         <div>
           <h3 id="about-heading">{brand.displayName}</h3>
           {info && <p className="about-version">Version {info.currentVersion}</p>}
+          <p className="edition-label">{edition.label}</p>
           <p className="about-tagline">{brand.tagline}</p>
         </div>
       </div>
       <p className="about-description">Raqsh is a local-first whiteboard for planning with coding agents. Map task dependencies, sketch on the Excalidraw canvas, and share board feedback with agents you pair through MCP.</p>
+      <p className="about-license-summary">
+        {edition.summary}{edition.publicUpdates && <> <a href={aboutLinks.licensing} onClick={openLink}>Commercial licensing</a></>}
+      </p>
       <nav className="about-project-links" aria-label="Raqsh project links">
         {projectLinks.map(({ label, url }) => <a key={url} href={url} onClick={openLink}>{label}<Icon name="arrow" size={15} /></a>)}
       </nav>
@@ -103,13 +115,18 @@ export function AboutSettings({ onClose }: { onClose: () => void }) {
     <footer className="about-credits">
       <p>Copyright © 2026 <a href={aboutLinks.author} onClick={openLink}>Mohamed Elashri</a></p>
       <details>
-        <summary>PolyForm Noncommercial License 1.0.0</summary>
+        <summary>{edition.licenseTitle}</summary>
         <pre tabIndex={0} aria-label="Raqsh license">{license}</pre>
       </details>
       <p>Drawing tools powered by <a href={aboutLinks.excalidraw} onClick={openLink}>Excalidraw</a>.</p>
       <details>
         <summary>Excalidraw MIT license</summary>
         <pre tabIndex={0} aria-label="Excalidraw license">{excalidrawLicense}</pre>
+      </details>
+      <details>
+        <summary>Font licenses</summary>
+        <pre tabIndex={0} aria-label="Font licenses">{Object.entries(fontNotices).map(([path, notice]) =>
+          `${path.split("/").at(-1)}\n\n${notice.trim()}`).join("\n\n")}</pre>
       </details>
     </footer>
     {linkError && <p className="library-error" role="alert">{linkError}</p>}
