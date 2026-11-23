@@ -17,3 +17,10 @@ The hero serves 800px and 1600px WebP sizes alongside the full capture. If the c
 ## GitHub Pages
 
 The **Publish website** workflow deploys changes to `site/` from `main` and supports manual runs from the same branch. It verifies the pinned Nida release and uploads `site/public/` to GitHub Pages. The production URL in `config.toml` sets the canonical links and sitemap for `https://melashri.net/raqsh/`.
+
+## Commercial pricing
+
+The pricing section uses the amount in `data/downloads.toml`. It shows
+“Coming to Ko-fi” until both `commercial_product` and `commercial_terms`
+contain the live product and approved versioned terms URLs. Keep the
+`#licensing` section ID for links from the desktop app.
