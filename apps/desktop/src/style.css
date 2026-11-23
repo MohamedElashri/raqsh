@@ -1,6 +1,17 @@
+@font-face {
+  font-family: Assistant;
+  src: url("./lean/fonts/Assistant-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: Nunito;
+  src: url("./lean/fonts/Nunito-Latin.woff2") format("woff2");
+  font-display: swap;
+}
+
 :root {
-  color-scheme: light dark;
-  font: 14px/1.45 system-ui, sans-serif;
+  color-scheme: light;
+  font: var(--interface-size, 14px)/1.45 var(--interface-font, system-ui, sans-serif);
   color: var(--ink);
   background: var(--surface);
   --surface: #e6e5e0;
@@ -140,9 +151,9 @@ dialog p:first-child { margin-top: 0; }
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border: 1px solid color-mix(in srgb, var(--brand-accent) 40%, var(--line));
+  border: 1px solid var(--line);
   border-radius: 7px;
-  background: color-mix(in srgb, var(--brand-accent) 12%, var(--panel));
+  background: color-mix(in srgb, var(--brand-accent) 9%, var(--panel));
   font-weight: 650;
   text-decoration: none;
 }
@@ -199,18 +210,17 @@ dialog p:first-child { margin-top: 0; }
   .app-mark { margin-bottom: 12px; }
   .library-content { padding: 18px; }
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface: #161614;
-    --panel: #262623;
-    --nav: #272724;
-    --canvas: #1f1f1c;
-    --line: #3a3935;
-    --ink: #e4e1d8;
-    --muted: #c6c2b7;
-    --control: #34332f;
-    --accent: #d9d5ca;
-    --danger: #e6b1a5;
-    --shadow: 0 8px 25px #0005, 0 1px 3px #0004;
-  }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #161614;
+  --panel: #262623;
+  --nav: #272724;
+  --canvas: #1f1f1c;
+  --line: #3a3935;
+  --ink: #e4e1d8;
+  --muted: #c6c2b7;
+  --control: #34332f;
+  --accent: #d9d5ca;
+  --danger: #e6b1a5;
+  --shadow: 0 8px 25px #0005, 0 1px 3px #0004;
 }

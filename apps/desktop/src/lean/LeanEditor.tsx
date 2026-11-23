@@ -26,6 +26,8 @@ type Props = {
   opened: OpenBoard;
   registerClose: MutableRefObject<((windowClose: boolean) => void) | undefined>;
   onClose: () => void;
+  dark: boolean;
+  onSettings: (trigger: HTMLElement) => void;
 };
 
 const tools: { id: Exclude<Tool, "connect" | "frame" | "laser">; label: string; key?: string; number?: string }[] = [
@@ -54,7 +56,7 @@ function deadline<T>(task: Promise<T>, timeout: number) {
   });
 }
 
-export default function LeanEditor({ opened, registerClose, onClose }: Props) {
+export default function LeanEditor({ opened, registerClose, onClose, dark, onSettings }: Props) {
   const { scope, board: info, drawing } = opened;
   const [board] = useState<Board>(() => ({ ...drawing, nodes: opened.nodes.sort(ordered), edges: opened.edges }));
   const [nodeIndex] = useState(() => new Map(board.nodes.map((node) => [node.id, node])));
@@ -109,22 +111,16 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
   const mounted = useRef(false);
   const remoteRefresh = useRef<() => void>();
   const [saver] = useState(() => new Checkpoint(scope, info.drawingRevision, drawing, setSaveState));
-  const [dark, setDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
-
   useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const changeTheme = (event: MediaQueryListEvent) => setDark(event.matches);
     const flushHidden = () => {
       if (document.hidden && !locked.current) void saver.flush().catch(() => {});
     };
     document.addEventListener("visibilitychange", flushHidden);
-    media.addEventListener("change", changeTheme);
     registerClose.current = (windowClose) => latestClose.current?.(windowClose);
     return () => {
       registerClose.current = undefined;
       saver.dispose();
       document.removeEventListener("visibilitychange", flushHidden);
-      media.removeEventListener("change", changeTheme);
     };
   }, [registerClose, saver]);
 
@@ -610,6 +606,12 @@ export default function LeanEditor({ opened, registerClose, onClose }: Props) {
               <button type="button" disabled={pending} onClick={() => void prepareExport("svg")}>SVG…</button>
             </div>
           </details>
+          <button type="button" disabled={pending} onClick={() => {
+            const trigger = menu.current?.querySelector("summary");
+            if (!trigger) return;
+            closeDisclosure(menu.current);
+            onSettings(trigger);
+          }}><Icon name="settings" size={16} />Settings</button>
           <button type="button" disabled={pending} onClick={() => leave(false)}><Icon name="back" size={16} />Close board</button>
         </div>
       </details>

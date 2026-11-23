@@ -1,16 +1,20 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { createRoot } from "react-dom/client";
 import { Icon } from "./Icon";
 import { Modal } from "./Modal";
 import { AboutSettings } from "./AboutSettings";
+import { Onboarding } from "./Onboarding";
+import { Settings } from "./Settings";
+import { usePreferences } from "./preferences";
 import { brand } from "./generated/brand";
 import { edition } from "./generated/edition";
 import icon from "./generated/icon.svg";
 import type { BoardInfo, OpenBoard, Page, Project } from "./model";
 import "./generated/brand.css";
 import "./style.css";
+import "./preferences.css";
 
 declare global {
   interface Window { __BOARD_FIXTURE__?: string }
@@ -24,6 +28,7 @@ const Editor = import.meta.env.VITE_TAURI_SHELL === "1" ? null : lazy(async () =
 });
 type CloseEditor = (windowClose: boolean) => void;
 const emptyPage = { items: [], nextOffset: null };
+type Overlay = "settings" | "about" | "welcome" | "tour";
 
 function Workspace() {
   const [projects, setProjects] = useState<Page<Project>>(emptyPage);
@@ -33,7 +38,12 @@ function Workspace() {
   const [action, setAction] = useState<{ kind: "rename" | "delete"; board: BoardInfo }>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [settings, setSettings] = useState(false);
+  const [overlay, setOverlay] = useState<Overlay>();
+  const [initialLibraryEmpty, setInitialLibraryEmpty] = useState(false);
+  const preferences = usePreferences();
+  const tourConsidered = useRef(false);
+  const overlayTrigger = useRef<HTMLElement>();
+  const projectFolder = useRef<HTMLButtonElement>(null);
   const pending = useRef(false);
   const close = useRef<CloseEditor>();
   const active = useRef(false);
@@ -52,6 +62,7 @@ function Workspace() {
   async function loadProjects(offset = 0) {
     const page = await invoke<Page<Project>>("list_projects", { offset });
     setProjects((prior) => offset ? { ...page, items: [...prior.items, ...page.items] } : page);
+    return page;
   }
 
   async function loadBoards(owner: Project, offset = 0) {
@@ -72,11 +83,15 @@ function Workspace() {
   }
 
   useEffect(() => {
-    if (!Editor) return;
     const subscription = listen("desktop-close-requested", () => {
-      if (close.current) close.current(true);
-      else if (!pending.current && !active.current) void invoke("finish_close").catch((error) => setError(String(error)));
+      const finish = () => {
+        if (close.current) close.current(true);
+        else if (!pending.current && !active.current) void invoke("finish_close").catch((error) => setError(String(error)));
+      };
+      if (preferences.work.current) void preferences.work.current.then(finish);
+      else finish();
     });
+    if (!Editor) return () => { void subscription.then((unlisten) => unlisten()); };
     const fixture = window.__BOARD_FIXTURE__;
     void run(async () => {
       if (fixture) {
@@ -87,10 +102,26 @@ function Workspace() {
         const owner = page.items.find((item) => item.id === board.scope.projectId);
         if (owner) setProject(owner);
         showBoard(board);
-      } else await loadProjects();
+      } else setInitialLibraryEmpty((await loadProjects()).items.length === 0);
     });
     return () => { void subscription.then((unlisten) => unlisten()); };
   }, []);
+
+  useEffect(() => {
+    if (!initialLibraryEmpty || !preferences.loaded || busy || tourConsidered.current) return;
+    tourConsidered.current = true;
+    if (!preferences.value.onboardingSeen && !overlay && !project) {
+      overlayTrigger.current = projectFolder.current ?? undefined;
+      setOverlay("welcome");
+    }
+  }, [initialLibraryEmpty, preferences.loaded, preferences.value.onboardingSeen, overlay, project, busy]);
+
+  useLayoutEffect(() => {
+    if (!overlay && overlayTrigger.current) {
+      overlayTrigger.current.focus({ preventScroll: true });
+      overlayTrigger.current = undefined;
+    }
+  }, [overlay]);
 
   useEffect(() => {
     if (!opened && !busy && boardFocus.current) {
@@ -109,12 +140,24 @@ function Workspace() {
   }
 
   function chooseProject(relocate: boolean) {
+    tourConsidered.current = true;
     void run(async () => {
       const chosen = await invoke<Project | null>("choose_project", { relocate: relocate ? project?.id : null });
       if (!chosen) return;
       await loadProjects();
       await selectProject(chosen);
     });
+  }
+
+  function openSettings(trigger: HTMLElement) {
+    tourConsidered.current = true;
+    overlayTrigger.current = trigger;
+    setOverlay("settings");
+  }
+
+  function closeTour() {
+    if (!preferences.value.onboardingSeen) preferences.update({ onboardingSeen: true });
+    setOverlay(overlay === "tour" ? "settings" : undefined);
   }
 
   function submitBoard(event: FormEvent<HTMLFormElement>) {
@@ -135,11 +178,17 @@ function Workspace() {
     });
   }
 
+  const dialog = overlay === "settings" ? <Settings preferences={preferences} onClose={() => setOverlay(undefined)}
+    onTour={() => setOverlay("tour")} onAbout={() => setOverlay("about")} />
+    : overlay === "about" ? <AboutSettings onClose={() => setOverlay(undefined)} onBack={() => setOverlay("settings")} />
+    : overlay ? <Onboarding firstRun={overlay === "welcome"} onClose={closeTour} /> : null;
+
   if (opened && Editor) return (
     <main className="board-workspace">
       <Suspense fallback={<p role="status" className="board-loading">Opening board…</p>}>
-        <Editor opened={opened} registerClose={close} onClose={closeBoard} />
+        <Editor opened={opened} registerClose={close} onClose={closeBoard} dark={preferences.dark} onSettings={openSettings} />
       </Suspense>
+      {dialog}
     </main>
   );
 
@@ -166,9 +215,9 @@ function Workspace() {
                 <Icon name="folder" /><span><strong dir="auto">{item.title}</strong><small title={item.root}>{item.root}</small></span>
               </button>
             </li>)}</ul>
-            {projects.nextOffset !== null && <button className="ui-button" disabled={busy} onClick={() => void run(() => loadProjects(projects.nextOffset!))}>More projects</button>}
+            {projects.nextOffset !== null && <button className="ui-button" disabled={busy} onClick={() => void run(async () => { await loadProjects(projects.nextOffset!); })}>More projects</button>}
           </section>}
-          <button type="button" className="project-link settings-link" disabled={busy} onClick={() => setSettings(true)}>
+          <button type="button" className="project-link settings-link" disabled={busy} onClick={(event) => openSettings(event.currentTarget)}>
             <Icon name="settings" />Settings
           </button>
         </div>
@@ -231,12 +280,12 @@ function Workspace() {
           <Icon name="board" size={42} />
           <h2>{projects.items.length ? "Choose a project" : "Open a project"}</h2>
           <p>{projects.items.length ? "Select a project to open one of its boards." : "Choose the folder or worktree where you want to plan."}</p>
-          <button className="ui-button primary" disabled={busy} onClick={() => chooseProject(false)}><Icon name="folder" />Open project folder…</button>
+          <button ref={projectFolder} className="ui-button primary" disabled={busy} onClick={() => chooseProject(false)}><Icon name="folder" />Open project folder…</button>
         </div>}
         {error && !action && <p className="library-error" role="alert">{error}</p>}
         </div>}
       </div>
-      {settings && <AboutSettings onClose={() => setSettings(false)} />}
+      {dialog}
     </main>
   );
 }

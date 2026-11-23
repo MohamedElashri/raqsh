@@ -6,6 +6,7 @@ mod bridge;
 mod commands;
 mod file_dialog;
 mod mcp_setup;
+mod preferences;
 mod updates;
 
 fn main() -> tauri::Result<()> {
@@ -69,6 +70,8 @@ fn main() -> tauri::Result<()> {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(updates::Updates::default())
         .invoke_handler(tauri::generate_handler![
+            commands::read_preferences,
+            commands::save_preferences,
             commands::list_projects,
             commands::choose_project,
             commands::list_boards,
