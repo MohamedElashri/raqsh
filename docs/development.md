@@ -88,10 +88,12 @@ python3 bench/scripts/linux-editing.py target/release/raqsh
 
 The check uses a disposable board and exercises keyboard shortcuts, grouped pointer gestures, drawing edits, unified history, and reopening the saved board.
 
+Run `python3 bench/scripts/linux-preferences.py target/release/raqsh` to verify first launch, reopening the tour, switching the board theme, and recovering from a settings write failure. Both checks use isolated local data.
+
 ## Releases and updates
 
 1. Generate a Tauri updater key outside the repository with `pnpm exec tauri signer generate --write-keys /path/to/raqsh-updater.key`. Store the private key securely. Set `TAURI_SIGNING_PRIVATE_KEY` and, if used, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` as GitHub repository secrets. Set the contents of the public key file as the `RAQSH_UPDATER_PUBLIC_KEY` repository variable. Keep the same updater key for future releases so installed versions can verify them.
-2. Push a tag `vMAJOR.MINOR.PATCH` whose version matches `apps/desktop/src-tauri/Cargo.toml`, then dispatch **Release** with that tag. The macOS bundle uses ad hoc signing. The README describes the first-launch step for downloaded copies.
+2. Push a tag `vMAJOR.MINOR.PATCH` whose version matches `apps/desktop/src-tauri/Cargo.toml`, then dispatch **Release** with that tag. The macOS bundle uses ad hoc signing. [First launch on macOS](https://melashri.net/raqsh/#macos-first-launch)
 3. Download the draft’s packages, verify `SHA256SUMS`, and smoke-test the installers. Publish the draft after those checks pass.
 
 Release builds embed the updater public key. The workflow signs the macOS, Debian, and RPM update packages against the release version and publishes a `latest.json` manifest to GitHub Releases. The download and manifest must be publicly reachable by the app. On Linux, installation may request system authorization. Local builds without the updater key show version information in About.

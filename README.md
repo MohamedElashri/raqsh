@@ -1,11 +1,9 @@
-<p align="center"><img src="docs/images/raqsh-mark.png" alt="" width="76" height="76"></p>
-<h1 align="center">Raqsh</h1>
-<p align="center">A local-first whiteboard for planning with coding agents.</p>
-<p align="center">
-  <a href="https://github.com/MohamedElashri/raqsh/releases/latest"><img src="https://img.shields.io/github/v/release/MohamedElashri/raqsh" alt="Latest release"></a>
-  <a href="https://ko-fi.com/melashri"><img src="https://img.shields.io/badge/Ko--fi-Leave%20a%20tip-913F51?style=for-the-badge&amp;logo=ko-fi&amp;logoColor=white" alt="Leave a tip on Ko-fi"></a>
-  <a href="https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml"><img src="https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status on main"></a>
-</p>
+# Raqsh
+
+[![Latest release](https://img.shields.io/github/v/release/MohamedElashri/raqsh)](https://github.com/MohamedElashri/raqsh/releases/latest)
+[![CI status on main](https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml)
+
+Raqsh is a local-first whiteboard for planning software work on macOS and Linux. Open a project folder, sketch a change, and share the plan with a coding agent when you need one.
 
 <table>
   <tr>
@@ -14,47 +12,24 @@
   </tr>
 </table>
 
-## Install
+## Editions
 
-Download [the noncommercial edition](https://github.com/MohamedElashri/raqsh/releases/latest) for macOS (Apple silicon or Intel), Ubuntu x86-64 (`.deb`), or Fedora x86-64 (`.rpm`). On macOS, unzip the download and move Raqsh to Applications. The shell installer also installs the noncommercial edition.
+- **Noncommercial edition.** Free for personal use and other uses permitted by the public licence. [Download the free edition](https://github.com/MohamedElashri/raqsh/releases/latest)
+- **Commercial edition.** **$10 USD once per person** for use on up to five computers they own, across macOS and Linux. Each user needs their own licence. [Coming to Ko-fi](https://melashri.net/raqsh/#licensing)
 
-```sh
-curl -fsSL https://github.com/MohamedElashri/raqsh/releases/latest/download/install.sh | sh
-```
+Both editions include the same features. [Installation and system requirements](https://melashri.net/raqsh/#download)
 
-> **First launch on macOS.** Raqsh is ad hoc signed and has no Apple notarization ticket. Gatekeeper may block the downloaded app. If that happens, verify the ZIP against `SHA256SUMS` from the same GitHub release, then remove the quarantine attribute from your installed copy of Raqsh only. [Apple’s explanation of Gatekeeper](https://support.apple.com/en-us/102445)
->
-> In Terminal, type `xattr -dr com.apple.quarantine` followed by a space. Drag your installed copy of Raqsh from Finder into Terminal to add its path, then press Return. The shell installer puts Raqsh in `~/Applications`.
+For volume licensing, email [mail@elashri.com](mailto:mail@elashri.com).
 
-## Get started
+## Features
 
-Open a project folder, create a board, and press **N** on the canvas to add a card. To connect an agent, open **Agents**, choose your client, and approve the pairing. Raqsh can register its bundled MCP helper for some clients and provides configuration for manual setup. Open a new session in your client to use it. [Client setup and compatibility](docs/development.md#coding-harnesses)
+- Draw and write on an Excalidraw canvas. Turn ideas into task cards, link dependencies, and track progress.
+- Pair Codex, Claude Code, or another MCP client to share board context and send feedback from the canvas. [Supported clients and setup](docs/development.md#coding-harnesses)
+- Work offline with boards stored on your device. Export a portable board file, PNG, or SVG.
+- Learn the basics with the quick tour, and adjust the theme, interface font, and text size in Settings. [New in v0.3.0](docs/releases/v0.3.0.md)
 
-Choose **Agents → Raqsh skill** to install optional board workflow guidance in the active project or save the [skill file](skills/raqsh-board/SKILL.md) for manual setup. Start a new client session from that project after installing.
+[Build from source](docs/development.md) · [Report a bug](https://github.com/MohamedElashri/raqsh/issues/new) · [Contribute](https://github.com/MohamedElashri/raqsh/compare) · [Leave a tip on Ko-fi](https://ko-fi.com/melashri)
 
-In the noncommercial edition, check for updates under **Settings → About**. In the commercial edition, get updates from your Ko-fi order. Boards are stored on your device.
+## LICENCE
 
-## Development
-
-Install the dependencies and start the desktop app in development mode.
-
-```sh
-pnpm install --frozen-lockfile
-pnpm desktop:dev
-```
-
-Run `pnpm desktop:build` to build the desktop app and MCP helper. [Prerequisites, tests, and packaging](docs/development.md)
-
-## Contributing
-
-Bug reports, ideas, and fixes are welcome. [Open an issue](https://github.com/MohamedElashri/raqsh/issues/new) or [submit a pull request](https://github.com/MohamedElashri/raqsh/compare).
-
-## Support
-
-Tips are optional and help maintain the project.
-
-**[Leave a tip on Ko-fi](https://ko-fi.com/melashri)**
-
-## License
-
-Raqsh is free for personal and other permitted noncommercial uses under the [PolyForm Noncommercial License 1.0.0](LICENSE). Commercial use outside those terms requires a separate license. The commercial edition has the same features and costs $10 USD once per person, for use on up to five computers they own. Each user needs their own license. [Commercial licensing and availability](https://melashri.net/raqsh/#licensing)
+The public source and downloads are covered by the PolyForm Noncommercial License 1.0.0. Commercial use outside its permissions requires a separate licence. [Read the licence](LICENSE)
