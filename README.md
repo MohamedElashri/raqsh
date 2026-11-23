@@ -3,6 +3,7 @@
 <p align="center">A local-first whiteboard for planning with coding agents.</p>
 <p align="center">
   <a href="https://github.com/MohamedElashri/raqsh/releases/latest"><img src="https://img.shields.io/github/v/release/MohamedElashri/raqsh" alt="Latest release"></a>
+  <a href="https://ko-fi.com/melashri"><img src="https://img.shields.io/badge/Ko--fi-Leave%20a%20tip-913F51?style=for-the-badge&amp;logo=ko-fi&amp;logoColor=white" alt="Leave a tip on Ko-fi"></a>
   <a href="https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml"><img src="https://github.com/MohamedElashri/raqsh/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status on main"></a>
 </p>
 
@@ -47,6 +48,12 @@ Run `pnpm desktop:build` to build the desktop app and MCP helper. [Prerequisites
 ## Contributing
 
 Bug reports, ideas, and fixes are welcome. [Open an issue](https://github.com/MohamedElashri/raqsh/issues/new) or [submit a pull request](https://github.com/MohamedElashri/raqsh/compare).
+
+## Support
+
+Tips are optional and help maintain the project.
+
+**[Leave a tip on Ko-fi](https://ko-fi.com/melashri)**
 
 ## License
 

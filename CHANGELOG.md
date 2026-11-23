@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.3
+
+- Add a visible Ko-fi tip button to the About header and a matching badge to the README.
+
 ## v0.2.2
 
 - Open the Add Card draft when you press N during board sync.
