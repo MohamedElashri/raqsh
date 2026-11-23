@@ -86,7 +86,12 @@ export function AboutSettings({ onClose }: { onClose: () => void }) {
   return <Modal title={`About ${brand.displayName}`} className="about-settings" cancel={() => { if (!running.current) onClose(); }}>
     <header className="settings-header">
       <h2>About</h2>
-      <button type="button" data-initial-focus disabled={busy} onClick={onClose}>Done</button>
+      <div className="about-header-actions">
+        <a className="about-tip" href={aboutLinks.support} onClick={openLink}>
+          <span aria-hidden="true">♥</span> Leave a tip on Ko-fi
+        </a>
+        <button type="button" data-initial-focus disabled={busy} onClick={onClose}>Done</button>
+      </div>
     </header>
     <section aria-labelledby="about-heading">
       <div className="about-brand">

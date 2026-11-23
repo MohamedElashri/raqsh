@@ -133,6 +133,20 @@ dialog p:first-child { margin-top: 0; }
 .about-brand .about-version { margin-top: 4px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .about-brand .about-tagline { margin-top: 7px; font-weight: 600; }
 .about-description { margin: 14px 0; }
+.about-settings .settings-header { position: sticky; top: 0; z-index: 1; background: var(--panel); }
+.about-header-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.about-settings .about-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 40%, var(--line));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--brand-accent) 12%, var(--panel));
+  font-weight: 650;
+  text-decoration: none;
+}
+.about-settings .about-tip:hover { border-color: var(--brand-accent); }
 .about-settings a { color: inherit; text-underline-offset: .17em; }
 .about-settings :is(a, pre):focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .about-project-links {
