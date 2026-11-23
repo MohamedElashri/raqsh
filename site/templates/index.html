@@ -158,7 +158,7 @@
     <div id="install" class="wrap">
       <div class="section-intro">
         <h2 id="download-title">Get Raqsh for your desktop.</h2>
-        <p class="lede">Choose the noncommercial package for your operating system.</p>
+        <p class="lede">Choose the noncommercial package for your operating system. The DEB supports Ubuntu 24.04 or later and Debian 13 or later.</p>
       </div>
       <ul class="package-list">
         {{ range $downloads.packages }}
@@ -212,24 +212,36 @@
       <h2 id="faq-title">Frequently asked questions</h2>
       <div class="faq-list">
         <details>
-          <summary>Which operating systems and processors are supported?</summary>
-          <p class="disclosure-body">Raqsh ships a universal ZIP for Apple silicon and Intel Macs, a DEB for x86-64 Ubuntu and Debian, and an RPM for x86-64 Fedora. For the DEB, use Ubuntu 24.04 or later, or Debian 13 or later.</p>
+          <summary>Is Raqsh free for personal use?</summary>
+          <p class="disclosure-body">Yes. Raqsh is free for personal use and other uses permitted by the PolyForm Noncommercial License 1.0.0. Both editions include the same features. <a href="{{ $license }}">Read the licence</a></p>
         </details>
         <details>
-          <summary>Which coding agents can I pair?</summary>
-          <p class="disclosure-body">Raqsh supports Codex, Claude Code, Pi, OpenCode, GitHub Copilot CLI, Cursor, and other MCP clients. See <a href="#integrations">pairing and skill setup</a> to get started.</p>
+          <summary>When do I need a commercial licence?</summary>
+          <p class="disclosure-body">You need one if you use Raqsh for commercial work outside the permissions of the free licence, such as planning paid client projects or developing a commercial product.</p>
+        </details>
+        <details>
+          <summary>How much does a commercial licence cost?</summary>
+          <p class="disclosure-body">It’s a one-time payment of <strong>{{ $downloads.commercial_price }} USD per person</strong>. Each licence covers one person on up to <strong>five computers they own</strong>, across macOS and Linux. Each user needs their own licence. <a href="#licensing">Pricing and Ko-fi availability</a></p>
+        </details>
+        <details>
+          <summary>Do you offer volume licensing for teams?</summary>
+          <p class="disclosure-body">For multiple users or deployment on company-owned computers, email <a href="mailto:mail@elashri.com">mail@elashri.com</a> with the number of people who need access.</p>
+        </details>
+        <details>
+          <summary>How do I get started?</summary>
+          <p class="disclosure-body">Open a project folder, create a board, and press <strong>N</strong> to add your first card. You can sketch ideas, connect tasks, and track progress on the same board.</p>
+        </details>
+        <details>
+          <summary>Do I need a coding agent?</summary>
+          <p class="disclosure-body">Pairing an agent is optional. To connect Codex, Claude Code, or another supported MCP client, open <strong>Agents</strong> on your board and follow the pairing steps. <a href="#integrations">Supported clients and setup</a></p>
         </details>
         <details>
           <summary>Where are my boards stored?</summary>
-          <p class="disclosure-body">Raqsh stores boards on your device. A paired agent can read the boards you grant it access to through MCP, and its client may send requests to its own provider.</p>
+          <p class="disclosure-body">Raqsh stores boards on your device and works offline without a Raqsh account. If you pair an agent, it can access the boards you grant it access to, and its client may send requests to its own provider.</p>
         </details>
         <details>
-          <summary>Why does macOS show a first-launch warning?</summary>
-          <p class="disclosure-body">Raqsh is ad hoc signed and has no Apple notarization ticket. If Gatekeeper blocks it, follow the <a href="#macos-first-launch">macOS first-launch instructions</a> to verify the download before allowing your installed copy to open.</p>
-        </details>
-        <details>
-          <summary>Can I use Raqsh commercially?</summary>
-          <p class="disclosure-body">The <a href="{{ $license }}">PolyForm Noncommercial License 1.0.0</a> permits personal and other noncommercial uses under its terms. Commercial use outside those terms requires a separate license. See <a href="#pricing">pricing and availability</a>.</p>
+          <summary>Which platforms are supported?</summary>
+          <p class="disclosure-body">Raqsh runs on Apple silicon and Intel Macs, and on x86-64 Ubuntu, Debian, and Fedora. Windows isn’t supported yet, but it’s on the roadmap. <a href="#download">Downloads and installation instructions</a></p>
         </details>
       </div>
     </div>

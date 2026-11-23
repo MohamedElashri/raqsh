@@ -3,6 +3,7 @@
   "description": "Scoped local project and board operations in the main window",
   "windows": ["main"],
   "permissions": [
+    "allow-read-preferences", "allow-save-preferences",
     "allow-list-projects", "allow-choose-project", "allow-list-boards", "allow-create-board",
     "allow-rename-board", "allow-delete-board", "allow-open-board", "allow-close-board",
     "allow-apply-operation", "allow-save-drawing", "allow-import-board", "allow-export-board",

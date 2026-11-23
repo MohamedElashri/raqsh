@@ -1,4 +1,9 @@
-use crate::{board_skill, file_dialog::Save, mcp_setup};
+use crate::{
+    board_skill,
+    file_dialog::Save,
+    mcp_setup,
+    preferences::{self, Preferences},
+};
 use board_domain::{Board, Drawing, Id, Operation, Project};
 use board_store::{OpenBoard, Page, Scope, Store};
 use std::{
@@ -22,6 +27,7 @@ type Reply<T> = Result<T, String>;
 pub struct Desktop {
     queue: SyncSender<Job>,
     library: PathBuf,
+    preferences: tokio::sync::Mutex<()>,
     mcp_setup: tokio::sync::Mutex<()>,
     pub permit_close: AtomicBool,
 }
@@ -41,6 +47,7 @@ impl Desktop {
         Ok(Self {
             queue,
             library,
+            preferences: tokio::sync::Mutex::new(()),
             mcp_setup: tokio::sync::Mutex::new(()),
             permit_close: AtomicBool::new(false),
         })
@@ -64,6 +71,30 @@ impl Desktop {
             .await
             .map_err(|_| "Board storage stopped responding.".to_owned())?
     }
+}
+
+#[tauri::command]
+pub async fn read_preferences(state: State<'_, Desktop>) -> Reply<Preferences> {
+    let _guard = state.preferences.lock().await;
+    let path = state.library.join("preferences.json");
+    tauri::async_runtime::spawn_blocking(move || preferences::read(&path))
+        .await
+        .map_err(|error| error.to_string())?
+        .map_err(|error| format!("Could not load preferences. {error}"))
+}
+
+#[tauri::command]
+pub async fn save_preferences(state: State<'_, Desktop>, preferences: Preferences) -> Reply<()> {
+    let _guard = state.preferences.lock().await;
+    let path = state.library.join("preferences.json");
+    tauri::async_runtime::spawn_blocking(move || -> board_store::Result<()> {
+        let bytes = serde_json::to_vec(&preferences)?;
+        write_local_file(&path, &bytes)?;
+        Ok(())
+    })
+    .await
+    .map_err(|error| error.to_string())?
+    .map_err(|error| format!("Could not save preferences. {error}"))
 }
 
 #[tauri::command]
@@ -233,15 +264,15 @@ async fn save_file(window: WebviewWindow, save: Save, data: Vec<u8>) -> Reply<bo
     let Some(destination) = crate::file_dialog::choose(window, Some(save)).await? else {
         return Ok(false);
     };
-    tauri::async_runtime::spawn_blocking(move || write_export(&destination, &data))
+    tauri::async_runtime::spawn_blocking(move || write_local_file(&destination, &data))
         .await
         .map_err(|error| error.to_string())?
         .map_err(|error| format!("Could not write the export. {error}"))?;
     Ok(true)
 }
 
-fn write_export(destination: &Path, data: &[u8]) -> std::io::Result<()> {
-    let temporary = destination.with_file_name(format!(".raqsh-export-{}.tmp", Id::new_v4()));
+fn write_local_file(destination: &Path, data: &[u8]) -> std::io::Result<()> {
+    let temporary = destination.with_file_name(format!(".raqsh-{}.tmp", Id::new_v4()));
     let mut options = std::fs::OpenOptions::new();
     options.create_new(true).write(true);
     #[cfg(unix)]

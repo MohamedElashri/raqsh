@@ -30,7 +30,7 @@ const projectLinks = [
   { label: "Report an issue", url: aboutLinks.issues },
 ];
 
-export function AboutSettings({ onClose }: { onClose: () => void }) {
+export function AboutSettings({ onClose, onBack }: { onClose: () => void; onBack: () => void }) {
   const [info, setInfo] = useState<UpdateInfo>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -85,7 +85,10 @@ export function AboutSettings({ onClose }: { onClose: () => void }) {
 
   return <Modal title={`About ${brand.displayName}`} className="about-settings" cancel={() => { if (!running.current) onClose(); }}>
     <header className="settings-header">
-      <h2>About</h2>
+      <div className="settings-heading">
+        <button type="button" aria-label="Back to Settings" disabled={busy} onClick={onBack}><Icon name="back" size={16} /></button>
+        <h2>About</h2>
+      </div>
       <div className="about-header-actions">
         <a className="about-tip" href={aboutLinks.support} onClick={openLink}>
           <span aria-hidden="true">♥</span> Leave a tip on Ko-fi

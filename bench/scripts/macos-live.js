@@ -276,7 +276,18 @@
   async function run() {
     const started = performance.now();
     if (mode === "about" || mode === "updater") {
+      (await waitFor(() => button("Skip tour"), "the first-run tour")).click();
       (await waitFor(() => button("Settings"), "the Settings entry")).click();
+      if (mode === "about") {
+        const dark = await waitFor(() => find('input[name="appearance"][value="dark"]:enabled'), "the theme control");
+        dark.click();
+        await waitFor(() => document.documentElement.dataset.theme === "dark", "the dark appearance");
+        find('input[name="appearance"][value="system"]').click();
+        await frame();
+        await waitFor(() => dark.closest("dialog").querySelector("[role=status]")?.textContent === "Saved on this device",
+          "preferences to persist");
+      }
+      (await waitFor(() => button("About"), "the About entry")).click();
       await waitFor(() => find(".about-brand p")?.textContent.startsWith("Version "), "the local app version");
       const state = find(".about-updates [role=status]").textContent;
       const commercial = find(".about-brand .edition-label").textContent === "Commercial edition";

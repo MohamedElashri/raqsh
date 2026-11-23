@@ -3,22 +3,11 @@
   src: url("./fonts/Excalifont-Regular.woff2") format("woff2");
   font-display: swap;
 }
-@font-face {
-  font-family: Assistant;
-  src: url("./fonts/Assistant-Regular.woff2") format("woff2");
-  font-display: swap;
-}
-@font-face {
-  font-family: Nunito;
-  src: url("./fonts/Nunito-Latin.woff2") format("woff2");
-  font-display: swap;
-}
-
 .lean-editor {
   position: relative;
   color: var(--ink);
   background: var(--canvas);
-  font-family: Assistant, system-ui, sans-serif;
+  font-family: var(--board-ui-font, Assistant, system-ui, sans-serif);
   --inset: 16px;
   --tool-size: 36px;
   --toolbar-gap: 4px;
@@ -152,6 +141,7 @@
   background: var(--active-tool);
 }
 .tool-key { position: absolute; right: 4px; bottom: 3px; color: var(--muted); font-size: 9px; line-height: 1; }
+:root[data-shortcut-hints="hide"] .tool-key { display: none; }
 .tool-divider { width: 1px; height: 24px; margin-inline: 4px; background: var(--line); }
 .more-tools { position: relative; }
 
@@ -162,12 +152,12 @@
   gap: 8px;
   height: 38px;
   padding: 0 10px;
-  font-size: 13px;
+  font-size: .93rem;
 }
 .lean-view { bottom: var(--inset); left: var(--inset); display: flex; gap: 10px; }
 .lean-zoom, .lean-history { display: flex; overflow: hidden; }
 .lean-view button { width: 36px; height: 36px; }
-.lean-zoom button:nth-child(2) { width: 60px; font: 600 13px Assistant, system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.lean-zoom button:nth-child(2) { width: 60px; font: 600 .93rem var(--board-ui-font, Assistant, system-ui, sans-serif); font-variant-numeric: tabular-nums; }
 .lean-help { bottom: var(--inset); right: var(--inset); }
 .lean-presence {
   bottom: 18px;
@@ -181,7 +171,7 @@
   background: var(--pill);
   color: var(--pill-text);
   padding: 6px 13px 6px 11px;
-  font: 400 16px/1 Excalifont, Nunito, system-ui, sans-serif;
+  font: 400 1.14rem/1 var(--board-ui-font, Excalifont, Nunito, system-ui, sans-serif);
 }
 .lean-presence > span { width: 8px; height: 8px; border: 1px solid currentColor; border-radius: 50%; }
 .lean-presence[aria-expanded="true"], .lean-presence:hover { color: var(--ink); }
@@ -273,7 +263,7 @@
   transform: translateX(-50%);
   max-width: min(430px, calc(100% - 32px));
   color: var(--muted);
-  font: 600 13px/1.35 Nunito, system-ui, sans-serif;
+  font: 600 .93rem/1.35 var(--board-ui-font, Nunito, system-ui, sans-serif);
   overflow-wrap: anywhere;
 }
 .lean-status[data-visible="true"] { display: grid; gap: 4px; padding: 7px 14px; }
@@ -293,22 +283,20 @@
   .lean-status { bottom: 98px; }
   .board-shortcuts { grid-template-columns: 1fr; }
 }
-@media (prefers-color-scheme: dark) {
-  .lean-editor {
-    --toolbar-surface: #262623;
-    --toolbar-line: #141413;
-    --control-surface: #272724;
-    --active-tool: #3a3935;
-    --card: #292925;
-    --card-badge: #33322e;
-    --card-done: #262623;
-    --card-doing: #3b3127;
-    --card-blocked: #3a2a27;
-    --status-marker: #8c8981;
-    --working: #d6a366;
-    --pill: #242421;
-    --pill-text: #8c8981;
-  }
+:root[data-theme="dark"] .lean-editor {
+  --toolbar-surface: #262623;
+  --toolbar-line: #141413;
+  --control-surface: #272724;
+  --active-tool: #3a3935;
+  --card: #292925;
+  --card-badge: #33322e;
+  --card-done: #262623;
+  --card-doing: #3b3127;
+  --card-blocked: #3a2a27;
+  --status-marker: #8c8981;
+  --working: #d6a366;
+  --pill: #242421;
+  --pill-text: #8c8981;
 }
 
 .excalidraw-surface {
@@ -323,7 +311,7 @@
   --zIndex-wysiwyg: 2;
   --zIndex-canvasButtons: 2;
   --zIndex-layerUI: 2;
-  --ui-font: Assistant, system-ui, sans-serif;
+  --ui-font: var(--board-ui-font, Assistant, system-ui, sans-serif);
   --color-primary: var(--focus);
   --color-primary-darker: var(--focus);
   --color-selection: var(--focus);
