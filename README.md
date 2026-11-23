@@ -15,7 +15,7 @@
 
 ## Install
 
-Download [the latest release](https://github.com/MohamedElashri/raqsh/releases/latest) for macOS (Apple silicon or Intel), Ubuntu x86-64 (`.deb`), or Fedora x86-64 (`.rpm`). On macOS, unzip the download and move Raqsh to Applications.
+Download [the noncommercial edition](https://github.com/MohamedElashri/raqsh/releases/latest) for macOS (Apple silicon or Intel), Ubuntu x86-64 (`.deb`), or Fedora x86-64 (`.rpm`). On macOS, unzip the download and move Raqsh to Applications. The shell installer also installs the noncommercial edition.
 
 ```sh
 curl -fsSL https://github.com/MohamedElashri/raqsh/releases/latest/download/install.sh | sh
@@ -31,7 +31,7 @@ Open a project folder, create a board, and press **N** on the canvas to add a ca
 
 Choose **Agents → Raqsh skill** to install optional board workflow guidance in the active project or save the [skill file](skills/raqsh-board/SKILL.md) for manual setup. Start a new client session from that project after installing.
 
-Check for updates under **Settings → About**. Checking, downloading, installing, and restarting are each started from the app. Boards are stored on your device.
+In the noncommercial edition, check for updates under **Settings → About**. In the commercial edition, get updates from your Ko-fi order. Boards are stored on your device.
 
 ## Development
 
@@ -50,4 +50,4 @@ Bug reports, ideas, and fixes are welcome. [Open an issue](https://github.com/Mo
 
 ## License
 
-Raqsh is free for personal and noncommercial community use under the [PolyForm Noncommercial License 1.0.0](LICENSE), with a separate license required for commercial use outside those terms.
+Raqsh is free for personal and other permitted noncommercial uses under the [PolyForm Noncommercial License 1.0.0](LICENSE). Commercial use outside those terms requires a separate license. The commercial edition has the same features and costs $10 USD once per person, for use on up to five computers they own. Each user needs their own license. [Commercial licensing and availability](https://melashri.net/raqsh/#licensing)

@@ -6,6 +6,7 @@ import { Icon } from "./Icon";
 import { Modal } from "./Modal";
 import { AboutSettings } from "./AboutSettings";
 import { brand } from "./generated/brand";
+import { edition } from "./generated/edition";
 import icon from "./generated/icon.svg";
 import type { BoardInfo, OpenBoard, Page, Project } from "./model";
 import "./generated/brand.css";
@@ -146,7 +147,13 @@ function Workspace() {
     <main className="workspace">
       <div className="library">
         <div className="library-sidebar">
-          <header className="app-mark"><img src={icon} width="32" height="32" alt="" /><h1>{brand.displayName}</h1></header>
+          <header className="app-mark">
+            <img src={icon} width="32" height="32" alt="" />
+            <div>
+              <h1>{brand.displayName}</h1>
+              <p className="edition-label">{edition.label}</p>
+            </div>
+          </header>
           {Editor && <section aria-label="Projects">
             <div className="library-heading"><h2>Projects</h2>
               <button className="ui-button" disabled={busy} onClick={() => chooseProject(false)} title="Open folder…">

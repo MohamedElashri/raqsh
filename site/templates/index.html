@@ -14,8 +14,12 @@
       <div class="hero-summary">
         <p class="lede">Review task dependencies, sketch changes, and send feedback to Codex or Claude Code from the same board.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="#download">Download Raqsh</a>
-          <a class="button button-secondary" href="{{ $downloads.source }}">View on GitHub</a>
+          <a class="button button-primary" href="#download">Download free edition</a>
+          {{ if $downloads.commercial_product }}
+          <a class="button button-secondary" href="{{ $downloads.commercial_product }}">Buy a commercial license</a>
+          {{ else }}
+          <a class="button button-secondary" href="#licensing">Commercial licensing</a>
+          {{ end }}
         </div>
         <p class="platforms">macOS (Apple silicon + Intel) · Ubuntu / Debian · Fedora</p>
       </div>
@@ -125,8 +129,8 @@
   <section id="download" class="section tinted" aria-labelledby="download-title">
     <div id="install" class="wrap">
       <div class="section-intro">
-        <h2 id="download-title">Get Raqsh for your desktop.</h2>
-        <p class="lede">Choose the package for your operating system.</p>
+        <h2 id="download-title">Download the noncommercial edition.</h2>
+        <p class="lede">Free for personal and other permitted noncommercial use. Choose the package for your operating system.</p>
       </div>
       <ul class="package-list">
         {{ range $downloads.packages }}
@@ -175,6 +179,32 @@
     </div>
   </section>
 
+  <section id="licensing" class="section wrap" aria-labelledby="licensing-title">
+    <div class="section-intro section-split">
+      <h2 id="licensing-title">Raqsh licenses</h2>
+      <p class="lede">Both editions include the same board and agent features.</p>
+    </div>
+    <ul class="feature-list license-options">
+      <li>
+        <h3>Personal and noncommercial use</h3>
+        <p>Use Raqsh for free under the <a href="{{ $license }}">PolyForm Noncommercial License 1.0.0</a>.</p>
+        <p><a href="#download">Download the free edition</a></p>
+      </li>
+      <li>
+        <h3>Commercial use</h3>
+        <p>A commercial license costs $10 USD once. It covers one person on up to five computers they own. Each user needs their own license.</p>
+        {{ if $downloads.commercial_product }}
+        <p><a href="{{ $downloads.commercial_product }}">Buy a commercial license on Ko-fi</a></p>
+        {{ else }}
+        <p>Ko-fi checkout is coming soon.</p>
+        {{ end }}
+        {{ if $downloads.commercial_terms }}
+        <p><a href="{{ $downloads.commercial_terms }}">Read the commercial license terms</a></p>
+        {{ end }}
+      </li>
+    </ul>
+  </section>
+
   <section class="section wrap faq" aria-labelledby="faq-title">
     <div class="section-split">
       <h2 id="faq-title">Frequently asked questions</h2>
@@ -197,7 +227,7 @@
         </details>
         <details>
           <summary>Can I use Raqsh commercially?</summary>
-          <p class="disclosure-body">The <a href="{{ $license }}">PolyForm Noncommercial License 1.0.0</a> permits personal and other noncommercial uses under its terms. Commercial use outside those terms requires a separate license.</p>
+          <p class="disclosure-body">Commercial use outside the PolyForm terms requires a separate license. See <a href="#licensing">Raqsh licenses</a> for pricing and purchase information.</p>
         </details>
       </div>
     </div>

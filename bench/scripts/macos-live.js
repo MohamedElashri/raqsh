@@ -279,7 +279,9 @@
       (await waitFor(() => button("Settings"), "the Settings entry")).click();
       await waitFor(() => find(".about-brand p")?.textContent.startsWith("Version "), "the local app version");
       const state = find(".about-updates [role=status]").textContent;
-      check(state.includes("signed release") || (state.includes("contacts GitHub when you check") && button("Check for updates")),
+      const commercial = find(".about-brand .edition-label").textContent === "Commercial edition";
+      check(commercial ? state.includes("Ko-fi order") && !button("Check for updates")
+        : state.includes("signed release") || (state.includes("contacts GitHub when you check") && button("Check for updates")),
         "About must start in a manual or unavailable update state");
       if (mode === "updater") {
         report("updater-ready");
@@ -307,8 +309,19 @@
       check(website, "About must link to the project website");
       const license = find(".about-credits details");
       license.querySelector("summary").click();
-      check(license.open && license.querySelector("pre").textContent.includes("## Distribution License"),
+      const licenseText = license.querySelector("pre").textContent;
+      check(license.open && licenseText.includes(commercial ? "Raqsh Commercial License" : "## Distribution License"),
         "The bundled Raqsh license must open without a network request");
+      if (commercial) {
+        for (const command of ["check_update", "download_update", "install_update", "restart_updated"]) {
+          const refused = await window.__TAURI_INTERNALS__.invoke(command)
+            .then(() => false, (error) => String(error).includes("Ko-fi order"));
+          check(refused, `${command} must refuse public updates in the commercial edition`);
+        }
+      } else {
+        check(find('.about-license-summary a[href="https://melashri.net/raqsh/#licensing"]'),
+          "The noncommercial edition must link to licensing");
+      }
       const rejected = await window.__TAURI_INTERNALS__.invoke("open_about_link", { url: "https://example.invalid/" })
         .then(() => false, (error) => String(error).includes("unavailable in About"));
       check(rejected, "The About opener must reject unrelated URLs");
