@@ -8,7 +8,7 @@ import type { Board, View } from "./board";
 import { Checkpoint, type SaveState } from "./checkpoint";
 import { boundedOffset, duplicateSelection, geometry, movableBounds, removeSelection } from "./editing";
 import EditorSurface, { blankSelection, countSelection, type BoardSelection, type Tool } from "./EditorSurface";
-import { exportScene, openScene } from "./scene";
+import { cardId, exportScene, openScene } from "./scene";
 import AgentPanel from "./AgentPanel";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
@@ -24,6 +24,7 @@ type HistoryEntry = { changes: Change[]; scene?: ExcalidrawScene };
 type Submission = { operation: Operation; scene?: ExcalidrawScene; history: HistoryAction; selection?: BoardSelection };
 type Props = {
   opened: OpenBoard;
+  fitOnOpen: boolean;
   registerClose: MutableRefObject<((windowClose: boolean) => void) | undefined>;
   onClose: () => void;
   dark: boolean;
@@ -56,7 +57,7 @@ function deadline<T>(task: Promise<T>, timeout: number) {
   });
 }
 
-export default function LeanEditor({ opened, registerClose, onClose, dark, onSettings }: Props) {
+export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, dark, onSettings }: Props) {
   const { scope, board: info, drawing } = opened;
   const [board] = useState<Board>(() => ({ ...drawing, nodes: opened.nodes.sort(ordered), edges: opened.edges }));
   const [nodeIndex] = useState(() => new Map(board.nodes.map((node) => [node.id, node])));
@@ -620,7 +621,16 @@ export default function LeanEditor({ opened, registerClose, onClose, dark, onSet
       <EditorSurface board={board} scene={scene} container={canvas} cardsLayer={cardsLayer} cards={cards} active={active}
         controller={controller} sync={settleScene} selection={selection} view={view} tool={tool} keepTool={keepTool}
         dark={dark} canEdit={canEdit} readOnly={pending || !!edit || keyboardHelp || !!closeFailure}
-        onReady={() => { if (panel.current) panel.current.dataset.editorReady = "true"; }} onView={setZoomPercent} onTool={setTool} onSelection={chooseSelection} onEditCard={editCard} onConnect={(card) => {
+        onReady={() => {
+          const api = controller.current;
+          if (fitOnOpen && api) {
+            // Frame the brief and first row so larger checklists stay legible on open.
+            const firstCards = new Set(board.nodes.slice(0, 4).map((card) => cardId(card.id)));
+            const elements = api.getSceneElements().filter((element) => firstCards.has(element.id));
+            api.scrollToContent(elements, { fitToViewport: true, viewportZoomFactor: .92, maxZoom: 1 });
+          }
+          if (panel.current) panel.current.dataset.editorReady = "true";
+        }} onView={setZoomPercent} onTool={setTool} onSelection={chooseSelection} onEditCard={editCard} onConnect={(card) => {
           selectCard(card);
           connect(card);
         }} onSettle={() => { if (remoteNeeded.current) scheduleRemote(); }} onNotice={setNotice}

@@ -7,6 +7,7 @@ import { Modal } from "./Modal";
 import { AboutSettings } from "./AboutSettings";
 import { Onboarding, onboardingVersion } from "./Onboarding";
 import { Settings } from "./Settings";
+import { TaskBoardDialog } from "./TaskBoardDialog";
 import { usePreferences } from "./preferences";
 import { brand } from "./generated/brand";
 import { edition } from "./generated/edition";
@@ -28,13 +29,13 @@ const Editor = import.meta.env.VITE_TAURI_SHELL === "1" ? null : lazy(async () =
 });
 type CloseEditor = (windowClose: boolean) => void;
 const emptyPage = { items: [], nextOffset: null };
-type Overlay = "settings" | "about" | "welcome" | "tour";
+type Overlay = "settings" | "about" | "welcome" | "tour" | "task";
 
 function Workspace() {
   const [projects, setProjects] = useState<Page<Project>>(emptyPage);
   const [project, setProject] = useState<Project>();
   const [boards, setBoards] = useState<Page<BoardInfo>>(emptyPage);
-  const [opened, setOpened] = useState<OpenBoard>();
+  const [opened, setOpened] = useState<{ board: OpenBoard; fitOnOpen: boolean }>();
   const [action, setAction] = useState<{ kind: "rename" | "delete"; board: BoardInfo }>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -75,10 +76,10 @@ function Workspace() {
     setProject(owner);
   }
 
-  function showBoard(board: OpenBoard) {
+  function showBoard(board: OpenBoard, fitOnOpen = false) {
     active.current = true;
     boardFocus.current = board.board.id;
-    setOpened(board);
+    setOpened({ board, fitOnOpen });
   }
 
   useEffect(() => {
@@ -180,15 +181,32 @@ function Workspace() {
     });
   }
 
+  function createTaskBoard(input: string) {
+    if (!project) return;
+    void run(async () => {
+      const board = await invoke<BoardInfo>("import_board", { project: project.id, input });
+      setOverlay(undefined);
+      try {
+        showBoard(await invoke<OpenBoard>("open_board", { project: project.id, board: board.id }), true);
+      } catch (error) {
+        await loadBoards(project);
+        throw error;
+      }
+    });
+  }
+
   const dialog = overlay === "settings" ? <Settings preferences={preferences} onClose={() => setOverlay(undefined)}
     onTour={() => setOverlay("tour")} onAbout={() => setOverlay("about")} />
     : overlay === "about" ? <AboutSettings onClose={() => setOverlay(undefined)} onBack={() => setOverlay("settings")} />
+    : overlay === "task" && project ? <TaskBoardDialog projectTitle={project.title} busy={busy} error={error}
+      onCreate={createTaskBoard} onClose={() => { setError(""); setOverlay(undefined); }} />
     : overlay ? <Onboarding firstRun={overlay === "welcome"} onClose={closeTour} /> : null;
 
   if (opened && Editor) return (
     <main className="board-workspace">
       <Suspense fallback={<p role="status" className="board-loading">Opening board…</p>}>
-        <Editor opened={opened} registerClose={close} onClose={closeBoard} dark={preferences.dark} onSettings={openSettings} />
+        <Editor opened={opened.board} fitOnOpen={opened.fitOnOpen} registerClose={close} onClose={closeBoard} dark={preferences.dark}
+          onSettings={openSettings} />
       </Suspense>
       {dialog}
     </main>
@@ -234,6 +252,11 @@ function Workspace() {
               <input name="title" aria-label="New board title" placeholder="Board title" required maxLength={256} dir="auto" />
               <button className="ui-button primary" disabled={busy} type="submit"><Icon name="add" size={16} />Create board</button>
             </form>
+            <button className="ui-button task-board-action" disabled={busy} onClick={(event) => {
+              setError("");
+              overlayTrigger.current = event.currentTarget;
+              setOverlay("task");
+            }}><Icon name="connect" size={16} />New from task…</button>
             <button className="ui-button" disabled={busy} onClick={() => importInput.current?.click()}>Import board…</button>
             <input ref={importInput} type="file" accept=".raqsh,application/json" hidden onChange={(event) => {
               const file = event.currentTarget.files?.[0];
@@ -284,7 +307,7 @@ function Workspace() {
           <p>{projects.items.length ? "Select a project to open one of its boards." : "Choose the folder or worktree where you want to plan."}</p>
           <button ref={projectFolder} className="ui-button primary" disabled={busy} onClick={() => chooseProject(false)}><Icon name="folder" />Open project folder…</button>
         </div>}
-        {error && !action && <p className="library-error" role="alert">{error}</p>}
+        {error && !action && overlay !== "task" && <p className="library-error" role="alert">{error}</p>}
         </div>}
       </div>
       {dialog}
