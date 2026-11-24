@@ -55,16 +55,15 @@ fn client_directories() -> Vec<PathBuf> {
         .collect()
 }
 
-fn find_client(harness: &Harness) -> Option<PathBuf> {
+pub(crate) fn find_local_executable(names: &[&str]) -> Option<PathBuf> {
     client_directories()
         .into_iter()
-        .flat_map(|directory| {
-            harness
-                .executables
-                .iter()
-                .map(move |name| directory.join(name))
-        })
+        .flat_map(|directory| names.iter().map(move |name| directory.join(name)))
         .find(|path| executable_file(path))
+}
+
+fn find_client(harness: &Harness) -> Option<PathBuf> {
+    find_local_executable(harness.executables)
 }
 
 pub fn clients() -> Vec<Client> {

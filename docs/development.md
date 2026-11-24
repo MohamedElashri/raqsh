@@ -8,6 +8,12 @@ pnpm test:unit
 pnpm desktop:dev
 ```
 
+## Import a GitHub issue
+
+Install GitHub CLI and sign in with `gh auth login`. In **New from task**, expand **Load a GitHub issue**, paste the issue URL, and choose **Load issue**. **Use issue** fills the title and brief. If the issue has checkboxes, choose **From checklist** to create editable cards. For a long issue, edit the brief to keep the relevant excerpt. Its GitHub source link stays in the resulting Task brief card.
+
+Run `python3 bench/scripts/linux-github-issue.py target/release/raqsh` to exercise the import and its recovery paths with a disposable CLI fixture.
+
 ## Coding harnesses
 
 Choose a client under **Agents** and approve a pairing. For manual setup, merge the generated entry into the file shown in the panel, preserve existing entries, and follow the client's approval flow. Keep generated entries local to your machine. After revoking a manual pairing in Raqsh, remove its named entry from the client's config. Raqsh removes registrations it installed automatically when the client's removal command succeeds.

@@ -39,7 +39,7 @@ export const maxTaskBriefLength = 4096;
 const lineBreak = /\r\n?|\n/;
 const checklistLine = /^ {0,3}(?:[-*+]|\d{1,9}[.)])[ \t]+\[([ xX])\][ \t]+(\S.*)$/;
 
-function shortTitle(text: string) {
+export function shortTitle(text: string) {
   return text.trim().slice(0, maxTaskTitleLength).replace(/[\uD800-\uDBFF]$/, "").trimEnd();
 }
 
