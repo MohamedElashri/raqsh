@@ -16,6 +16,7 @@ import VerificationDialog from "./VerificationDialog";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
+import { SaveBoardTemplate } from "../BoardTemplates";
 import "../editor.css";
 import "./lean.css";
 
@@ -76,6 +77,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
   const [agents, setAgents] = useState(false);
   const [keyboardHelp, setKeyboardHelp] = useState(false);
   const [agentBrief, setAgentBrief] = useState<AgentBrief>();
+  const [savingTemplate, setSavingTemplate] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>({
     message: `Drawing checkpoint ${info.drawingRevision}`,
     failed: false,
@@ -418,6 +420,11 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
     }
   }
 
+  function closeTemplateCapture() {
+    setSavingTemplate(false);
+    requestAnimationFrame(() => menu.current?.querySelector("summary")?.focus());
+  }
+
   function zoom(factor: number) {
     const api = controller.current;
     if (!api || active.current) return;
@@ -546,7 +553,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
   }
 
   function onBoardKey(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp || agentBrief || review) return;
+    if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp || agentBrief || review || savingTemplate) return;
     const target = event.target as HTMLElement;
     if (locked.current || target.closest("input, textarea, select, [contenteditable], .agent-panel")) return;
     const nativeState = controller.current?.getAppState();
@@ -630,6 +637,11 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
             openAgentBrief(trigger);
           }}>Copy agent brief</button>
           <button type="button" disabled={unavailable} onClick={() => { closeDisclosure(menu.current); setReview("summary"); }}>Review summary…</button>
+          <button type="button" disabled={unavailable} onClick={() => {
+            if (active.current) return;
+            closeDisclosure(menu.current);
+            setSavingTemplate(true);
+          }}><Icon name="board" size={16} />Save as template…</button>
           <details className="export-menu"><summary><Icon name="export" size={16} />Export</summary>
             <div>
               <button type="button" disabled={pending} onClick={() => void prepareExport("board")}>Board file…</button>
@@ -823,6 +835,8 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
       {agentBrief && <AgentBriefDialog brief={agentBrief} close={closeAgentBrief} />}
       {review && <VerificationDialog scope={scope} card={review === "summary" ? undefined : review}
         cards={board.nodes} boardTitle={info.title} onClose={() => setReview(undefined)} />}
+      {savingTemplate && <SaveBoardTemplate scope={scope} onClose={closeTemplateCapture}
+        onSaved={() => { setNotice("Template saved."); closeTemplateCapture(); }} />}
       {keyboardHelp && <Modal title="Board shortcuts" cancel={() => setKeyboardHelp(false)}>
         <h2>Board shortcuts</h2>
         <dl className="board-shortcuts">

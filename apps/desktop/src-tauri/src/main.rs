@@ -2,6 +2,7 @@ use std::sync::atomic::Ordering;
 use tauri::{Emitter, Manager, WebviewWindowBuilder, WindowEvent};
 
 mod board_skill;
+mod board_templates;
 mod bridge;
 mod commands;
 mod file_dialog;
@@ -92,6 +93,13 @@ fn main() -> tauri::Result<()> {
             commands::export_preview,
             commands::import_board,
             github_issue::load_github_issue,
+            board_templates::capture_board_template,
+            board_templates::save_board_template,
+            board_templates::list_board_templates,
+            board_templates::read_board_template,
+            board_templates::decode_board_template,
+            board_templates::export_board_template,
+            board_templates::new_board_from_template,
             commands::open_benchmark,
             commands::finish_close,
             commands::open_about_link,

@@ -12,6 +12,7 @@ use std::{
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 pub mod bridge;
+pub mod templates;
 mod verification;
 
 const DB_VERSION: u32 = 2;
@@ -217,6 +218,7 @@ impl Store {
             migration.pragma_update(None, "user_version", DB_VERSION)?;
         }
         migration.execute_batch(verification::SCHEMA)?;
+        migration.execute_batch(include_str!("templates.sql"))?;
         migration.commit()?;
         Ok(Self {
             db,

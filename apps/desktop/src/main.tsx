@@ -8,6 +8,7 @@ import { AboutSettings } from "./AboutSettings";
 import { Onboarding, onboardingVersion } from "./Onboarding";
 import { Settings } from "./Settings";
 import { TaskBoardDialog } from "./TaskBoardDialog";
+import { BoardTemplateLibrary } from "./BoardTemplates";
 import { usePreferences } from "./preferences";
 import { brand } from "./generated/brand";
 import { edition } from "./generated/edition";
@@ -29,7 +30,7 @@ const Editor = import.meta.env.VITE_TAURI_SHELL === "1" ? null : lazy(async () =
 });
 type CloseEditor = (windowClose: boolean) => void;
 const emptyPage = { items: [], nextOffset: null };
-type Overlay = "settings" | "about" | "welcome" | "tour" | "task";
+type Overlay = "settings" | "about" | "welcome" | "tour" | "task" | "templates";
 
 function Workspace() {
   const [projects, setProjects] = useState<Page<Project>>(emptyPage);
@@ -195,11 +196,27 @@ function Workspace() {
     });
   }
 
+  function createTemplateBoard(id: string, title: string) {
+    if (!project) return;
+    void run(async () => {
+      const board = await invoke<BoardInfo>("new_board_from_template", { project: project.id, id, title });
+      setOverlay(undefined);
+      try {
+        showBoard(await invoke<OpenBoard>("open_board", { project: project.id, board: board.id }), true);
+      } catch (error) {
+        await loadBoards(project);
+        throw error;
+      }
+    });
+  }
+
   const dialog = overlay === "settings" ? <Settings preferences={preferences} onClose={() => setOverlay(undefined)}
     onTour={() => setOverlay("tour")} onAbout={() => setOverlay("about")} />
     : overlay === "about" ? <AboutSettings onClose={() => setOverlay(undefined)} onBack={() => setOverlay("settings")} />
     : overlay === "task" && project ? <TaskBoardDialog projectTitle={project.title} busy={busy} error={error}
       onCreate={createTaskBoard} onClose={() => { setError(""); setOverlay(undefined); }} />
+    : overlay === "templates" && project ? <BoardTemplateLibrary projectTitle={project.title} creating={busy} error={error}
+      onCreate={createTemplateBoard} onClose={() => { setError(""); setOverlay(undefined); }} />
     : overlay ? <Onboarding firstRun={overlay === "welcome"} onClose={closeTour} /> : null;
 
   if (opened && Editor) return (
@@ -257,6 +274,11 @@ function Workspace() {
               overlayTrigger.current = event.currentTarget;
               setOverlay("task");
             }}><Icon name="connect" size={16} />New from task…</button>
+            <button className="ui-button" disabled={busy} onClick={(event) => {
+              setError("");
+              overlayTrigger.current = event.currentTarget;
+              setOverlay("templates");
+            }}><Icon name="board" size={16} />Templates…</button>
             <button className="ui-button" disabled={busy} onClick={() => importInput.current?.click()}>Import board…</button>
             <input ref={importInput} type="file" accept=".raqsh,application/json" hidden onChange={(event) => {
               const file = event.currentTarget.files?.[0];
@@ -307,7 +329,7 @@ function Workspace() {
           <p>{projects.items.length ? "Select a project to open one of its boards." : "Choose the folder or worktree where you want to plan."}</p>
           <button ref={projectFolder} className="ui-button primary" disabled={busy} onClick={() => chooseProject(false)}><Icon name="folder" />Open project folder…</button>
         </div>}
-        {error && !action && overlay !== "task" && <p className="library-error" role="alert">{error}</p>}
+        {error && !action && overlay !== "task" && overlay !== "templates" && <p className="library-error" role="alert">{error}</p>}
         </div>}
       </div>
       {dialog}
