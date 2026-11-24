@@ -224,6 +224,17 @@ section[id], h2[id], #install, #macos-first-launch { scroll-margin-top: 1.5rem; 
 .feature-list { list-style: ""; }
 .feature-list li, .workflow-steps li { border-top: 1px solid var(--control-line); padding-top: .75rem; }
 .feature-list p, .workflow-steps p, .package p { margin-top: .5rem; color: var(--muted); }
+.task-feature {
+  display: grid;
+  grid-template-columns: minmax(0, .72fr) minmax(0, 1.28fr);
+  align-items: center;
+  gap: 1.25rem clamp(1.5rem, 4vw, 3.25rem);
+  margin-top: clamp(1.75rem, 4vw, 3rem);
+  padding-top: clamp(1.5rem, 3.5vw, 2.5rem);
+  border-top: 1px solid var(--line);
+}
+.task-feature h3 { max-width: 18ch; font-size: clamp(1.5rem, 2.75vw, 2.125rem); }
+.task-feature h3 ~ p { max-width: 40ch; margin-top: .75rem; color: var(--muted); }
 .workflow-steps { list-style-position: inside; }
 .workflow-steps li::marker { color: var(--brand); font-weight: 700; }
 .workflow-steps h3 { display: inline; }
@@ -342,7 +353,7 @@ summary:hover { color: var(--brand); }
 .prose p + p { margin-top: .625rem; }
 
 @media (max-width: 52rem) {
-  .hero-intro, .section-split { grid-template-columns: minmax(0, 1fr); }
+  .hero-intro, .section-split, .task-feature { grid-template-columns: minmax(0, 1fr); }
   .hero h1 { font-size: clamp(2.375rem, 8vw, 4.25rem); }
   .site-nav { gap: 0 clamp(.75rem, 3vw, 1.5rem); }
   .site-nav a { font-size: .875rem; }
