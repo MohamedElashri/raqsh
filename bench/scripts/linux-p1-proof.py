@@ -240,10 +240,11 @@ def exercise(launch, parent, binary, root, native):
     result = {}
     with launch(binary, () if native else ("--fixture=empty",)) as session:
         if native:
-            wait_until(lambda: exists(session, ".library"), "library")
-            button(session, "Open folder…")
+            wait_until(lambda: exists(session, ".onboarding-dialog[open]"), "first-run tour")
+            button(session, "Skip tour")
+            button(session, "Open project folder…")
             native_path("Choose a project or worktree", root / "worktree")
-            wait_until(lambda: exists(session, '[aria-label="Boards"]'), "approved project")
+            wait_until(lambda: exists(session, ".library-start-copy"), "first board guidance")
         else:
             ready(session)
             close_editor(session)

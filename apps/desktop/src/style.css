@@ -102,9 +102,23 @@ textarea { padding: 7px 9px; }
 .board-row { background: var(--panel); padding: 4px; border: 1px solid var(--line); border-radius: 10px; }
 .board-link { flex: 1 1 8rem; font-weight: 600; overflow-wrap: anywhere; }
 .row-action { border-color: transparent; color: var(--muted); }
-.library-empty { display: grid; align-content: center; justify-items: start; min-height: min(380px, 62dvh); gap: 13px; }
-.library-empty > svg { color: var(--accent); }
-.library-empty p { margin: 0; color: var(--muted); max-width: 34ch; }
+.library-start { padding: clamp(16px, 3vw, 26px); border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.project-start { display: grid; justify-items: start; max-width: 34rem; gap: 12px; }
+.library-start-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 9px;
+  color: var(--accent);
+  background: var(--control);
+}
+.library-start p { margin: 0; color: var(--muted); }
+.project-start p { max-width: 46ch; }
+.project-start .ui-button:not(.primary) { background: var(--nav); }
+.project-start .ui-button:not(.primary):not(:disabled):hover { background: var(--control); }
+.library-start-copy { flex: 1 0 100%; margin-bottom: 6px; }
+.library-start-copy h3 { margin: 0 0 4px; font-size: 1.12rem; }
 .library-error { color: var(--danger); }
 .board-dialog { width: min(27rem, calc(100% - 32px)); }
 .board-dialog form, .board-dialog label { display: grid; gap: 10px; }

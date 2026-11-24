@@ -46,6 +46,7 @@ function Workspace() {
   const tourConsidered = useRef(false);
   const overlayTrigger = useRef<HTMLElement>();
   const projectFolder = useRef<HTMLButtonElement>(null);
+  const projectHeading = useRef<HTMLHeadingElement>(null);
   const pending = useRef(false);
   const close = useRef<CloseEditor>();
   const active = useRef(false);
@@ -126,6 +127,10 @@ function Workspace() {
       overlayTrigger.current = undefined;
     }
   }, [overlay]);
+
+  useLayoutEffect(() => {
+    projectHeading.current?.focus();
+  }, [project?.id]);
 
   useEffect(() => {
     if (!opened && !busy && boardFocus.current) {
@@ -240,7 +245,7 @@ function Workspace() {
               <p className="edition-label">{edition.label}</p>
             </div>
           </header>
-          {Editor && <section aria-label="Projects">
+          {Editor && projects.items.length > 0 && <section aria-label="Projects">
             <div className="library-heading"><h2>Projects</h2>
               <button className="ui-button" disabled={busy} onClick={() => chooseProject(false)} title="Open folder…">
                 <Icon name="add" size={16} /><span className="visually-hidden">Open folder…</span>
@@ -260,11 +265,15 @@ function Workspace() {
         </div>
         {Editor && <div className="library-content">
         {project ? <section aria-label="Boards">
-          <div className="library-heading"><h2 dir="auto">{project.title}</h2>
+          <div className="library-heading"><h2 ref={projectHeading} tabIndex={-1} dir="auto">{project.title}</h2>
             <button className="ui-button" disabled={busy} onClick={() => chooseProject(true)}>Locate folder…</button>
           </div>
-          <p className="library-caption">Boards</p>
-          <div className="library-actions">
+          {boards.items.length > 0 && <p className="library-caption">Boards</p>}
+          <div className={boards.items.length ? "library-actions" : "library-actions library-start"}>
+            {!boards.items.length && <div className="library-start-copy">
+              <h3>Create your first board</h3>
+              <p>Sketch a plan on a blank board, turn a task checklist into cards, or start from a template.</p>
+            </div>}
             <form onSubmit={submitBoard}>
               <input name="title" aria-label="New board title" placeholder="Board title" required maxLength={256} dir="auto" />
               <button className="ui-button primary" disabled={busy} type="submit"><Icon name="add" size={16} />Create board</button>
@@ -299,7 +308,6 @@ function Workspace() {
             <button className="ui-button row-action" disabled={busy} onClick={() => setAction({ kind: "rename", board })}>Rename</button>
             <button className="ui-button row-action" disabled={busy} onClick={() => setAction({ kind: "delete", board })}>Delete</button>
           </li>)}</ul>
-          {!boards.items.length && <p className="library-caption">Create a board to start this project’s plan.</p>}
           {boards.nextOffset !== null && <button className="ui-button" disabled={busy} onClick={() => void run(() => loadBoards(project, boards.nextOffset!))}>More boards</button>}
           {action?.kind === "rename" && <Modal title="Rename board" className="board-dialog" cancel={() => setAction(undefined)}>
             <form key={action.board.id} onSubmit={submitBoard}>
@@ -323,12 +331,14 @@ function Workspace() {
             </div>
             {error && <p role="alert">{error}</p>}
           </Modal>}
-        </section> : <div className="library-empty">
-          <Icon name="board" size={42} />
-          <h2>{projects.items.length ? "Choose a project" : "Open a project"}</h2>
-          <p>{projects.items.length ? "Select a project to open one of its boards." : "Choose the folder or worktree where you want to plan."}</p>
-          <button ref={projectFolder} className="ui-button primary" disabled={busy} onClick={() => chooseProject(false)}><Icon name="folder" />Open project folder…</button>
-        </div>}
+        </section> : <section className="library-start project-start" aria-labelledby="project-start-title">
+          <span className="library-start-icon"><Icon name="board" size={22} /></span>
+          <h2 id="project-start-title">{projects.items.length ? "Choose a project" : "Open a project"}</h2>
+          <p>{projects.items.length
+            ? "Select a saved project from the Projects list to see its boards."
+            : "Choose a folder or Git worktree. Then create a blank board, start from a task, or use a template."}</p>
+          <button ref={projectFolder} className={projects.items.length ? "ui-button" : "ui-button primary"} disabled={busy} onClick={() => chooseProject(false)}><Icon name="folder" />Open project folder…</button>
+        </section>}
         {error && !action && overlay !== "task" && overlay !== "templates" && <p className="library-error" role="alert">{error}</p>}
         </div>}
       </div>

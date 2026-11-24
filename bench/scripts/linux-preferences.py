@@ -125,9 +125,18 @@ def run(binary, directory):
                 assert database.execute("select count(*) from projects").fetchone() == (0,)
             dialog_button(web, TOUR, "Get started")
             assert web.evaluate('return document.activeElement.textContent.trim();') == "Open project folder…"
+            assert web.evaluate("""
+                const panel = document.querySelector('.project-start');
+                return panel.querySelector('h2').textContent === 'Open a project' &&
+                    panel.querySelector('.primary') === document.activeElement &&
+                    panel.getBoundingClientRect().bottom <= innerHeight &&
+                    document.documentElement.scrollWidth <= innerWidth;
+            """)
+            capture(web, directory, "raqsh-project-start-compact")
             wait_until(lambda: saved(path, onboardingVersion=2), "tour completion saved")
 
             resize(web, 1024, 720)
+            capture(web, directory, "raqsh-project-start")
             launcher_settings(web)
             assert web.evaluate("""
                 const dark = matchMedia('(prefers-color-scheme: dark)').matches;
@@ -137,6 +146,8 @@ def run(binary, directory):
             web.click(f'{SETTINGS} [value="dark"]')
             choose(web, "interface-font", "nunito")
             choose(web, "interface-size", "extraLarge")
+            wait_until(lambda: saved(path, appearance="dark", interfaceFont="nunito", textSize="extraLarge"),
+                       "appearance ready before clicking resized controls")
             web.click("#shortcut-hints")
             wait_until(lambda: saved(path, appearance="dark", interfaceFont="nunito", textSize="extraLarge",
                                      showShortcutHints=False, onboardingVersion=2), "all settings saved")
@@ -166,6 +177,7 @@ def run(binary, directory):
             press(web, "\ue00c")
             assert not shown(web, "dialog[open]")
             assert web.evaluate('return document.activeElement.matches(".settings-link");')
+            capture(web, directory, "raqsh-project-start-dark")
 
         with session(binary, ["--fixture=empty"]) as web:
             wait_until(lambda: shown(web, ".lean-editor[data-editor-ready]"), "board ready")
@@ -219,7 +231,23 @@ def run(binary, directory):
                     done(document.documentElement.dataset.interfaceFont === 'assistant' &&
                         !document.querySelector('.onboarding-dialog[open]'))));
             """, asynchronous=True)
-        print("PASS guided exercises, tour completion and upgrade, focus, persistence, canvas appearance, and write recovery")
+            assert web.evaluate("return document.querySelector('.project-start h2').textContent;") == "Choose a project"
+            web.click(".library-list .project-link")
+            wait_until(lambda: shown(web, ".board-row"), "saved project boards")
+            assert web.evaluate('return document.activeElement.matches("[aria-label=Boards] h2");')
+            assert not shown(web, ".library-start-copy")
+            web.click(".board-row button:last-child")
+            dialog_button(web, 'dialog[aria-label="Delete board"]', "Delete board")
+            wait_until(lambda: shown(web, ".library-start-copy h3"), "empty project guidance")
+            assert web.evaluate("""
+                const actions = document.querySelector('.library-actions');
+                return [actions.querySelector('h3').textContent,
+                        ...Array.from(actions.querySelectorAll('button'), button => button.textContent.trim())];
+            """) == ["Create your first board", "Create board", "New from task…", "Templates…", "Import board…"]
+            capture(web, directory, "raqsh-first-board")
+            resize(web, 480, 360)
+            assert web.evaluate('return document.documentElement.scrollWidth <= innerWidth;')
+        print("PASS guided exercises, project and board start screens, tour completion and upgrade, focus, persistence, canvas appearance, and write recovery")
 
 
 if __name__ == "__main__":
