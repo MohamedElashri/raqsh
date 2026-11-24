@@ -14,6 +14,7 @@ fn main() {
             "apply_operation",
             "save_drawing",
             "import_board",
+            "load_github_issue",
             "export_board",
             "export_preview",
             "open_benchmark",

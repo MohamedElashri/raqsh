@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Icon } from "./Icon";
+import { GitHubIssueImport } from "./GitHubIssueImport";
+import { briefWithIssueSource, type GitHubIssue } from "./github-issue";
 import { Modal } from "./Modal";
-import { checklistSteps, maxTaskBriefLength, maxTaskTitleLength, suggestTaskTitle, taskBoardDocument, taskTemplates,
+import { checklistSteps, maxTaskBriefLength, maxTaskTitleLength, shortTitle, suggestTaskTitle, taskBoardDocument, taskTemplates,
   type TaskSource, type TaskStep, type TaskTemplate } from "./task-board";
 import "./task-board.css";
 
@@ -16,7 +18,10 @@ export function TaskBoardDialog({ projectTitle, busy, error, onCreate, onClose }
   const [brief, setBrief] = useState("");
   const [title, setTitle] = useState<string>();
   const [edits, setEdits] = useState<Record<string, Partial<Pick<TaskStep, "title" | "description">>>>({});
-  const briefTooLong = brief.length > maxTaskBriefLength;
+  const [issueUrl, setIssueUrl] = useState<string>();
+  const savedBrief = briefWithIssueSource(brief, issueUrl);
+  const briefLimit = issueUrl ? maxTaskBriefLength - briefWithIssueSource("", issueUrl).length - 2 : maxTaskBriefLength;
+  const briefTooLong = savedBrief.length > maxTaskBriefLength;
   const checklist = briefTooLong ? [] : checklistSteps(brief);
   const entries: { key: string; step: TaskStep }[] = source === "checklist" ? checklist
     : taskTemplates[source].steps.map((step, index) => ({ key: `${source}-${index}`, step }));
@@ -29,9 +34,18 @@ export function TaskBoardDialog({ projectTitle, busy, error, onCreate, onClose }
     setEdits((prior) => ({ ...prior, [key]: { ...prior[key], [field]: value } }));
   }
 
+  function applyIssue(issue: GitHubIssue) {
+    setTitle(shortTitle(issue.title));
+    const body = issue.body?.replace(/\r\n?/g, "\n") ?? "";
+    setBrief(body);
+    setIssueUrl(issue.url);
+    setEdits((prior) => Object.fromEntries(Object.entries(prior).filter(([key]) => !key.startsWith("checklist-"))));
+    if (source === "checklist" && !checklistSteps(body).length) setSource("feature");
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (canCreate) onCreate(taskBoardDocument(boardTitle, brief, steps, source));
+    if (canCreate) onCreate(taskBoardDocument(boardTitle, savedBrief, steps, source));
   }
 
   return <Modal title="New board from task" className="task-board-dialog" cancel={() => { if (!busy) onClose(); }}>
@@ -42,6 +56,7 @@ export function TaskBoardDialog({ projectTitle, busy, error, onCreate, onClose }
         <p>Paste an issue or spec and choose a starting plan.</p>
       </header>
       <div className="task-board-body">
+        <GitHubIssueImport busy={busy} onApply={applyIssue} />
         <div className="task-board-content">
           <div className="task-board-fields">
             <label>Task brief <small>Optional</small>
@@ -50,7 +65,8 @@ export function TaskBoardDialog({ projectTitle, busy, error, onCreate, onClose }
                 placeholder="Paste a task, including its goal and any constraints." />
             </label>
             <p id="task-brief-hint" data-invalid={briefTooLong} aria-live="polite">{briefTooLong
-              ? `Shorten the brief to ${maxTaskBriefLength.toLocaleString()} characters.` : "Saved in the Task brief card."}</p>
+              ? `Shorten the brief to ${briefLimit.toLocaleString()} characters${issueUrl ? " to fit its source link" : ""}.`
+              : issueUrl ? "The brief and GitHub source link will be saved together." : "Saved in the Task brief card."}</p>
             <label>Board title
               <input name="title" dir="auto" required maxLength={maxTaskTitleLength} readOnly={busy} value={boardTitle}
                 onChange={(event) => setTitle(event.target.value)} placeholder="Give the board a name" />

@@ -1,0 +1,15 @@
+.github-issue-import {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--nav);
+  padding: 7px 10px;
+  margin-block-end: 14px;
+}
+.github-issue-import summary { cursor: pointer; font-weight: 650; }
+.github-issue-import[open] summary { margin-block-end: 8px; }
+.github-issue-import label { display: block; margin-block-end: 4px; }
+.github-issue-input, .github-issue-result { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.github-issue-input input { flex: 1 1 220px; min-width: 0; max-width: 100%; }
+.github-issue-import p { margin-block: 7px 0; overflow-wrap: anywhere; }
+.github-issue-result { margin-block-start: 7px; }
+.github-issue-result p { flex: 1 1 150px; min-width: 0; margin: 0; }

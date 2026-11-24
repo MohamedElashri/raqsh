@@ -5,6 +5,7 @@ mod board_skill;
 mod bridge;
 mod commands;
 mod file_dialog;
+mod github_issue;
 mod mcp_setup;
 mod preferences;
 mod updates;
@@ -85,6 +86,7 @@ fn main() -> tauri::Result<()> {
             commands::export_board,
             commands::export_preview,
             commands::import_board,
+            github_issue::load_github_issue,
             commands::open_benchmark,
             commands::finish_close,
             commands::open_about_link,
