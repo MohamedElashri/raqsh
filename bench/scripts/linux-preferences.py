@@ -5,6 +5,7 @@ import argparse
 import base64
 import json
 from pathlib import Path
+import sqlite3
 
 from webkit_driver import close_board, isolated_library, open_disclosure, wait_until, webdriver
 
@@ -78,22 +79,53 @@ def run(binary, directory):
             assert web.evaluate('return document.activeElement.textContent;') == "Start with a project"
             assert not path.exists()
             capture(web, directory, "raqsh-first-run")
+            dialog_button(web, TOUR, "Next")
+            assert web.evaluate('return document.activeElement.textContent;') == "Build a plan with cards"
+            press(web, "n")
+            assert shown(web, f"{TOUR} .onboarding-card:nth-child(3)")
+            press(web, "c")
+            assert web.evaluate('return document.activeElement.querySelector("strong")?.textContent;') == "Build package"
+            press(web, "\ue007")
+            assert web.evaluate('return document.activeElement.querySelector("strong")?.textContent;') == "Verify download"
+            press(web, "\ue007")
+            assert shown(web, f'{TOUR} [data-linked="true"]')
+            capture(web, directory, "raqsh-tour-plan")
+            dialog_button(web, TOUR, "Next")
+            assert web.evaluate('return document.activeElement.textContent;') == "Review progress on the board"
+            choose(web, "onboarding-status", "inProgress")
+            assert shown(web, f'{TOUR} .onboarding-card [data-status="inProgress"]')
+            dialog_button(web, TOUR, "Next")
+            choose(web, "onboarding-client", "Other MCP client")
+            assert web.evaluate('return document.querySelector(".onboarding-activity [role=status]").textContent;').startswith("Use MCP configuration")
+            dialog_button(web, TOUR, "Next")
+            dialog_button(web, TOUR, "Queue sample feedback")
+            assert web.evaluate('return document.querySelector(".onboarding-activity [role=status]").textContent;').startswith("Queued")
+            dialog_button(web, TOUR, "Show sample acknowledgement")
+            assert web.evaluate('return document.activeElement.textContent;').startswith("Acknowledged")
+            assert web.evaluate("""
+                const stage = document.querySelector('.onboarding-stage');
+                const gap = stage.getBoundingClientRect().bottom - stage.lastElementChild.getBoundingClientRect().bottom;
+                return gap >= 0 && gap <= 32;
+            """)
+            capture(web, directory, "raqsh-tour-feedback")
             resize(web, 480, 360)
-            dialog_button(web, TOUR, "Next")
-            assert web.evaluate('return document.activeElement.textContent;') == "Turn the plan into cards"
-            dialog_button(web, TOUR, "Next")
-            assert web.evaluate('return document.activeElement.textContent;') == "Bring in a coding agent"
             assert web.evaluate("""
                 const dialog = document.querySelector(arguments[0]);
                 const footer = dialog.querySelector('footer').getBoundingClientRect();
-                return dialog.scrollWidth <= dialog.clientWidth && footer.bottom < innerHeight;
+                const body = dialog.querySelector('.onboarding-stage');
+                return body.scrollWidth <= body.clientWidth && footer.bottom < innerHeight;
             """, TOUR)
             capture(web, directory, "raqsh-tour-compact")
             dialog_button(web, TOUR, "Back")
-            assert web.evaluate('return document.activeElement.textContent;') == "Turn the plan into cards"
-            dialog_button(web, TOUR, "Skip tour")
+            assert web.evaluate('return document.activeElement.textContent;') == "Pair a coding agent"
+            dialog_button(web, TOUR, "Next")
+            assert web.evaluate('return document.querySelector(".onboarding-activity [role=status]").textContent;').startswith("Acknowledged")
+            assert not path.exists()
+            with sqlite3.connect(path.with_name("boards.sqlite3")) as database:
+                assert database.execute("select count(*) from projects").fetchone() == (0,)
+            dialog_button(web, TOUR, "Get started")
             assert web.evaluate('return document.activeElement.textContent.trim();') == "Open project folder…"
-            wait_until(lambda: saved(path, onboardingSeen=True), "tour dismissal saved")
+            wait_until(lambda: saved(path, onboardingVersion=2), "tour completion saved")
 
             resize(web, 1024, 720)
             launcher_settings(web)
@@ -107,7 +139,7 @@ def run(binary, directory):
             choose(web, "interface-size", "extraLarge")
             web.click("#shortcut-hints")
             wait_until(lambda: saved(path, appearance="dark", interfaceFont="nunito", textSize="extraLarge",
-                                     showShortcutHints=False, onboardingSeen=True), "all settings saved")
+                                     showShortcutHints=False, onboardingVersion=2), "all settings saved")
             assert web.evaluate("""
                 const style = getComputedStyle(document.documentElement);
                 return [style.colorScheme, style.fontFamily, style.fontSize];
@@ -120,13 +152,15 @@ def run(binary, directory):
             """, SETTINGS)
             capture(web, directory, "raqsh-settings-compact")
             dialog_button(web, SETTINGS, "Quick tour")
-            dialog_button(web, TOUR, "Next")
-            dialog_button(web, TOUR, "Next")
-            dialog_button(web, TOUR, "Finish tour")
+            dialog_button(web, TOUR, "Close tour")
             assert shown(web, SETTINGS)
             resize(web, 1024, 720)
             dialog_button(web, SETTINGS, "About")
             assert shown(web, "dialog.about-settings[open] .about-brand")
+            assert web.evaluate("""
+                const agreement = document.querySelector('.about-license-summary a[href="https://melashri.net/raqsh/eula/"]');
+                return agreement?.textContent === 'End User Licence Agreement';
+            """)
             web.click('dialog.about-settings[open] [aria-label="Back to Settings"]')
             assert shown(web, SETTINGS)
             press(web, "\ue00c")
@@ -152,9 +186,12 @@ def run(binary, directory):
             close_board(web)
             wait_until(lambda: shown(web, ".board-row"), "board still in project library")
 
-        # Existing projects take precedence even if settings were never written or became invalid.
-        path.write_text('{"appearance":"future-theme","textSize":"large","interfaceFont":"assistant"}')
+        path.write_text('{"appearance":"future-theme","textSize":"large","interfaceFont":"assistant","onboardingSeen":true}')
         with session(binary) as web:
+            wait_until(lambda: shown(web, TOUR), "updated tour with an existing project and older tour flag")
+            assert shown(web, ".library-list .project-link")
+            dialog_button(web, TOUR, "Skip tour")
+            wait_until(lambda: saved(path, onboardingVersion=2), "dismissal of the updated tour saved")
             launcher_settings(web)
             assert not shown(web, TOUR)
             assert web.evaluate("""
@@ -173,7 +210,16 @@ def run(binary, directory):
             web.click(f'{SETTINGS} [value="light"]')
             wait_until(lambda: saved(path, appearance="light", interfaceFont="assistant", textSize="large"),
                        "preferences saved after retry")
-        print("PASS first-run and replay, focus, persistence, canvas appearance, existing library, and write recovery")
+
+        with session(binary) as web:
+            wait_until(lambda: shown(web, '.library-list .project-link:not([disabled])'), "existing project ready")
+            assert web.evaluate("""
+                const done = arguments[arguments.length - 1];
+                requestAnimationFrame(() => requestAnimationFrame(() =>
+                    done(document.documentElement.dataset.interfaceFont === 'assistant' &&
+                        !document.querySelector('.onboarding-dialog[open]'))));
+            """, asynchronous=True)
+        print("PASS guided exercises, tour completion and upgrade, focus, persistence, canvas appearance, and write recovery")
 
 
 if __name__ == "__main__":

@@ -26,10 +26,10 @@ For volume licensing, email [mail@elashri.com](mailto:mail@elashri.com).
 - Draw and write on an Excalidraw canvas. Turn ideas into task cards, link dependencies, and track progress.
 - Pair Codex, Claude Code, or another MCP client to share board context and send feedback from the canvas. [Supported clients and setup](docs/development.md#coding-harnesses)
 - Work offline with boards stored on your device. Export a portable board file, PNG, or SVG.
-- Learn the basics with the quick tour, and adjust the theme, interface font, and text size in Settings. [New in v0.3.0](docs/releases/v0.3.0.md)
+- Use the quick tour to practise linking cards, updating progress, and sending agent feedback. Adjust the theme, interface font, and text size in Settings. [New in v0.3.0](docs/releases/v0.3.0.md)
 
 [Build from source](docs/development.md) · [Report a bug](https://github.com/MohamedElashri/raqsh/issues/new) · [Contribute](https://github.com/MohamedElashri/raqsh/compare) · [Leave a tip on Ko-fi](https://ko-fi.com/melashri)
 
 ## LICENCE
 
-The public source and downloads are covered by the PolyForm Noncommercial License 1.0.0. Commercial use outside its permissions requires a separate licence. [Read the licence](LICENSE)
+The public source and downloads are covered by the PolyForm Noncommercial License 1.0.0. Commercial use outside its permissions requires a separate licence. [Read the licence](LICENSE) · [End User Licence Agreement](https://melashri.net/raqsh/eula/)

@@ -10,7 +10,7 @@ export type Preferences = {
   interfaceFont: typeof interfaceFonts[number];
   textSize: typeof textSizes[number];
   showShortcutHints: boolean;
-  onboardingSeen: boolean;
+  onboardingVersion: number;
 };
 
 const defaults: Preferences = {
@@ -18,7 +18,7 @@ const defaults: Preferences = {
   interfaceFont: "default",
   textSize: "default",
   showShortcutHints: true,
-  onboardingSeen: false,
+  onboardingVersion: 0,
 };
 
 export function usePreferences() {

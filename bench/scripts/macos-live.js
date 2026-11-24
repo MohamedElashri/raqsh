@@ -318,6 +318,8 @@
       check(find(".about-credits").textContent.includes("Mohamed Elashri"), "About must credit the creator");
       const website = find('.about-project-links a[href="https://melashri.net/raqsh/"]');
       check(website, "About must link to the project website");
+      const agreement = find('.about-license-summary a[href="https://melashri.net/raqsh/eula/"]');
+      check(agreement?.textContent === "End User Licence Agreement", "About must link to the EULA");
       const license = find(".about-credits details");
       license.querySelector("summary").click();
       const licenseText = license.querySelector("pre").textContent;

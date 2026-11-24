@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { Icon } from "./Icon";
 import { Modal } from "./Modal";
 import { AboutSettings } from "./AboutSettings";
-import { Onboarding } from "./Onboarding";
+import { Onboarding, onboardingVersion } from "./Onboarding";
 import { Settings } from "./Settings";
 import { usePreferences } from "./preferences";
 import { brand } from "./generated/brand";
@@ -39,7 +39,7 @@ function Workspace() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [overlay, setOverlay] = useState<Overlay>();
-  const [initialLibraryEmpty, setInitialLibraryEmpty] = useState(false);
+  const [libraryReady, setLibraryReady] = useState(false);
   const preferences = usePreferences();
   const tourConsidered = useRef(false);
   const overlayTrigger = useRef<HTMLElement>();
@@ -62,7 +62,6 @@ function Workspace() {
   async function loadProjects(offset = 0) {
     const page = await invoke<Page<Project>>("list_projects", { offset });
     setProjects((prior) => offset ? { ...page, items: [...prior.items, ...page.items] } : page);
-    return page;
   }
 
   async function loadBoards(owner: Project, offset = 0) {
@@ -102,19 +101,22 @@ function Workspace() {
         const owner = page.items.find((item) => item.id === board.scope.projectId);
         if (owner) setProject(owner);
         showBoard(board);
-      } else setInitialLibraryEmpty((await loadProjects()).items.length === 0);
+      } else {
+        await loadProjects();
+        setLibraryReady(true);
+      }
     });
     return () => { void subscription.then((unlisten) => unlisten()); };
   }, []);
 
   useEffect(() => {
-    if (!initialLibraryEmpty || !preferences.loaded || busy || tourConsidered.current) return;
+    if (!libraryReady || !preferences.loaded || busy || tourConsidered.current) return;
     tourConsidered.current = true;
-    if (!preferences.value.onboardingSeen && !overlay && !project) {
+    if (preferences.value.onboardingVersion < onboardingVersion && !overlay && !project) {
       overlayTrigger.current = projectFolder.current ?? undefined;
       setOverlay("welcome");
     }
-  }, [initialLibraryEmpty, preferences.loaded, preferences.value.onboardingSeen, overlay, project, busy]);
+  }, [libraryReady, preferences.loaded, preferences.value.onboardingVersion, overlay, project, busy]);
 
   useLayoutEffect(() => {
     if (!overlay && overlayTrigger.current) {
@@ -156,7 +158,7 @@ function Workspace() {
   }
 
   function closeTour() {
-    if (!preferences.value.onboardingSeen) preferences.update({ onboardingSeen: true });
+    if (preferences.value.onboardingVersion < onboardingVersion) preferences.update({ onboardingVersion });
     setOverlay(overlay === "tour" ? "settings" : undefined);
   }
 
@@ -215,7 +217,7 @@ function Workspace() {
                 <Icon name="folder" /><span><strong dir="auto">{item.title}</strong><small title={item.root}>{item.root}</small></span>
               </button>
             </li>)}</ul>
-            {projects.nextOffset !== null && <button className="ui-button" disabled={busy} onClick={() => void run(async () => { await loadProjects(projects.nextOffset!); })}>More projects</button>}
+            {projects.nextOffset !== null && <button className="ui-button" disabled={busy} onClick={() => void run(() => loadProjects(projects.nextOffset!))}>More projects</button>}
           </section>}
           <button type="button" className="project-link settings-link" disabled={busy} onClick={(event) => openSettings(event.currentTarget)}>
             <Icon name="settings" />Settings

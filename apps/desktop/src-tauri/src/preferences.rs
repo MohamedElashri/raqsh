@@ -41,7 +41,7 @@ pub struct Preferences {
     interface_font: InterfaceFont,
     text_size: TextSize,
     show_shortcut_hints: bool,
-    onboarding_seen: bool,
+    onboarding_version: u32,
 }
 
 impl Default for Preferences {
@@ -51,7 +51,7 @@ impl Default for Preferences {
             interface_font: InterfaceFont::default(),
             text_size: TextSize::default(),
             show_shortcut_hints: true,
-            onboarding_seen: false,
+            onboarding_version: 0,
         }
     }
 }
@@ -74,7 +74,12 @@ fn decode(bytes: &[u8]) -> Preferences {
         interface_font: field(&value, "interfaceFont", defaults.interface_font),
         text_size: field(&value, "textSize", defaults.text_size),
         show_shortcut_hints: field(&value, "showShortcutHints", defaults.show_shortcut_hints),
-        onboarding_seen: field(&value, "onboardingSeen", defaults.onboarding_seen),
+        // The first tour used a boolean. Acknowledging it counts as version 1.
+        onboarding_version: field(
+            &value,
+            "onboardingVersion",
+            u32::from(field(&value, "onboardingSeen", false)),
+        ),
     }
 }
 
@@ -107,18 +112,22 @@ mod tests {
             Preferences {
                 appearance: Appearance::Dark,
                 text_size: TextSize::ExtraLarge,
-                onboarding_seen: true,
+                onboarding_version: 1,
                 ..Preferences::default()
             }
         );
         assert!(serde_json::from_slice::<Preferences>(stored).is_err());
         assert_eq!(decode(b"{invalid"), Preferences::default());
+        assert_eq!(
+            decode(br#"{"onboardingVersion":7,"onboardingSeen":false}"#).onboarding_version,
+            7
+        );
     }
 
     #[test]
     fn preferences_round_trip_with_the_frontend_field_names() {
         let stored = br#"{"appearance":"light","interfaceFont":"nunito","textSize":"large",
-            "showShortcutHints":false,"onboardingSeen":true}"#;
+            "showShortcutHints":false,"onboardingVersion":2}"#;
         let settings: Preferences = serde_json::from_slice(stored).unwrap();
         assert_eq!(
             serde_json::to_value(&settings).unwrap(),

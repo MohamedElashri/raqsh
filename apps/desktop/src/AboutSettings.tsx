@@ -108,7 +108,8 @@ export function AboutSettings({ onClose, onBack }: { onClose: () => void; onBack
       </div>
       <p className="about-description">Raqsh is a local-first whiteboard for planning with coding agents. Map task dependencies, sketch on the Excalidraw canvas, and share board feedback with agents you pair through MCP.</p>
       <p className="about-license-summary">
-        {edition.summary}{edition.publicUpdates && <> <a href={aboutLinks.licensing} onClick={openLink}>Commercial licensing</a></>}
+        {edition.summary} <a href={aboutLinks.eula} onClick={openLink}>End User Licence Agreement</a>
+        {edition.publicUpdates && <> · <a href={aboutLinks.licensing} onClick={openLink}>Commercial licensing</a></>}
       </p>
       <nav className="about-project-links" aria-label="Raqsh project links">
         {projectLinks.map(({ label, url }) => <a key={url} href={url} onClick={openLink}>{label}<Icon name="arrow" size={15} /></a>)}

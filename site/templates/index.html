@@ -57,7 +57,7 @@
   <section id="how-it-works" class="section tinted" aria-labelledby="workflow-title">
     <div class="wrap">
       <div class="section-intro section-split">
-        <h2 id="workflow-title">Plan. Review.<br> Keep moving.</h2>
+        <h2 id="workflow-title">Plan and review with an agent.</h2>
         <p class="lede">Follow a request to verify update signatures on the Raqsh release board.</p>
       </div>
       <ol class="workflow-steps">
@@ -104,21 +104,20 @@
   </section>
 
   <section id="integrations" class="section wrap" aria-labelledby="agents">
-    <div class="section-split integrations">
-      <div>
-        <h2 id="agents">Bring your coding agent.</h2>
-        <p class="lede">Raqsh bundles a local MCP server. Within the access you grant, paired clients can read and edit cards, connect dependencies, update statuses, and respond to feedback.</p>
-      </div>
+    <div class="section-intro section-split">
+      <h2 id="agents">Bring your coding agent.</h2>
+      <p class="lede">Raqsh bundles a local MCP server. Paired clients can read and edit cards, connect dependencies, and respond to feedback within the access you grant.</p>
+    </div>
+    <div class="integration-options">
       <div class="pairing">
         <h3>Pair an agent</h3>
         <p>Open <strong>Agents</strong> and choose your client. Raqsh can set up MCP for Codex, Claude Code, and Pi, and provides configuration for OpenCode, Cursor, and other clients. Start a new session after pairing.</p>
-        <p>Pairings are board-scoped by default. You can explicitly approve project-wide access or revoke a pairing in the app.</p>
-        <p>Boards are stored on your device. Paired clients may connect to their own services.</p>
-        <div class="pairing-skill" id="agent-skill">
-          <h3>Give your agent the Raqsh skill</h3>
-          <p>The optional skill teaches agents how to find the right board, update tasks, and respond to feedback. Open <strong>Agents → Raqsh skill</strong> to install it in your project or save the file for manual setup.</p>
-          <p><a href="{{ $downloads.source }}/blob/main/skills/raqsh-board/SKILL.md">Read the Raqsh skill</a></p>
-        </div>
+        <p>Pairings are board-scoped by default. You can approve project-wide access or revoke a pairing in the app.</p>
+      </div>
+      <div class="pairing" id="agent-skill">
+        <h3>Install the Raqsh skill</h3>
+        <p>The optional skill teaches agents how to find the right board, update tasks, and respond to feedback. Open <strong>Agents → Raqsh skill</strong> to install it in your project or save the file for manual setup.</p>
+        <p><a href="{{ $downloads.source }}/blob/main/skills/raqsh-board/SKILL.md">Read the Raqsh skill</a></p>
       </div>
     </div>
   </section>
@@ -152,10 +151,11 @@
           </div>
         </li>
       </ul>
+      <p class="pricing-terms"><a href="{{ relURL "/eula/" }}">End User Licence Agreement</a></p>
     </div>
   </section>
 
-  <section id="download" class="section tinted" aria-labelledby="download-title">
+  <section id="download" class="section" aria-labelledby="download-title">
     <div id="install" class="wrap">
       <div class="section-intro">
         <h2 id="download-title">Get Raqsh for your desktop.</h2>
@@ -229,42 +229,46 @@
     </div>
   </section>
 
-  <section class="section wrap faq" aria-labelledby="faq-title">
-    <div class="section-split">
-      <h2 id="faq-title">Frequently asked questions</h2>
+  <section id="faq" class="section tinted" aria-labelledby="faq-title">
+    <div class="wrap">
+      <h2 id="faq-title" class="section-intro">Frequently asked questions</h2>
       <div class="faq-list">
-        <details>
-          <summary>Is Raqsh free for personal use?</summary>
-          <p class="disclosure-body">Yes. Raqsh is free for personal use and other uses permitted by the PolyForm Noncommercial License 1.0.0. Both editions include the same features. <a href="{{ $license }}">Read the licence</a></p>
-        </details>
-        <details>
-          <summary>When do I need a commercial licence?</summary>
-          <p class="disclosure-body">You need one if you use Raqsh for commercial work outside the permissions of the free licence, such as planning paid client projects or developing a commercial product.</p>
-        </details>
-        <details>
-          <summary>How much does a commercial licence cost?</summary>
-          <p class="disclosure-body">It’s a one-time payment of <strong>{{ $downloads.commercial_price }} USD per person</strong>. Each licence covers one person on up to <strong>five computers they own</strong>, across macOS and Linux. Each user needs their own licence. <a href="#licensing">Pricing and Ko-fi availability</a></p>
-        </details>
-        <details>
-          <summary>Do you offer volume licensing for teams?</summary>
-          <p class="disclosure-body">For multiple users or deployment on company-owned computers, email <a href="mailto:mail@elashri.com">mail@elashri.com</a> with the number of people who need access.</p>
-        </details>
-        <details>
-          <summary>How do I get started?</summary>
-          <p class="disclosure-body">Open a project folder, create a board, and press <strong>N</strong> to add your first card. You can sketch ideas, connect tasks, and track progress on the same board.</p>
-        </details>
-        <details>
-          <summary>Do I need a coding agent?</summary>
-          <p class="disclosure-body">Pairing an agent is optional. To connect Codex, Claude Code, or another supported MCP client, open <strong>Agents</strong> on your board and follow the pairing steps. <a href="#integrations">Supported clients and setup</a></p>
-        </details>
-        <details>
-          <summary>Where are my boards stored?</summary>
-          <p class="disclosure-body">Raqsh stores boards on your device and works offline without a Raqsh account. If you pair an agent, it can access the boards you grant it access to, and its client may send requests to its own provider.</p>
-        </details>
-        <details>
-          <summary>Which platforms are supported?</summary>
-          <p class="disclosure-body">Raqsh runs on Apple silicon and Intel Macs, and on x86-64 Ubuntu, Debian, and Fedora. Windows isn’t supported yet, but it’s on the roadmap. <a href="#download">Downloads and installation instructions</a></p>
-        </details>
+        <div class="faq-group">
+          <details>
+            <summary>Is Raqsh free for personal use?</summary>
+            <p class="disclosure-body">Yes. Raqsh is free for personal use and other uses permitted by the PolyForm Noncommercial License 1.0.0. Both editions include the same features. <a href="{{ $license }}">Read the licence</a></p>
+          </details>
+          <details>
+            <summary>When do I need a commercial licence?</summary>
+            <p class="disclosure-body">You need one if you use Raqsh for commercial work outside the permissions of the free licence, such as planning paid client projects or developing a commercial product.</p>
+          </details>
+          <details>
+            <summary>How much does a commercial licence cost?</summary>
+            <p class="disclosure-body">It’s a one-time payment of <strong>{{ $downloads.commercial_price }} USD per person</strong>. Each licence covers one person on up to <strong>five computers they own</strong>, across macOS and Linux. Each user needs their own licence. <a href="#licensing">Pricing and Ko-fi availability</a></p>
+          </details>
+          <details>
+            <summary>Do you offer volume licensing for teams?</summary>
+            <p class="disclosure-body">For multiple users or deployment on company-owned computers, email <a href="mailto:mail@elashri.com">mail@elashri.com</a> with the number of people who need access.</p>
+          </details>
+        </div>
+        <div class="faq-group">
+          <details>
+            <summary>How do I get started?</summary>
+            <p class="disclosure-body">Open a project folder, create a board, and press <strong>N</strong> to add your first card. You can sketch ideas, connect tasks, and track progress on the same board.</p>
+          </details>
+          <details>
+            <summary>Do I need a coding agent?</summary>
+            <p class="disclosure-body">Pairing an agent is optional. To connect Codex, Claude Code, or another supported MCP client, open <strong>Agents</strong> on your board and follow the pairing steps. <a href="#integrations">Supported clients and setup</a></p>
+          </details>
+          <details>
+            <summary>Where are my boards stored?</summary>
+            <p class="disclosure-body">Raqsh stores boards on your device and works offline without a Raqsh account. If you pair an agent, it can access the boards you grant it access to, and its client may send requests to its own provider.</p>
+          </details>
+          <details>
+            <summary>Which platforms are supported?</summary>
+            <p class="disclosure-body">Raqsh runs on Apple silicon and Intel Macs, and on x86-64 Ubuntu, Debian, and Fedora. Windows isn’t supported yet, but it’s on the roadmap. <a href="#download">Downloads and installation instructions</a></p>
+          </details>
+        </div>
       </div>
     </div>
   </section>
