@@ -10,6 +10,8 @@ import { boundedOffset, duplicateSelection, geometry, movableBounds, removeSelec
 import EditorSurface, { blankSelection, countSelection, type BoardSelection, type Tool } from "./EditorSurface";
 import { cardId, exportScene, openScene } from "./scene";
 import AgentPanel from "./AgentPanel";
+import { AgentBriefDialog } from "./AgentBriefDialog";
+import { createAgentBrief, type AgentBrief } from "./agent-brief";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
@@ -71,6 +73,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
   const [inspector, setInspector] = useState(false);
   const [agents, setAgents] = useState(false);
   const [keyboardHelp, setKeyboardHelp] = useState(false);
+  const [agentBrief, setAgentBrief] = useState<AgentBrief>();
   const [saveState, setSaveState] = useState<SaveState>({
     message: `Drawing checkpoint ${info.drawingRevision}`,
     failed: false,
@@ -106,6 +109,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
   const locked = useRef(false);
   const draftChanged = useRef(false);
   const editAnchor = useRef<HTMLElement>();
+  const briefAnchor = useRef<HTMLElement>();
   const remoteTimer = useRef(0);
   const remoteNeeded = useRef(false);
   const remoteBusy = useRef(false);
@@ -434,6 +438,23 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
     return board.nodes.filter((card) => selectionRef.current.cards.has(card.id));
   }
 
+  function openAgentBrief(trigger: HTMLElement) {
+    const brief = createAgentBrief(info.title, board.nodes, board.edges, selectionRef.current.cards);
+    if (!brief) return;
+    briefAnchor.current = trigger;
+    setAgentBrief(brief);
+  }
+
+  function closeAgentBrief() {
+    const trigger = briefAnchor.current;
+    briefAnchor.current = undefined;
+    setAgentBrief(undefined);
+    requestAnimationFrame(() => {
+      const target = trigger?.isConnected && !trigger.matches(":disabled") ? trigger : surface();
+      target?.focus({ preventScroll: true });
+    });
+  }
+
   function reorder(card: Card, direction: number) {
     const siblings = board.nodes.filter((node) => node.parent === card.parent);
     const other = siblings[siblings.indexOf(card) + direction];
@@ -523,7 +544,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
   }
 
   function onBoardKey(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp) return;
+    if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp || agentBrief) return;
     const target = event.target as HTMLElement;
     if (locked.current || target.closest("input, textarea, select, [contenteditable], .agent-panel")) return;
     const nativeState = controller.current?.getAppState();
@@ -600,6 +621,12 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
             onClick={() => { closeDisclosure(menu.current); changeHistory(true); }}><Icon name="redo" size={16} />Redo</button>
           <button type="button" disabled={unavailable || !count}
             onClick={() => { closeDisclosure(menu.current); deleteSelected(); }}>Delete selection</button>
+          <button type="button" disabled={unavailable || !selection.cards.size} onClick={() => {
+            const trigger = menu.current?.querySelector("summary");
+            if (!trigger) return;
+            closeDisclosure(menu.current);
+            openAgentBrief(trigger);
+          }}>Copy agent brief</button>
           <details className="export-menu"><summary><Icon name="export" size={16} />Export</summary>
             <div>
               <button type="button" disabled={pending} onClick={() => void prepareExport("board")}>Board file…</button>
@@ -783,10 +810,13 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
         <div>
           <button type="button" disabled={unavailable || !selection.cards.size}
             onClick={duplicateSelected}>Duplicate</button>
+          <button type="button" disabled={unavailable || !selection.cards.size}
+            onClick={(event) => openAgentBrief(event.currentTarget)}>Copy agent brief</button>
           <button type="button" disabled={unavailable} onClick={deleteSelected}>Delete</button>
         </div>
       </aside>}
       </div>}
+      {agentBrief && <AgentBriefDialog brief={agentBrief} close={closeAgentBrief} />}
       {keyboardHelp && <Modal title="Board shortcuts" cancel={() => setKeyboardHelp(false)}>
         <h2>Board shortcuts</h2>
         <dl className="board-shortcuts">

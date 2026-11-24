@@ -1,0 +1,12 @@
+.agent-brief-dialog { width: min(41rem, calc(100% - 32px)); }
+.agent-brief-context { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.agent-brief-context input { min-height: 0; margin: 0; accent-color: var(--accent); }
+.agent-brief-preview { display: grid; gap: 5px; font-weight: 650; }
+.agent-brief-preview textarea {
+  min-width: 0;
+  height: clamp(6rem, 47dvh, 23rem);
+  resize: vertical;
+  font: .86rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.agent-brief-status { margin: 7px 0 0; color: var(--muted); font-size: .88rem; }
+.agent-brief-status:empty { display: none; }
