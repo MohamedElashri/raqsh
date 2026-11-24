@@ -13,6 +13,8 @@
     "allow-list-bindings", "allow-revoke-client", "allow-queue-feedback",
     "allow-list-feedback", "allow-cancel-feedback", "allow-board-deltas",
     "allow-update-info", "allow-check-update", "allow-download-update", "allow-install-update", "allow-restart-updated",
+    "allow-capture-board-template", "allow-save-board-template", "allow-list-board-templates", "allow-read-board-template",
+    "allow-decode-board-template", "allow-export-board-template", "allow-new-board-from-template",
     "core:event:allow-listen", "core:event:allow-unlisten"
   ]
 }

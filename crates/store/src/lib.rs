@@ -12,6 +12,7 @@ use std::{
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 pub mod bridge;
+pub mod templates;
 
 const DB_VERSION: u32 = 2;
 const LOCAL_ACTOR: &str = "desktop";
@@ -215,6 +216,7 @@ impl Store {
             migration.execute_batch(include_str!("bridge.sql"))?;
             migration.pragma_update(None, "user_version", DB_VERSION)?;
         }
+        migration.execute_batch(include_str!("templates.sql"))?;
         migration.commit()?;
         Ok(Self {
             db,

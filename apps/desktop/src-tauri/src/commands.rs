@@ -260,7 +260,7 @@ async fn save_board_file(
     .await
 }
 
-async fn save_file(window: WebviewWindow, save: Save, data: Vec<u8>) -> Reply<bool> {
+pub(crate) async fn save_file(window: WebviewWindow, save: Save, data: Vec<u8>) -> Reply<bool> {
     let Some(destination) = crate::file_dialog::choose(window, Some(save)).await? else {
         return Ok(false);
     };
