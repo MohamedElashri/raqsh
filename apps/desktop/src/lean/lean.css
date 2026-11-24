@@ -192,6 +192,11 @@
   width: 175px;
   padding: 5px;
 }
+.board-header > .board-menu {
+  max-height: calc(100dvh - var(--inset) - var(--inset) - 50px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 .more-tools .board-menu { left: auto; right: 0; }
 .board-menu button, .board-menu .export-menu summary, .lean-shelf button, .agent-panel button {
   display: flex;
