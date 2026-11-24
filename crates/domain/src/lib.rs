@@ -3,6 +3,9 @@ use serde_json::Value;
 use std::collections::{BTreeMap, HashMap, HashSet};
 pub use uuid::Uuid as Id;
 
+pub mod verification;
+use verification::{CardVerification, MAX_VERIFICATIONS, VERIFICATION_DOCUMENT_VERSION};
+
 pub const FORMAT: &str = "dev.local.raqsh.board";
 pub const SCHEMA_VERSION: u32 = 1;
 pub const MAX_DOCUMENT_BYTES: usize = 8 * 1024 * 1024;
@@ -571,11 +574,15 @@ pub struct Document {
     pub nodes: Vec<Node>,
     pub edges: Vec<Edge>,
     pub drawing: Drawing,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub verification: Vec<CardVerification>,
 }
 
 impl Document {
-    pub fn remap(self) -> Result<(String, Graph, Drawing), Error> {
-        if self.format != FORMAT || self.schema_version != SCHEMA_VERSION {
+    pub fn remap(self) -> Result<(String, Graph, Drawing, Vec<CardVerification>), Error> {
+        let supported_version = self.schema_version == VERIFICATION_DOCUMENT_VERSION
+            || (self.schema_version == SCHEMA_VERSION && self.verification.is_empty());
+        if self.format != FORMAT || !supported_version {
             return Err(Error::Invalid(
                 "Unsupported board file format or schema version.",
             ));
@@ -604,6 +611,23 @@ impl Document {
                 edge
             })
             .collect();
+        let mut verification = self.verification;
+        if verification.len() > MAX_VERIFICATIONS {
+            return Err(Error::Invalid(
+                "Too many verification records on this board.",
+            ));
+        }
+        let mut check_ids = HashSet::new();
+        for record in &mut verification {
+            record.validate()?;
+            if !check_ids.insert(record.id) {
+                return Err(Error::Invalid("Duplicate verification record."));
+            }
+            record.card_id = *ids
+                .get(&record.card_id)
+                .ok_or(Error::Invalid("Verification refers to a missing card."))?;
+            record.id = Id::new_v4();
+        }
         let mut drawing = self.drawing;
         if let Some(scene) = &mut drawing.excalidraw {
             scene.remap_cards(&ids);
@@ -611,7 +635,12 @@ impl Document {
         for stroke in &mut drawing.strokes {
             stroke.id = Id::new_v4().to_string();
         }
-        Ok((title, Graph::from_rows(nodes, edges)?, drawing))
+        Ok((
+            title,
+            Graph::from_rows(nodes, edges)?,
+            drawing,
+            verification,
+        ))
     }
 }
 
@@ -725,6 +754,7 @@ mod tests {
             nodes: vec![a.clone(), b.clone()],
             edges: vec![link.clone()],
             drawing: Drawing::default(),
+            verification: Vec::new(),
         };
         document.drawing.arrows.push(Arrow {
             from: [f64::INFINITY, 0.0],
@@ -733,7 +763,7 @@ mod tests {
         });
         assert!(document.clone().remap().is_err());
         document.drawing.arrows.clear();
-        let (_, copied, _) = document.remap().unwrap();
+        let (_, copied, _, _) = document.remap().unwrap();
         let new_edge = copied.edges.values().next().unwrap();
         assert_ne!(new_edge.id, link.id);
         assert_ne!(new_edge.from, a.id);

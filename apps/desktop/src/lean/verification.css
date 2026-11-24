@@ -1,0 +1,10 @@
+.verification-dialog { width: min(38rem, calc(100% - 2rem)); max-height: calc(100% - 2rem); overflow: auto; }
+.verification-dialog h2 { margin: 0; }
+.verification-subtitle { margin-block: .4rem .8rem; overflow-wrap: anywhere; }
+.verification-list { padding: 0; margin-block: .8rem; list-style: none; max-height: 14rem; overflow: auto; }
+.verification-list li { padding-block: .55rem; border-block-end: 1px solid var(--line); overflow-wrap: anywhere; }
+.verification-list li > strong, .verification-list li > span { display: block; }
+.verification-list li > div, .verification-dialog .dialog-actions { display: flex; flex-wrap: wrap; gap: .4rem; }
+.verification-list li > div { margin-block-start: .35rem; }
+.verification-reference { color: var(--muted); font-size: .85em; }
+.verification-preview { box-sizing: border-box; width: 100%; margin-block: .8rem; resize: vertical; }

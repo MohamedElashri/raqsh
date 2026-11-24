@@ -8,6 +8,7 @@ mod file_dialog;
 mod mcp_setup;
 mod preferences;
 mod updates;
+mod verification;
 
 fn main() -> tauri::Result<()> {
     #[cfg(feature = "combined-mcp")]
@@ -82,6 +83,10 @@ fn main() -> tauri::Result<()> {
             commands::close_board,
             commands::apply_operation,
             commands::save_drawing,
+            verification::list_verification,
+            verification::save_verification,
+            verification::remove_verification,
+            verification::open_verification_reference,
             commands::export_board,
             commands::export_preview,
             commands::import_board,
