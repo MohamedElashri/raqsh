@@ -12,6 +12,7 @@ import { cardId, exportScene, openScene } from "./scene";
 import AgentPanel from "./AgentPanel";
 import { AgentBriefDialog } from "./AgentBriefDialog";
 import { createAgentBrief, type AgentBrief } from "./agent-brief";
+import VerificationDialog from "./VerificationDialog";
 import { brand } from "../generated/brand";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
@@ -71,6 +72,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
   const [selection, setSelection] = useState(blankSelection);
   const [edit, setEdit] = useState<Edit>();
   const [inspector, setInspector] = useState(false);
+  const [review, setReview] = useState<Card | "summary">();
   const [agents, setAgents] = useState(false);
   const [keyboardHelp, setKeyboardHelp] = useState(false);
   const [agentBrief, setAgentBrief] = useState<AgentBrief>();
@@ -544,7 +546,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
   }
 
   function onBoardKey(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp || agentBrief) return;
+    if (event.nativeEvent.isComposing || event.defaultPrevented || edit || closeFailure || keyboardHelp || agentBrief || review) return;
     const target = event.target as HTMLElement;
     if (locked.current || target.closest("input, textarea, select, [contenteditable], .agent-panel")) return;
     const nativeState = controller.current?.getAppState();
@@ -627,6 +629,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
             closeDisclosure(menu.current);
             openAgentBrief(trigger);
           }}>Copy agent brief</button>
+          <button type="button" disabled={unavailable} onClick={() => { closeDisclosure(menu.current); setReview("summary"); }}>Review summary…</button>
           <details className="export-menu"><summary><Icon name="export" size={16} />Export</summary>
             <div>
               <button type="button" disabled={pending} onClick={() => void prepareExport("board")}>Board file…</button>
@@ -794,6 +797,7 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
         {card.kind === "task" && <small>Status source {card.statusSource ? "paired client" : "local editor"}</small>}
         <div>
           <button type="button" disabled={unavailable} onClick={() => editCard(card)}>Edit card</button>
+          <button type="button" disabled={unavailable} onClick={() => setReview(card)}>Verification…</button>
           <button type="button" disabled={unavailable} onClick={() => commit([setNode({ ...card, dropped: !card.dropped })])}>{card.dropped ? "Restore" : "Drop"}</button>
           <button type="button" disabled={unavailable} onClick={() => reorder(card, -1)}>Move earlier</button>
           <button type="button" disabled={unavailable} onClick={() => reorder(card, 1)}>Move later</button>
@@ -817,6 +821,8 @@ export default function LeanEditor({ opened, fitOnOpen, registerClose, onClose, 
       </aside>}
       </div>}
       {agentBrief && <AgentBriefDialog brief={agentBrief} close={closeAgentBrief} />}
+      {review && <VerificationDialog scope={scope} card={review === "summary" ? undefined : review}
+        cards={board.nodes} boardTitle={info.title} onClose={() => setReview(undefined)} />}
       {keyboardHelp && <Modal title="Board shortcuts" cancel={() => setKeyboardHelp(false)}>
         <h2>Board shortcuts</h2>
         <dl className="board-shortcuts">

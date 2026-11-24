@@ -1,6 +1,6 @@
 use board_domain::{
     Board, Change, Document, Drawing, Edge, FORMAT, Graph, Id, MAX_DOCUMENT_BYTES, Node, Operation,
-    Project, Receipt, SCHEMA_VERSION, title,
+    Project, Receipt, SCHEMA_VERSION, title, verification::VERIFICATION_DOCUMENT_VERSION,
 };
 use rusqlite::{Connection, OptionalExtension, Row, params};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
@@ -12,6 +12,7 @@ use std::{
 
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 pub mod bridge;
+mod verification;
 
 const DB_VERSION: u32 = 2;
 const LOCAL_ACTOR: &str = "desktop";
@@ -215,6 +216,7 @@ impl Store {
             migration.execute_batch(include_str!("bridge.sql"))?;
             migration.pragma_update(None, "user_version", DB_VERSION)?;
         }
+        migration.execute_batch(verification::SCHEMA)?;
         migration.commit()?;
         Ok(Self {
             db,
@@ -447,7 +449,7 @@ impl Store {
         Ok((
             metadata,
             Graph::from_rows(nodes, edges)?,
-            node_bytes + edge_bytes,
+            node_bytes + edge_bytes + self.verification_bytes(board)?,
         ))
     }
 
@@ -742,9 +744,14 @@ impl Store {
 
     pub fn export(&self, scope: Scope) -> Result<String> {
         let active = self.scoped(scope)?;
+        let verification = self.board_verification(scope)?;
         bounded_json(&Document {
             format: FORMAT.to_owned(),
-            schema_version: SCHEMA_VERSION,
+            schema_version: if verification.is_empty() {
+                SCHEMA_VERSION
+            } else {
+                VERIFICATION_DOCUMENT_VERSION
+            },
             title: active.board.title.clone(),
             nodes: active
                 .graph
@@ -758,6 +765,7 @@ impl Store {
                 .collect(),
             edges: active.graph.edges.values().cloned().collect(),
             drawing: self.read_drawing(scope.board_id)?.0,
+            verification,
         })
     }
 
@@ -766,7 +774,8 @@ impl Store {
             return Err("Board file exceeds the 8 MiB limit.".into());
         }
         self.project_available(project)?;
-        let (title, graph, drawing) = serde_json::from_str::<Document>(input)?.remap()?;
+        let (title, graph, drawing, verification) =
+            serde_json::from_str::<Document>(input)?.remap()?;
         let drawing = bounded_json(&drawing)?;
         let mut semantic_bytes = 0;
         for node in graph.nodes.values() {
@@ -774,6 +783,9 @@ impl Store {
         }
         for edge in graph.edges.values() {
             semantic_bytes += entry_bytes(edge)?;
+        }
+        for record in &verification {
+            semantic_bytes += entry_bytes(record)?;
         }
         check_budget(semantic_bytes, drawing.len())?;
         let tx = self.db.transaction()?;
@@ -784,6 +796,9 @@ impl Store {
         }
         for edge in graph.edges.values() {
             Self::upsert_edge(&tx, &id, edge)?;
+        }
+        for record in &verification {
+            Self::write_verification(&tx, board.id, record)?;
         }
         tx.commit()?;
         Ok(board)
@@ -849,6 +864,177 @@ mod tests {
                 },
             }],
         }
+    }
+
+    #[test]
+    fn verification_persists_stays_scoped_and_remaps_in_portable_files() {
+        use board_domain::verification::{CheckResult, VerificationDraft};
+
+        let folder = Folder::new();
+        let path = folder.database();
+        let mut store = Store::open(&path).unwrap();
+        let project = store.add_project(&folder.0).unwrap();
+        let board = store.create_board(project.id, "Review evidence").unwrap();
+        let scope = store.open_board(project.id, board.id).unwrap().scope;
+        let operation = operation();
+        let Change::SetNode { node } = &operation.changes[0] else {
+            panic!("fixture must create a card");
+        };
+        let card = node.id;
+        store.apply(scope, operation).unwrap();
+        let legacy = store.export(scope).unwrap();
+        let legacy_value: Value = serde_json::from_str(&legacy).unwrap();
+        assert_eq!(legacy_value["schemaVersion"], SCHEMA_VERSION);
+        assert!(legacy_value.get("verification").is_none());
+
+        let draft = VerificationDraft {
+            title: "  Smoke-test signing  ".into(),
+            result: CheckResult::Passed,
+            revision: " c2e5fd9 ".into(),
+            reference: Some("https://github.com/org/repo/actions/runs/123".into()),
+        };
+        let check_id = Id::new_v4();
+        assert!(
+            store
+                .record_verification(
+                    Scope {
+                        instance: Id::new_v4(),
+                        ..scope
+                    },
+                    card,
+                    check_id,
+                    draft.clone(),
+                )
+                .is_err()
+        );
+        assert!(
+            store
+                .record_verification(scope, Id::new_v4(), check_id, draft.clone())
+                .is_err()
+        );
+        assert!(
+            store
+                .record_verification(
+                    scope,
+                    card,
+                    check_id,
+                    VerificationDraft {
+                        revision: " ".into(),
+                        ..draft.clone()
+                    }
+                )
+                .is_err()
+        );
+        assert!(
+            store
+                .record_verification(
+                    scope,
+                    card,
+                    check_id,
+                    VerificationDraft {
+                        reference: Some("javascript:alert(1)".into()),
+                        ..draft.clone()
+                    }
+                )
+                .is_err()
+        );
+        let recorded = store
+            .record_verification(scope, card, check_id, draft.clone())
+            .unwrap();
+        assert_eq!(recorded.check.title, "Smoke-test signing");
+        assert_eq!(
+            store
+                .record_verification(scope, card, check_id, draft.clone())
+                .unwrap(),
+            recorded
+        );
+        assert!(
+            store
+                .record_verification(
+                    scope,
+                    card,
+                    check_id,
+                    VerificationDraft {
+                        title: "Different check".into(),
+                        ..draft
+                    }
+                )
+                .is_err()
+        );
+        assert_eq!(
+            store.verification_reference(scope, check_id).unwrap(),
+            recorded.check.reference.clone().unwrap()
+        );
+        let portable = store.export(scope).unwrap();
+        let mut portable_value: Value = serde_json::from_str(&portable).unwrap();
+        assert_eq!(
+            portable_value["schemaVersion"],
+            VERIFICATION_DOCUMENT_VERSION
+        );
+        portable_value["verification"][0]["cardId"] = json!(Id::new_v4());
+        assert!(
+            store
+                .import(project.id, &portable_value.to_string())
+                .is_err()
+        );
+
+        store.close_board(scope).unwrap();
+        drop(store);
+        let mut store = Store::open(&path).unwrap();
+        assert!(store.board_verification(scope).is_err());
+        let reopened = store.open_board(project.id, board.id).unwrap();
+        assert_eq!(reopened.nodes[0].status, Status::Blocked);
+        assert_eq!(reopened.board.semantic_revision, 1);
+        assert_eq!(
+            store.board_verification(reopened.scope).unwrap(),
+            [recorded.clone()]
+        );
+        let deleted = store
+            .apply(
+                reopened.scope,
+                Operation {
+                    id: Id::new_v4(),
+                    expected_revision: 1,
+                    changes: vec![Change::RemoveNode { id: card }],
+                },
+            )
+            .unwrap();
+        assert!(store.board_verification(reopened.scope).unwrap().is_empty());
+        store
+            .apply(
+                reopened.scope,
+                Operation {
+                    id: Id::new_v4(),
+                    expected_revision: 2,
+                    changes: deleted.inverse,
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            store.board_verification(reopened.scope).unwrap(),
+            [recorded.clone()]
+        );
+        store
+            .remove_verification(reopened.scope, card, check_id)
+            .unwrap();
+        store
+            .remove_verification(reopened.scope, card, check_id)
+            .unwrap();
+        assert!(store.board_verification(reopened.scope).unwrap().is_empty());
+        store.close_board(reopened.scope).unwrap();
+
+        let old_copy = store.import(project.id, &legacy).unwrap();
+        let opened = store.open_board(project.id, old_copy.id).unwrap();
+        assert!(store.board_verification(opened.scope).unwrap().is_empty());
+        store.close_board(opened.scope).unwrap();
+        let new_copy = store.import(project.id, &portable).unwrap();
+        let opened = store.open_board(project.id, new_copy.id).unwrap();
+        let copied = &store.board_verification(opened.scope).unwrap()[0];
+        assert_ne!(copied.id, check_id);
+        assert_ne!(copied.card_id, card);
+        assert_eq!(copied.card_id, opened.nodes[0].id);
+        assert_eq!(copied.check, recorded.check);
+        assert_eq!(copied.recorded_at, recorded.recorded_at);
     }
 
     #[test]

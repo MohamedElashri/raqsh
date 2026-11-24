@@ -22,7 +22,7 @@ use tauri::{
 use tokio::sync::oneshot;
 
 type Job = Box<dyn FnOnce(&mut board_store::Result<Store>) + Send>;
-type Reply<T> = Result<T, String>;
+pub(crate) type Reply<T> = Result<T, String>;
 
 pub struct Desktop {
     queue: SyncSender<Job>,
@@ -347,7 +347,10 @@ pub async fn open_about_link(url: String) -> Reply<()> {
     if !links.values().any(|link| link == &url) {
         return Err("This link is unavailable in About.".into());
     }
+    open_web_link(url).await
+}
 
+pub(crate) async fn open_web_link(url: String) -> Reply<()> {
     #[cfg(target_os = "macos")]
     const OPENER: &str = "/usr/bin/open";
     #[cfg(target_os = "linux")]

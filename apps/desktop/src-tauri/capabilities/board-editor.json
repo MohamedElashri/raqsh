@@ -9,6 +9,8 @@
     "allow-apply-operation", "allow-save-drawing", "allow-import-board", "allow-export-board",
     "allow-export-preview", "allow-open-benchmark", "allow-finish-close", "allow-open-about-link",
     "allow-load-github-issue",
+    "allow-list-verification", "allow-save-verification", "allow-remove-verification",
+    "allow-open-verification-reference",
     "allow-pair-client", "allow-mcp-clients", "allow-connect-client", "allow-client-config",
     "allow-install-board-skill", "allow-save-board-skill",
     "allow-list-bindings", "allow-revoke-client", "allow-queue-feedback",
