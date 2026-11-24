@@ -1,0 +1,69 @@
+{
+  "format": "dev.local.raqsh.template",
+  "version": 1,
+  "title": "Feature delivery",
+  "cards": [
+    {
+      "id": "00000000-0000-4000-8000-000000000201",
+      "kind": "note",
+      "title": "Task brief",
+      "description": "Describe the user need and any constraints that apply to the change.",
+      "priority": "normal",
+      "x": 42,
+      "y": 92,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 0
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000202",
+      "kind": "task",
+      "title": "Define acceptance checks",
+      "description": "Agree on observable outcomes and examples before implementation.",
+      "priority": "high",
+      "x": 42,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 1
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000203",
+      "kind": "task",
+      "title": "Implement the change",
+      "description": "Deliver the smallest reviewable change that satisfies the agreed scope.",
+      "priority": "normal",
+      "x": 298,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 2
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000204",
+      "kind": "task",
+      "title": "Review the result",
+      "description": "Verify the acceptance checks and record what was tested.",
+      "priority": "normal",
+      "x": 554,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 3
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "00000000-0000-4000-8000-000000000202",
+      "to": "00000000-0000-4000-8000-000000000203"
+    },
+    {
+      "from": "00000000-0000-4000-8000-000000000203",
+      "to": "00000000-0000-4000-8000-000000000204"
+    }
+  ]
+}

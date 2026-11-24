@@ -16,6 +16,7 @@ shown, text, board_records = (helpers[k] for k in ("shown", "text", "board_recor
 native_path, button, ready, request_window_close = (
     native_helpers[k] for k in ("native_path", "button", "ready", "request_window_close")
 )
+add = native_helpers["add"]
 DIALOG = ".template-dialog[open]"
 SOURCE = "Prepare release packages"
 TEMPLATE = "Portable release checks"
@@ -38,6 +39,110 @@ def upload(web, name, payload):
         input.files = files.files;
         input.dispatchEvent(new Event("change", { bubbles: true }));
     """, name, payload)
+
+
+def select_named(web, selector, label):
+    web.evaluate("""
+        const select = document.querySelector(arguments[0]);
+        const option = [...select.options].find(item => item.textContent === arguments[1]);
+        if (!option) throw Error('Missing option: ' + arguments[1]);
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    """, selector, label)
+
+
+def select_template(web, name):
+    web.evaluate("""
+        const button = [...document.querySelectorAll('.template-list button')]
+            .find(item => item.querySelector('strong')?.textContent === arguments[0]);
+        if (!button || button.disabled) throw Error('Template unavailable: ' + arguments[0]);
+        button.click();
+    """, name)
+    wait_until(lambda: shown(web, f"{DIALOG} input[name=boardTitle]:not(:disabled)"), "saved template selection")
+
+
+def create_from_selection(web, title):
+    text(web, f"{DIALOG} input[name=boardTitle]", title)
+    web.click(f"{DIALOG} .template-creation button[type=submit]")
+    ready(web)
+
+
+def edit_example(web, database):
+    close_board(web)
+    open_library(web)
+    open_disclosure(web, f"{DIALOG} .template-examples")
+    assert web.evaluate("return [...document.querySelectorAll('.template-examples button')].map(button => button.textContent);") == [
+        "Bug triage", "Feature delivery", "Release verification",
+    ]
+    button(web, "Release verification")
+    wait_until(lambda: shown(web, f"{DIALOG} input[name=templateName]:not(:disabled)"), "example preview")
+    text(web, f"{DIALOG} input[name=templateName]", "Release starter")
+    button(web, "Save template")
+    wait_until(lambda: shown(web, f"{DIALOG} input[name=boardTitle]:not(:disabled)"), "example saved")
+    create_from_selection(web, "Original example board")
+    close_board(web)
+    open_library(web)
+    wait_until(lambda: shown(web, f"{DIALOG} .template-list button:not(:disabled)"), "template list ready")
+    select_template(web, "Release starter")
+    button(web, "Edit template…")
+    wait_until(lambda: shown(web, f"{DIALOG} input[name=cardTitle]"), "quick edit")
+    text(web, f"{DIALOG} input[name=templateName]", "Discard this draft")
+    text(web, f"{DIALOG} input[name=cardTitle]", " ")
+    assert shown(web, f"{DIALOG} button[type=submit]:disabled")
+    button(web, "Cancel")
+    wait_until(lambda: shown(web, f"{DIALOG} input[name=boardTitle]"), "returned to saved template")
+    assert web.evaluate("return document.querySelector('.template-creation input').value;") == "Release starter"
+
+    button(web, "Edit template…")
+    wait_until(lambda: shown(web, f"{DIALOG} select[name=card]"), "edit again")
+    web.call("POST", "/window/rect", {"width": 480, "height": 360})
+    wait_until(lambda: web.evaluate("return innerWidth === 480 && innerHeight === 360;"), "compact window")
+    assert web.evaluate("""
+        const dialog = document.querySelector('.template-dialog');
+        return dialog.scrollWidth === dialog.clientWidth && dialog.getBoundingClientRect().right <= innerWidth;
+    """)
+    text(web, f"{DIALOG} input[name=templateName]", "Release starter edited")
+    select_named(web, f"{DIALOG} select[name=card]", "Verify package checksums")
+    text(web, f"{DIALOG} input[name=cardTitle]", "Check published checksums")
+    text(web, f"{DIALOG} textarea[name=cardDetails]", "Review the candidate manifest.")
+    select_named(web, f"{DIALOG} select[name=priority]", "Low")
+    button(web, "Save changes")
+    wait_until(lambda: shown(web, f"{DIALOG} input[name=boardTitle]:not(:disabled)"), "saved edits")
+    assert web.evaluate("return document.querySelector('.template-creation input').value;") == "Release starter edited"
+
+    web.call("POST", "/window/rect", {"width": 1024, "height": 720})
+    wait_until(lambda: web.evaluate("return innerWidth === 1024 && innerHeight === 720;"), "full window")
+    create_from_selection(web, "Edited example board")
+    with sqlite3.connect(database) as db:
+        original, _, _, _ = board_records(db, "Original example board")
+        edited, links, _, _ = board_records(db, "Edited example board")
+        assert "Verify package checksums" in {card["title"] for card in original}
+        changed = next(card for card in edited if card["title"] == "Check published checksums")
+        assert changed["description"] == "Review the candidate manifest." and changed["priority"] == "low"
+        assert len(links) == 4
+
+    add(web, "Check release notes")
+    wait_until(lambda: web.evaluate("return document.querySelectorAll('.lean-card').length;") == 6, "added card")
+    open_disclosure(web, ".board-header")
+    button(web, "Save as template…")
+    wait_until(lambda: shown(web, f"{DIALOG} input[name=templateName]:not([readonly])"), "updated board preview")
+    button(web, "Update a saved template…")
+    wait_until(lambda: shown(web, f"{DIALOG} select[name=replacementTemplate]:not(:disabled)"), "replacement choices")
+    select_named(web, f"{DIALOG} select[name=replacementTemplate]", "Release starter edited")
+    wait_until(lambda: shown(web, f"{DIALOG} button[type=submit]:not(:disabled)"), "replacement selected")
+    button(web, "Update template")
+    wait_until(lambda: not shown(web, DIALOG), "update from board saved")
+
+    close_board(web)
+    open_library(web)
+    wait_until(lambda: shown(web, f"{DIALOG} .template-list button:not(:disabled)"), "updated template listed")
+    select_template(web, "Release starter edited")
+    create_from_selection(web, "Template updated from board")
+    with sqlite3.connect(database) as db:
+        fresh, dependencies, _, _ = board_records(db, "Template updated from board")
+        assert len(fresh) == 6 and len(dependencies) == 4
+        assert {card["title"] for card in fresh}.issuperset({"Check published checksums", "Check release notes"})
+        assert db.execute("SELECT count(*) FROM board_templates WHERE title = ?", ("Release starter edited",)).fetchone() == (1,)
 
 
 def run(binary):
@@ -108,6 +213,7 @@ def run(binary):
             assert {card["id"] for card in new_nodes}.isdisjoint(card["id"] for card in source_nodes)
             assert {edge["id"] for edge in new_links}.isdisjoint(edge["id"] for edge in source_links)
             assert len(new_links) == len(source_links) == 2
+            edit_example(web, database)
             request_window_close(web)
             wait_until(lambda: process_birth(driver, binary) is None, "destination desktop closed")
             web.terminated = True
@@ -117,4 +223,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("binary")
     run(parser.parse_args().binary)
-    print("Native template capture, persistence, file round-trip, and reuse passed.")
+    print("Native template capture, file round-trip, examples, quick edits, and update from board passed.")

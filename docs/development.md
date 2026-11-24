@@ -14,6 +14,12 @@ Install GitHub CLI and sign in with `gh auth login`. In **New from task**, expan
 
 Run `python3 bench/scripts/linux-github-issue.py target/release/raqsh` to exercise the import and its recovery paths with a disposable CLI fixture.
 
+## Reuse board templates
+
+In the project library, open **Templates → Template examples** or import a `.raqsh-template` file. Try [Bug triage](../examples/board-templates/bug-triage.raqsh-template), [Feature delivery](../examples/board-templates/feature-delivery.raqsh-template), or [Release verification](../examples/board-templates/release-verification.raqsh-template).
+
+Select a saved template and choose **Edit template** to change its name, card text, or priorities. To change the structure or layout, create a board from the template, edit it on the canvas, then choose **Save as template → Update a saved template** from the board menu. Changes apply to future boards created from that template.
+
 ## Coding harnesses
 
 Choose a client under **Agents** and approve a pairing. For manual setup, merge the generated entry into the file shown in the panel, preserve existing entries, and follow the client's approval flow. Keep generated entries local to your machine. After revoking a manual pairing in Raqsh, remove its named entry from the client's config. Raqsh removes registrations it installed automatically when the client's removal command succeeds.

@@ -1,0 +1,69 @@
+{
+  "format": "dev.local.raqsh.template",
+  "version": 1,
+  "title": "Bug triage",
+  "cards": [
+    {
+      "id": "00000000-0000-4000-8000-000000000101",
+      "kind": "note",
+      "title": "Task brief",
+      "description": "Record the symptoms, expected behaviour, and affected versions.",
+      "priority": "normal",
+      "x": 42,
+      "y": 92,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 0
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000102",
+      "kind": "task",
+      "title": "Reproduce the issue",
+      "description": "Capture the smallest reproducible case and record the actual result.",
+      "priority": "high",
+      "x": 42,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 1
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000103",
+      "kind": "task",
+      "title": "Confirm the cause",
+      "description": "Identify where the observed behaviour diverges from the expected flow.",
+      "priority": "normal",
+      "x": 298,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 2
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000104",
+      "kind": "task",
+      "title": "Verify the fix",
+      "description": "Repeat the reproduction and record a focused regression check.",
+      "priority": "normal",
+      "x": 554,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 3
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "00000000-0000-4000-8000-000000000102",
+      "to": "00000000-0000-4000-8000-000000000103"
+    },
+    {
+      "from": "00000000-0000-4000-8000-000000000103",
+      "to": "00000000-0000-4000-8000-000000000104"
+    }
+  ]
+}

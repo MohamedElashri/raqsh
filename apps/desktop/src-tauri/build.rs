@@ -21,6 +21,7 @@ fn main() {
             "open_verification_reference",
             "capture_board_template",
             "save_board_template",
+            "update_board_template",
             "list_board_templates",
             "read_board_template",
             "decode_board_template",

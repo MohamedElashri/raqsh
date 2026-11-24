@@ -4,8 +4,14 @@
 .template-dialog p, .template-dialog strong { overflow-wrap: anywhere; }
 .template-dialog [role="alert"] { color: var(--danger); }
 .template-toolbar { margin-block: 12px; }
-.template-list { list-style: none; padding: 0; display: grid; gap: 6px; max-height: 10rem; overflow: auto; }
-.template-list button { width: 100%; display: flex; align-items: baseline; gap: 12px; justify-content: space-between; text-align: start; }
+.template-examples { margin-block: 12px; }
+.template-examples summary { cursor: pointer; }
+.template-examples ul { margin-top: 8px; }
+.template-card-edit { min-width: 0; margin: 0; padding: 0 12px 12px; border: 1px solid var(--line); border-radius: 8px; }
+.template-card-edit legend { padding-inline: 4px; font-weight: 650; }
+.template-card-edit textarea { min-width: 0; resize: vertical; }
+.template-list, .template-examples ul { list-style: none; padding: 0; display: grid; gap: 6px; max-height: 10rem; overflow: auto; }
+.template-list button, .template-examples button { width: 100%; display: flex; align-items: baseline; gap: 12px; justify-content: space-between; text-align: start; }
 .template-list button[aria-pressed="true"] { background: var(--control); }
 .template-list small { flex: none; }
 .template-contents { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }

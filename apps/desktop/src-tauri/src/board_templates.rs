@@ -31,6 +31,18 @@ pub async fn save_board_template(
 }
 
 #[tauri::command]
+pub async fn update_board_template(
+    state: State<'_, Desktop>,
+    id: Id,
+    expected: TemplateDocument,
+    document: TemplateDocument,
+) -> Result<TemplateDocument, String> {
+    state
+        .call(move |store| store.update_board_template(id, expected, document))
+        .await
+}
+
+#[tauri::command]
 pub async fn list_board_templates(
     state: State<'_, Desktop>,
     offset: u32,

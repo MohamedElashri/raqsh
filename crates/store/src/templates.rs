@@ -198,6 +198,28 @@ impl Store {
         Ok(info)
     }
 
+    pub fn update_board_template(
+        &mut self,
+        id: Id,
+        mut expected: TemplateDocument,
+        mut document: TemplateDocument,
+    ) -> Result<TemplateDocument> {
+        expected.validate()?;
+        document.validate()?;
+        let existing = self.read_board_template(id)?;
+        let stored = TemplateDocument::parse(&existing)?;
+        if stored == document {
+            return Ok(stored);
+        }
+        if stored != expected || self.db.execute(
+            "UPDATE board_templates SET title = ?1, card_count = ?2, data = ?3 WHERE id = ?4 AND data = ?5",
+            params![document.title, document.cards.len() as u32, bounded_json(&document)?, id.to_string(), existing],
+        )? != 1 {
+            return Err("The template changed since you opened it. Reopen it before saving again.".into());
+        }
+        Ok(document)
+    }
+
     pub fn board_templates(&self, offset: u32) -> Result<Page<TemplateInfo>> {
         let mut stmt = self.db.prepare(
             "SELECT id, title, card_count FROM board_templates ORDER BY title COLLATE NOCASE, id LIMIT ?1 OFFSET ?2",
@@ -317,6 +339,133 @@ mod tests {
         payload["cards"][0]["statusSource"] = serde_json::json!(Id::new_v4());
         assert!(TemplateDocument::parse(&serde_json::to_string(&payload).unwrap()).is_err());
         assert!(TemplateDocument::parse(&" ".repeat(MAX_DOCUMENT_BYTES + 1)).is_err());
+    }
+
+    #[test]
+    fn edits_are_atomic_and_apply_to_future_boards_only() {
+        let library = Library::new();
+        let db = library.0.join("library/boards.sqlite3");
+        let mut store = Store::open(&db).unwrap();
+        let project = store.add_project(&library.0).unwrap();
+        let template_id = Id::new_v4();
+        let mut source = sample();
+        source.cards[1].x = -0.0;
+        store.save_board_template(template_id, source).unwrap();
+        let before = store.read_board_template(template_id).unwrap();
+        let original = store
+            .new_board_from_template(project.id, template_id, "Original")
+            .unwrap();
+        let mut changed = TemplateDocument::parse(&before).unwrap();
+        changed.title = " Updated release checks ".into();
+        changed.cards[1].title = "Check archive contents".into();
+        changed.cards[1].description = "Use a clean profile.".into();
+        changed.cards[1].priority = Priority::Low;
+        let after = bounded_json(&changed).unwrap();
+        let expected = || {
+            let mut expected = TemplateDocument::parse(&before).unwrap();
+            expected.cards[1].x = 0.0;
+            expected
+        };
+        assert_eq!(
+            store
+                .update_board_template(template_id, expected(), changed)
+                .unwrap()
+                .title,
+            "Updated release checks"
+        );
+        store
+            .update_board_template(
+                template_id,
+                expected(),
+                TemplateDocument::parse(&after).unwrap(),
+            )
+            .unwrap();
+        assert!(
+            store
+                .update_board_template(template_id, expected(), sample())
+                .is_err()
+        );
+        let latest = store.read_board_template(template_id).unwrap();
+        let mut invalid = TemplateDocument::parse(&latest).unwrap();
+        invalid.cards[1].title.clear();
+        assert!(
+            store
+                .update_board_template(
+                    template_id,
+                    TemplateDocument::parse(&latest).unwrap(),
+                    invalid
+                )
+                .is_err()
+        );
+        assert_eq!(store.read_board_template(template_id).unwrap(), latest);
+        drop(store);
+
+        let mut store = Store::open(&db).unwrap();
+        assert_eq!(
+            store.board_templates(0).unwrap().items[0].title,
+            "Updated release checks"
+        );
+        let original = store.open_board(project.id, original.id).unwrap();
+        assert!(
+            original
+                .nodes
+                .iter()
+                .any(|card| card.title == "Extract the archive")
+        );
+        store.close_board(original.scope).unwrap();
+        let fresh = store
+            .new_board_from_template(project.id, template_id, "Next release")
+            .unwrap();
+        let fresh = store.open_board(project.id, fresh.id).unwrap();
+        let edited = fresh
+            .nodes
+            .iter()
+            .find(|card| card.title == "Check archive contents")
+            .unwrap();
+        assert_eq!(edited.description, "Use a clean profile.");
+        assert_eq!(edited.priority, Priority::Low);
+        assert_eq!(fresh.edges[0].from, edited.id);
+    }
+
+    #[test]
+    fn bundled_examples_validate_and_instantiate() {
+        let library = Library::new();
+        let mut store = Store::open(&library.0.join("library/boards.sqlite3")).unwrap();
+        let project = store.add_project(&library.0).unwrap();
+        for (input, title, cards, links) in [
+            (
+                include_str!("../../../examples/board-templates/bug-triage.raqsh-template"),
+                "Bug triage",
+                4,
+                2,
+            ),
+            (
+                include_str!("../../../examples/board-templates/feature-delivery.raqsh-template"),
+                "Feature delivery",
+                4,
+                2,
+            ),
+            (
+                include_str!(
+                    "../../../examples/board-templates/release-verification.raqsh-template"
+                ),
+                "Release verification",
+                5,
+                4,
+            ),
+        ] {
+            let template_id = Id::new_v4();
+            let document = TemplateDocument::parse(input).unwrap();
+            assert_eq!(document.title, title);
+            store.save_board_template(template_id, document).unwrap();
+            let board = store
+                .new_board_from_template(project.id, template_id, title)
+                .unwrap();
+            let opened = store.open_board(project.id, board.id).unwrap();
+            assert_eq!((opened.nodes.len(), opened.edges.len()), (cards, links));
+            assert!(opened.nodes.iter().all(|card| card.status == Status::Todo));
+            store.close_board(opened.scope).unwrap();
+        }
     }
 
     #[test]

@@ -1,0 +1,90 @@
+{
+  "format": "dev.local.raqsh.template",
+  "version": 1,
+  "title": "Release verification",
+  "cards": [
+    {
+      "id": "00000000-0000-4000-8000-000000000301",
+      "kind": "note",
+      "title": "Task brief",
+      "description": "Record the release version, target platforms, and where to find the candidate packages.",
+      "priority": "normal",
+      "x": 42,
+      "y": 92,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 0
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000302",
+      "kind": "task",
+      "title": "Verify package checksums",
+      "description": "Compare each candidate package against the published checksums.",
+      "priority": "high",
+      "x": 42,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 1
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000303",
+      "kind": "task",
+      "title": "Smoke-test Linux",
+      "description": "Use a disposable profile to check installation, launch, and reopening a board.",
+      "priority": "normal",
+      "x": 298,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 2
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000304",
+      "kind": "task",
+      "title": "Smoke-test macOS",
+      "description": "Check launch, signing, and reopening a board on the target architecture.",
+      "priority": "normal",
+      "x": 298,
+      "y": 340,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 3
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000305",
+      "kind": "task",
+      "title": "Review release readiness",
+      "description": "Review the checks, record discrepancies, and confirm the candidate is ready.",
+      "priority": "high",
+      "x": 554,
+      "y": 218,
+      "width": 216,
+      "height": 86,
+      "parent": null,
+      "order": 4
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "00000000-0000-4000-8000-000000000302",
+      "to": "00000000-0000-4000-8000-000000000303"
+    },
+    {
+      "from": "00000000-0000-4000-8000-000000000302",
+      "to": "00000000-0000-4000-8000-000000000304"
+    },
+    {
+      "from": "00000000-0000-4000-8000-000000000303",
+      "to": "00000000-0000-4000-8000-000000000305"
+    },
+    {
+      "from": "00000000-0000-4000-8000-000000000304",
+      "to": "00000000-0000-4000-8000-000000000305"
+    }
+  ]
+}

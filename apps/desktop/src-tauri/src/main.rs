@@ -95,6 +95,7 @@ fn main() -> tauri::Result<()> {
             github_issue::load_github_issue,
             board_templates::capture_board_template,
             board_templates::save_board_template,
+            board_templates::update_board_template,
             board_templates::list_board_templates,
             board_templates::read_board_template,
             board_templates::decode_board_template,
